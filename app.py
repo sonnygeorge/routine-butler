@@ -26,7 +26,7 @@ class MyApp(remi.server.App):
 
     def instantiate_performers(self):
         """
-        Uses _recursively_instantiate_performers() to instantiate the performer types in
+        Uses _recursively_instantiate_performers() to instantiate objects of each performer type in
         self.performer_type_hierarchy and store them in self.performer_hierarchy
         """
 
@@ -34,7 +34,7 @@ class MyApp(remi.server.App):
             performer_type_hierarchy: PerformerTypeHierarchy,
         ) -> PerformerHierarchy:
             """
-            Instantiates the performer types at the current level of the hierarchy and recurses inwards
+            Instantiates objects of each performer type at the current level of the hierarchy and recurses inwards
             """
             performer_hierarchy = {}
             for (
