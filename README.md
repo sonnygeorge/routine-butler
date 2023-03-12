@@ -8,6 +8,8 @@ This repo currently exists to help me test and plan the theory behind the "kiosk
 - controlling mechanical devices such as a lockbox for downtime from electronics
 - other interactive sub-apps such as: computer-vision-monitored physical exercise, personal study tools like flashcards, etc.
 
+![picture of the lockbox and kiosk](https://i.imgur.com/64x0Byw.jpeg)
+
 ## 📈 Current Goal
 
 Come up with a way to effectively modularize sub-apps such that:
