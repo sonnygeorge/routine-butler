@@ -1,10 +1,14 @@
-# README.md
+# 🚀 README.md
 
-## About
+## ❓ About
 
-This repo currently exists to help me test and plan the theory behind the "kiosk-style" app that I will run on my raspberry pi and use to accomplish a variety of tasks.
+This repo currently exists to help me test and plan the theory behind the "kiosk-style" app that I will run on my raspberry pi and use to accomplish a variety of tasks including but not limited to:
 
-## Current Goal
+- entertainment (limited watching of videos, etc.)
+- controlling mechanical devices such as a lockbox for downtime from electronics
+- other interactive sub-apps such as: computer-vision-monitored physical exercise, personal study tools like flashcards, etc.
+
+## 📈 Current Goal
 
 Come up with a way to effectively modularize sub-apps such that:
 
@@ -12,13 +16,13 @@ Come up with a way to effectively modularize sub-apps such that:
 2. They are self-governed
 3. My main app code does not need to know anything about them.
 
-## Current Status
+## 📉 Current Status
 
 I have successfully written an app structure that seems to accomplish the current goal.
 
 However, I would like to improve the code/strategy/design pattern to the extent possible.
 
-## Running the app
+## 💻 Running the app
 
 - Clone the repo
 - Navigate to the repo directory
@@ -33,7 +37,7 @@ make install
 - Run the app with either of the following commands:
 
 ```bash
-python app.py
+python3 app.py
 ```
 
 or
@@ -42,9 +46,9 @@ or
 make run
 ```
 
-## Theater Analogy
+## 💃🏯 Theater Analogy
 
-The app is currently written with semantic naming that corresponds to the following theater analogy:
+The app is currently written with naming that corresponds to the following analogy:
 
 ![images/TheaterAnalogy-1.png](images/TheaterAnalogy-1.png)
 ![images/TheaterAnalogy-2.png](images/TheaterAnalogy-2.png)
