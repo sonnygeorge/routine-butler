@@ -2,15 +2,13 @@ import datetime
 
 import remi
 
-from performers.performer import Performer, PerformerContainer
+from performers.performer import Performer
 from global_state import global_state
 
 
-class ConditionalPerformerContainer(PerformerContainer, remi.gui.VBox):
-    def __init__(self, name, app_instance):
+class ConditionalPerformerContainer(remi.gui.VBox):
+    def __init__(self):
         remi.gui.VBox.__init__(self)
-        self.name = name
-        self.app_instance = app_instance
 
         self.css_height = "400.0px"
         self.css_width = "795.0px"
@@ -56,8 +54,10 @@ class ConditionalPerformerContainer(PerformerContainer, remi.gui.VBox):
 
 
 class ConditionalPerformer(Performer):
-    def __init__(self, name: str, app_instance: remi.server.App):
-        self.container = ConditionalPerformerContainer(name, app_instance)
+
+    def __init__(self, name: str):
+        Performer.__init__(self, name)
+        self.container = ConditionalPerformerContainer()
 
     def should_be_on_stage(self):
         # We only want this performer "on stage" when:
@@ -69,3 +69,6 @@ class ConditionalPerformer(Performer):
             return True
         else:
             return False
+        
+    def do_stuff(self):
+        return super().do_stuff()
