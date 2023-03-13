@@ -23,6 +23,7 @@ class MyApp(remi.server.App):
     def idle(self):
         """Gets called every update_interval seconds"""
         self.implement_stage_management()
+        self.performers_do_stuff(self.performer_hierarchy)
 
     def instantiate_performers(self):
         """
@@ -41,9 +42,7 @@ class MyApp(remi.server.App):
                 performer_type,
                 sub_performer_type_hierarchy,
             ) in performer_type_hierarchy.items():
-                performer = performer_type(
-                    name=performer_type.__name__, app_instance=self
-                )
+                performer = performer_type(name=performer_type.__name__)
                 performer_hierarchy[performer] = _recursively_instantiate_performers(
                     sub_performer_type_hierarchy
                 )
@@ -83,7 +82,7 @@ class MyApp(remi.server.App):
                     performer.should_be_on_stage()
                     and performer.container not in parent_container.children
                 ):
-                    parent_container.append(performer.container, performer.container.name)
+                    parent_container.append(performer.container, performer.name)
                     _recursively_put_on_or_take_off_the_stage(
                         sub_performer_hierarchy, performer.container
                     )
@@ -102,6 +101,11 @@ class MyApp(remi.server.App):
         _recursively_put_on_or_take_off_the_stage(
             self.performer_hierarchy, self.main_container
         )
+
+    def performers_do_stuff(self, performer_hierarchy):
+        for performer, sub_performer_hierarchy in performer_hierarchy.items():
+            performer.do_stuff()
+            self.performers_do_stuff(sub_performer_hierarchy)
 
 
 if __name__ == "__main__":

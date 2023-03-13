@@ -1,17 +1,14 @@
 import time
-from threading import Timer
 
 import remi
 
-from performers.performer import Performer, PerformerContainer
+from performers.performer import Performer
 from global_state import global_state
 
 
-class HeaderContainer(PerformerContainer, remi.gui.HBox):
-    def __init__(self, name, app_instance):
+class HeaderContainer(remi.gui.HBox):
+    def __init__(self):
         remi.gui.HBox.__init__(self)
-        self.name = name
-        self.app_instance = app_instance
 
         self.css_height = "60.0px"
         self.css_width = "795.0px"
@@ -52,16 +49,19 @@ class HeaderContainer(PerformerContainer, remi.gui.HBox):
     def update_time(self):
         t = time.localtime()
         t_str = f"{t.tm_hour}:{t.tm_min}:{t.tm_sec}"
-        with self.app_instance.update_lock:
-            self.clock.set_text(t_str)
-
-        Timer(1, self.update_time).start()
-
+        
+        self.clock.set_text(t_str)
+        
 
 class Header(Performer):
-    def __init__(self, name: str, app_instance: remi.server.App):
-        self.container = HeaderContainer(name, app_instance)
+    def __init__(self, name: str):
+        Performer.__init__(self, name)
+        self.container = HeaderContainer()
 
     def should_be_on_stage(self):
         # We want the header to always be "on stage"
         return True
+    
+    def do_stuff(self):
+        self.container.update_time()
+        return super().do_stuff()
