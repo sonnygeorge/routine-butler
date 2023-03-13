@@ -38,11 +38,11 @@ class HeaderContainer(remi.gui.HBox):
     def on_button_clicked(self, _):
         button_was_already_clicked = global_state.read()["clicked"]
         if button_was_already_clicked:
-            # We "unclick" the button
+            # We "unclickify" the button
             global_state.update({"clicked": False})
             self.button.text = "not clicked"
         else:
-            # We "click" the button
+            # We "clickify" the button
             global_state.update({"clicked": True})
             self.button.text = "clicked"
         
@@ -55,7 +55,7 @@ class HeaderContainer(remi.gui.HBox):
 
 class Header(Performer):
     def __init__(self, name: str):
-        Performer.__init__(self, name)
+        self.name = name
         self.container = HeaderContainer()
 
     def should_be_on_stage(self):
@@ -64,4 +64,3 @@ class Header(Performer):
     
     def do_stuff(self):
         self.container.update_time()
-        return super().do_stuff()

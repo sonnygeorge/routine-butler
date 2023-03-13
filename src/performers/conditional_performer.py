@@ -56,7 +56,7 @@ class ConditionalPerformerContainer(remi.gui.VBox):
 class ConditionalPerformer(Performer):
 
     def __init__(self, name: str):
-        Performer.__init__(self, name)
+        self.name = name
         self.container = ConditionalPerformerContainer()
 
     def should_be_on_stage(self):
@@ -71,4 +71,4 @@ class ConditionalPerformer(Performer):
             return False
         
     def do_stuff(self):
-        return super().do_stuff()
+        pass
