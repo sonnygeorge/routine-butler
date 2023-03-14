@@ -3,7 +3,7 @@ import datetime
 import remi
 
 from performers.performer import Performer
-from global_state import global_state
+from states import states
 
 
 class ConditionalPerformerContainer(remi.gui.VBox):
@@ -54,7 +54,6 @@ class ConditionalPerformerContainer(remi.gui.VBox):
 
 
 class ConditionalPerformer(Performer):
-
     def __init__(self, name: str):
         self.name = name
         self.container = ConditionalPerformerContainer()
@@ -64,11 +63,11 @@ class ConditionalPerformer(Performer):
         # 1. The current second's final digit is 0-5
         # 2. The header button is not "clicked"
         condition_one = 0 <= int(datetime.datetime.now().strftime("%S")) % 10 <= 5
-        condition_two = not global_state.read()["clicked"]
+        condition_two = not states.header_button_was_clicked
         if condition_one and condition_two:
             return True
         else:
             return False
-        
+
     def do_stuff(self):
         pass

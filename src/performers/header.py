@@ -3,7 +3,7 @@ import time
 import remi
 
 from performers.performer import Performer
-from global_state import global_state
+from states import states
 
 
 class HeaderContainer(remi.gui.HBox):
@@ -25,7 +25,7 @@ class HeaderContainer(remi.gui.HBox):
         self.button = remi.gui.Button()
         self.button.text = "not clicked"
         self.button.onclick.do(self.on_button_clicked)
-        self.append(self.button, 'button')
+        self.append(self.button, "button")
 
         self.clock = remi.gui.TextInput()
         self.clock.css_height = "30px"
@@ -36,22 +36,22 @@ class HeaderContainer(remi.gui.HBox):
         self.update_time()
 
     def on_button_clicked(self, _):
-        button_was_already_clicked = global_state.read()["clicked"]
+        button_was_already_clicked = states.header_button_was_clicked
         if button_was_already_clicked:
             # We "unclickify" the button
-            global_state.update({"clicked": False})
+            states.header_button_was_clicked = False
             self.button.text = "not clicked"
         else:
             # We "clickify" the button
-            global_state.update({"clicked": True})
+            states.header_button_was_clicked = True
             self.button.text = "clicked"
-        
+
     def update_time(self):
         t = time.localtime()
         t_str = f"{t.tm_hour}:{t.tm_min}:{t.tm_sec}"
-        
+
         self.clock.set_text(t_str)
-        
+
 
 class Header(Performer):
     def __init__(self, name: str):
@@ -61,6 +61,6 @@ class Header(Performer):
     def should_be_on_stage(self):
         # We want the header to always be "on stage"
         return True
-    
+
     def do_stuff(self):
         self.container.update_time()
