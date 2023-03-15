@@ -15,7 +15,7 @@ class MyApp(remi.server.App):
         # header container containers header sub-app
         self.header = Header(name="header")
         self.main_container.append(self.header.container, "header")
-        
+
         # content container contains the hierarchy of other sub-apps
         self.content_container = remi.gui.VBox(
             width="100%", style={"margin": "23px 23px"}

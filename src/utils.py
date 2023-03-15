@@ -1,5 +1,3 @@
-import remi
-
 ZERO = """
  █████  
 ██   ██ 
@@ -88,7 +86,19 @@ COLON = """
 ██ 
 """
 
-_FANCY_CLOCK_ENCODER_VALS = [ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, COLON]
+_FANCY_CLOCK_ENCODER_VALS = [
+    ZERO,
+    ONE,
+    TWO,
+    THREE,
+    FOUR,
+    FIVE,
+    SIX,
+    SEVEN,
+    EIGHT,
+    NINE,
+    COLON,
+]
 _FANCY_CLOCK_ENCODER_VALS = [c.replace(" ", " ") for c in _FANCY_CLOCK_ENCODER_VALS]
 _FANCY_CLOCK_ENCODER_KEYS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":"]
 _FANCY_CLOCK_ENCODER = dict(zip(_FANCY_CLOCK_ENCODER_KEYS, _FANCY_CLOCK_ENCODER_VALS))

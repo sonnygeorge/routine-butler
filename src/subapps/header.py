@@ -2,10 +2,9 @@ import time
 
 import remi
 
+from states import states
 from subapps.subapp import SubApp
 from utils import get_fancy_clock_string
-from states import states
-
 
 LOGO_TEXT = r"""
  ██████  █████  ███████ ███████ ██ ██    ██ ███████ 
