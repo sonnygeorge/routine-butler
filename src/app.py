@@ -1,80 +1,66 @@
 import remi
 
-from performer_hierarchy import (
-    PerformerTypeHierarchy,
-    PerformerHierarchy,
-    PERFORMER_TYPE_HIERARCHY,
-)
+from subapps.header import Header
+from subapps.subapp_hierarchy import PERFORMER_HIERARCHY, PerformerHierarchy
+from utils import add_default_styles
 
 
 class MyApp(remi.server.App):
-    performer_type_hierarchy: PerformerTypeHierarchy = PERFORMER_TYPE_HIERARCHY
-    performer_hierarchy: PerformerHierarchy = {}
+    performer_hierarchy: PerformerHierarchy = PERFORMER_HIERARCHY
 
     def main(self):
         """Gets called when the app is started"""
-        self.main_container = remi.gui.VBox(
-            width=1000, height=600, style={"margin": "10px auto"}
+        # main container contains everything as is always the full screen
+        self.main_container = remi.gui.Container(width="100%", height="100%")
+        add_default_styles(self.main_container)
+
+        # header container containers header sub-app
+        self.header = Header(name="header")
+        self.main_container.append(self.header.container, "header")
+        
+        # content container contains the hierarchy of other sub-apps
+        self.content_container = remi.gui.VBox(
+            width="100%", style={"margin": "23px 23px"}
         )
-        self.instantiate_performers()
-        self.implement_stage_management()
+        add_default_styles(self.content_container)
+        self.main_container.append(self.content_container, "content")
+
+        # self.instantiate_performers()
+        self.manage_sub_apps()
         return self.main_container
 
     def idle(self):
         """Gets called every update_interval seconds"""
-        self.implement_stage_management()
-        self.performers_do_stuff(self.performer_hierarchy)
+        self.manage_sub_apps()
 
-    def instantiate_performers(self):
+    def manage_sub_apps(self):
         """
-        Uses _recursively_instantiate_performers() to instantiate objects of each performer type in
-        self.performer_type_hierarchy and store them in self.performer_hierarchy
-        """
-
-        def _recursively_instantiate_performers(
-            performer_type_hierarchy: PerformerTypeHierarchy,
-        ) -> PerformerHierarchy:
-            """
-            Instantiates objects of each performer type at the current level of the hierarchy and recurses inwards
-            """
-            performer_hierarchy = {}
-            for (
-                performer_type,
-                sub_performer_type_hierarchy,
-            ) in performer_type_hierarchy.items():
-                performer = performer_type(name=performer_type.__name__)
-                performer_hierarchy[performer] = _recursively_instantiate_performers(
-                    sub_performer_type_hierarchy
-                )
-            return performer_hierarchy
-
-        self.performer_hierarchy = _recursively_instantiate_performers(
-            self.performer_type_hierarchy
-        )
-
-    def implement_stage_management(self):
-        """
-        Uses a recursive function to navigate self.performer_hierarchy and implement "stage management"
+        Recurses through the sub-app hierarchy in order to:
+          1. add/remove sub-apps
+          2. call do_stuff on active sub-apps
         """
 
-        def _recursively_put_on_or_take_off_the_stage(
+        def _recursively_manage_sub_apps(
             performer_hierarchy: PerformerHierarchy,
             parent_container: remi.gui.Container,
         ):
             """
-            Case 1:
-                If the performer should render and is not already on the stage:
-                    1. Put it on the stage
-                    2. Recurse into the performer's sub-performers
-            Case 2:
-                If the performer should not render and is already on the stage:
-                    1. Take it off the stage
-                    2. DON'T recurse into the performer's sub-performers...
-                    (a child performer should not be on the stage if its parent is not on the stage)
-            Case 3:
-                If the performer should render and is already on the stage:
-                    1. Do nothing (the performer is already where it should be)
-                    2. Recurse into the performer's sub-performers
+            Does the following for any given sub-app:
+                Case 1:
+                    If the performer should render and is not already on the stage:
+                        1. Put it on the stage
+                        2. Recurse into the performer's sub-performers
+                        3. call the performer's do_stuff method
+                Case 2:
+                    If the performer should not render and is already on the stage:
+                        1. Take it off the stage
+                        2. DON'T recurse into the performer's sub-performers...
+                        (a child performer should not be on the stage if its parent is not on the stage)
+                Case 3:
+                    If the performer should render and is already on the stage:
+                        1. Do nothing (the performer is already where it should be)
+                        2. Recurse into the performer's sub-performers
+                        3. call the performer's do_stuff method
             """
             for performer, sub_performer_hierarchy in performer_hierarchy.items():
                 # case 1
@@ -83,9 +69,10 @@ class MyApp(remi.server.App):
                     and performer.container not in parent_container.children
                 ):
                     parent_container.append(performer.container, performer.name)
-                    _recursively_put_on_or_take_off_the_stage(
+                    _recursively_manage_sub_apps(
                         sub_performer_hierarchy, performer.container
                     )
+                    performer.do_stuff()
                 # case 2
                 elif (
                     not performer.should_be_on_stage()
@@ -94,18 +81,16 @@ class MyApp(remi.server.App):
                     parent_container.remove_child(performer.container)
                 # case 3
                 else:
-                    _recursively_put_on_or_take_off_the_stage(
+                    _recursively_manage_sub_apps(
                         sub_performer_hierarchy, performer.container
                     )
+                    performer.do_stuff()
 
-        _recursively_put_on_or_take_off_the_stage(
-            self.performer_hierarchy, self.main_container
-        )
+        # first, call the header's do_stuff method
+        self.header.do_stuff()
 
-    def performers_do_stuff(self, performer_hierarchy):
-        for performer, sub_performer_hierarchy in performer_hierarchy.items():
-            performer.do_stuff()
-            self.performers_do_stuff(sub_performer_hierarchy)
+        # then, call the recursive function to manage the app's content sub-apps
+        _recursively_manage_sub_apps(self.performer_hierarchy, self.content_container)
 
 
 if __name__ == "__main__":

@@ -2,16 +2,16 @@ import datetime
 
 import remi
 
-from performers.performer import Performer
+from subapps.subapp import SubApp
 from states import states
 
 
-class ConditionalPerformerContainer(remi.gui.VBox):
+class ConditionalSubAppContainer(remi.gui.VBox):
     def __init__(self):
         remi.gui.VBox.__init__(self)
 
         self.css_height = "400.0px"
-        self.css_width = "795.0px"
+        self.css_width = "65%"
         self.css_border_width = "2px"
         self.css_border_color = "gray"
         self.css_border_style = "dashed"
@@ -53,10 +53,10 @@ class ConditionalPerformerContainer(remi.gui.VBox):
         self.append(content_box, "content_box")
 
 
-class ConditionalPerformer(Performer):
+class ConditionalSubApp(SubApp):
     def __init__(self, name: str):
         self.name = name
-        self.container = ConditionalPerformerContainer()
+        self.container = ConditionalSubAppContainer()
 
     def should_be_on_stage(self):
         # We only want this performer "on stage" when:

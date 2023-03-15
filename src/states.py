@@ -1,7 +1,7 @@
 import shelve
 import threading
 
-import rich
+import rich.pretty
 from loguru import logger
 
 
@@ -61,6 +61,9 @@ class States:
     # alarm
     alarm_on = State(default_value=False, store_to_disk=True)
     alarm_time = State(default_value=False, store_to_disk=True)
+
+    def __init__(self):
+        logger.debug(f"Created states: {self.__str__()}")
 
     def __str__(self):
         _dict = {

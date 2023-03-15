@@ -1,7 +1,7 @@
 from typing import Protocol
 
 
-class Performer(Protocol):
+class SubApp(Protocol):
     name: str
 
     def should_be_on_stage(self) -> bool:
