@@ -3,54 +3,33 @@ import time
 import remi
 
 from subapps.subapp import SubApp
-from utils import add_default_styles, get_fancy_clock_string
+from utils import get_fancy_clock_string
 from states import states
 
 
-LOGO_TEXT = """
-╔════════════════════════════════════════════════════╗
-║░█████╗░░█████╗░░██████╗░██████╗██╗██╗░░░██╗░██████╗║
-║██╔══██╗██╔══██╗██╔════╝██╔════╝██║██║░░░██║██╔════╝║
-║██║░░╚═╝███████║╚█████╗░╚█████╗░██║██║░░░██║╚█████╗░║
-║██║░░██╗██╔══██║░╚═══██╗░╚═══██╗██║██║░░░██║░╚═══██╗║
-║╚█████╔╝██║░░██║██████╔╝██████╔╝██║╚██████╔╝██████╔╝║
-║░╚════╝░╚═╝░░╚═╝╚═════╝░╚═════╝░╚═╝░╚═════╝░╚═════╝░║
-╚════════════════════════════════════════════════════╝ 
-"""
-
-# LOGO_TEXT = """
-# ╔═════════════════════════════════════════════════════════════╗
-# ║ .▄████▄. .▄▄▄ . . . .██████ . ██████ .██░ █▓. .██ . ██████. ║  
-# ║ ▒██▀ ▀█. ▒████▄ . .▒██ . .▒ ▒██. .▒▒ ░██░ ██. ░██░ ██▒ . ▒. ║ 
-# ║ ▒▓█. . ▄ ▒██. ▀█▄ .░ ▓██▄ . ░ ▓██▄ . ▒██░.██. ▒██░. ▓██▄. . ║ 
-# ║ ▒▓▓▄ ▄██▒░██▄▄▄▄██ . ▒ .░██▒. ▒ .░██▒░██░░▓█. ░██░. ▒ .░██▒ ║
-# ║ ▒ ▓███▀ ░ ▓█ . ▓██▒▒██████▒░.██████▒▒░██░░▒█████▓ ▒██████▒▒ ║
-# ║ ░ ░▒ ▒ .░ ▒▒ . ▓▒█░▒ ▒▓▒ ▒░░▒ ▒▓▒ ▒ ░░▓. ░▒▓▒ ▒ ▒ ▒ ▒▓▒ ▒ ░ ║
-# ║ . .░ ▒ .▒ . ▒▒ ░░ ░▒. ░. ▒░░▒ .░.░ ▒.░░░▒░ ░ ░ ░ ░▒ ░░ ░░ . ║
-# ║ ░. . . . . ░ . ▒. .░ .░. ░░ ░ .░. ░ . ▒ ░ ░░░ ░ ░ ░ ░░ .░ . ║ 
-# ║ ▒ ░. . .░. . . ░. ░. . . ░. . . . ░ . ░ . . ░ . . . ░. .░ . ║
-# ╚═════════════════════════════════════════════════════════════╝ 
-# """
-
-LOGO_TEXT = r'''
+LOGO_TEXT = r"""
  ██████  █████  ███████ ███████ ██ ██    ██ ███████ 
 ██      ██   ██ ██      ██      ██ ██    ██ ██      
 ██      ███████ ███████ ███████ ██ ██    ██ ███████ 
 ██      ██   ██      ██      ██ ██ ██    ██      ██ 
  ██████ ██   ██ ███████ ███████ ██  ██████  ███████ 
-'''
+"""
 
-LOGO_TEXT = LOGO_TEXT.replace("░", " ")
+LOGO_TEXT = LOGO_TEXT.replace(" ", " ")
 
-LOGO_TEXT = LOGO_TEXT.replace(" ", " ").replace("C", "█").replace("s", "█").replace("i", "█").replace("u", "█")
 
-COLOR = "#333366"
-CLOCK_FONT_SIZE = "5px"
-LOGO_FONT_SIZE = "6px"
+COLOR = "#007399"
+CLOCK_FONT_SIZE = "4.5px"
+LOGO_FONT_SIZE = "4.5px"
+DATE_FONT_SIZE = "15px"
+MOYAI_FONT_SIZE = "38px"
+MOYAI_SHADOW = f"0px 0px 3px rgb(0, 0, 0, .2)"
 SIDE_PADDING = "20px"
 
 
-def fill_vbox_with_multiline_text(vbox: remi.gui.VBox, text: str):
+def fill_vbox_with_multiline_text(
+    vbox: remi.gui.VBox, text: str, text_align: str = "right"
+):
     if len(vbox.children) != 0:
         children = list(vbox.children.values())
         for child in children:
@@ -58,25 +37,41 @@ def fill_vbox_with_multiline_text(vbox: remi.gui.VBox, text: str):
     for line in text.split("\n"):
         if line.strip():
             row = remi.gui.Label(
-                line, style={"width": "100%", "margin": "0px 0px"}
+                line,
+                style={"width": "100%", "margin": "0px 0px", "text-align": text_align},
             )
             vbox.append(row)
 
 
 class HeaderContainer(remi.gui.HBox):
     def __init__(self):
-        remi.gui.Widget.__init__(self)
-        add_default_styles(self)
+        remi.gui.Widget.__init__(
+            self, style={"box-shadow": "0px 0px 10px rgba(0, 0, 0, 0.5)"}
+        )
         self.css_width = "100%"
         self.css_height = "70px"
         self.css_direction = "row"
         self.css_background_color = COLOR
-        self.css_font_family = "Monospace"
         self.css_color = "white"
+        self.css_font_family = "Courier"
+
+        # moyai
+        self.moyai_box = remi.gui.VBox(style={"padding-left": SIDE_PADDING})
+        self.moyai_box.css_width = "30px"
+        self.moyai_box.css_height = "100%"
+        self.moyai_box.css_font_size = MOYAI_FONT_SIZE
+        self.moyai_box.css_align_self = "flex-start"
+        self.moyai_box.css_float = "left"
+        self.moyai_box.css_background_color = COLOR
+        self.moyai = remi.gui.Label("🗿", style={"text-shadow": MOYAI_SHADOW})
+        self.moyai.css_align_self = "flex-start"
+        self.moyai.css_background_color = COLOR
+        self.moyai_box.append(self.moyai)
+        self.append(self.moyai_box, "moyai")
 
         # logo text
         self.logo_box = remi.gui.VBox(style={"padding-left": SIDE_PADDING})
-        self.logo_box.css_width = "37%"
+        self.logo_box.css_width = "160px"
         self.logo_box.css_height = "100%"
         self.logo_box.css_font_size = LOGO_FONT_SIZE
         self.logo_box.css_align_self = "flex-start"
@@ -91,7 +86,7 @@ class HeaderContainer(remi.gui.HBox):
 
         # clock
         self.clock_box = remi.gui.VBox(style={"padding-right": SIDE_PADDING})
-        self.clock_box.css_width = "45%"
+        self.clock_box.css_width = "160px"
         self.clock_box.css_height = "100%"
         self.clock_box.css_font_size = CLOCK_FONT_SIZE
         self.clock_box.css_align_self = "flex-end"
@@ -104,7 +99,22 @@ class HeaderContainer(remi.gui.HBox):
         self.clock_box.append(self.clock)
         self.append(self.clock_box, "clock")
 
-        self.update_time()
+        # date
+        self.date_box = remi.gui.VBox(style={"padding-right": SIDE_PADDING})
+        self.date_box.css_width = "60px"
+        self.date_box.css_height = "100%"
+        self.date_box.css_font_size = DATE_FONT_SIZE
+        self.date_box.css_align_self = "flex-end"
+        self.date_box.css_float = "right"
+        self.date_box.css_background_color = COLOR
+        self.date = remi.gui.VBox()
+        self.date.css_align_self = "flex-end"
+        self.date.css_background_color = COLOR
+        fill_vbox_with_multiline_text(self.date, "Mon\nJan 01")
+        self.date_box.append(self.date)
+        self.append(self.date_box, "date")
+
+        self.update_datetime()
 
     def on_button_clicked(self, _):
         button_was_already_clicked = states.header_button_was_clicked
@@ -117,10 +127,16 @@ class HeaderContainer(remi.gui.HBox):
             states.header_button_was_clicked = True
             self.button.text = "clicked"
 
-    def update_time(self):
+    def update_datetime(self):
         t = time.localtime()
         t_str = time.asctime(t)
-        fill_vbox_with_multiline_text(self.clock, get_fancy_clock_string(t_str.split(" ")[3]))
+        fill_vbox_with_multiline_text(
+            self.clock, get_fancy_clock_string(t_str.split(" ")[3])
+        )
+        fill_vbox_with_multiline_text(
+            self.date,
+            f"{t_str.split(' ')[0]}\n{t_str.split(' ')[1]} {t_str.split(' ')[2]}",
+        )
 
 
 class Header(SubApp):
@@ -133,4 +149,4 @@ class Header(SubApp):
         return True
 
     def do_stuff(self):
-        self.container.update_time()
+        self.container.update_datetime()

@@ -10,9 +10,6 @@ class State:
 
     def __init__(self, default_value=None, store_to_disk=False, shelf_path="states"):
         """Initializes the State, sets the default value, if it should be stored to disk and the path to the shelf."""
-        logger.debug(
-            f"Creating State: {self.__class__.__name__}({default_value!r}, {store_to_disk!r}, {shelf_path!r})"
-        )
         self._value = default_value
         self._store_to_disk = store_to_disk
         self._shelf_path = shelf_path
@@ -71,8 +68,9 @@ class States:
             for attr in dir(self)
             if not callable(getattr(self, attr)) and not attr.startswith("__")
         }
-        title = f"<class '{self.__class__.__module__}.{self.__class__.__name__}'> "
-        return title + rich.pretty.pretty_repr(_dict)
+        out = f"<class '{self.__class__.__module__}.{self.__class__.__name__}'>\n"
+        out += rich.pretty.pretty_repr(_dict).replace("{\n", "").replace("\n}", "")
+        return out
 
 
 states = States()

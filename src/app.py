@@ -2,7 +2,6 @@ import remi
 
 from subapps.header import Header
 from subapps.subapp_hierarchy import PERFORMER_HIERARCHY, PerformerHierarchy
-from utils import add_default_styles
 
 
 class MyApp(remi.server.App):
@@ -12,7 +11,6 @@ class MyApp(remi.server.App):
         """Gets called when the app is started"""
         # main container contains everything as is always the full screen
         self.main_container = remi.gui.Container(width="100%", height="100%")
-        add_default_styles(self.main_container)
 
         # header container containers header sub-app
         self.header = Header(name="header")
@@ -22,7 +20,7 @@ class MyApp(remi.server.App):
         self.content_container = remi.gui.VBox(
             width="100%", style={"margin": "23px 23px"}
         )
-        add_default_styles(self.content_container)
+        self.css_background_color = "lightgray"
         self.main_container.append(self.content_container, "content")
 
         # self.instantiate_performers()
