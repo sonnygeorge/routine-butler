@@ -1,29 +1,30 @@
 import remi
 
 from subapps.header import Header
-from subapps.subapp_hierarchy import PERFORMER_HIERARCHY, PerformerHierarchy
+from subapps.subapp_hierarchy import SUBAPP_HIERARCHY, SubAppHierarchy
+
+BACKGROUND_COLOR = "lightgray"
 
 
 class MyApp(remi.server.App):
-    performer_hierarchy: PerformerHierarchy = PERFORMER_HIERARCHY
+    performer_hierarchy: SubAppHierarchy = SUBAPP_HIERARCHY
 
     def main(self):
         """Gets called when the app is started"""
-        # main container contains everything as is always the full screen
+        # main container
         self.main_container = remi.gui.Container(width="100%", height="100%")
+        self.main_container.css_background_color = BACKGROUND_COLOR
 
-        # header container containers header sub-app
+        # header container
         self.header = Header(name="header")
         self.main_container.append(self.header.container, "header")
 
-        # content container contains the hierarchy of other sub-apps
+        # content container
         self.content_container = remi.gui.VBox(
-            width="100%", style={"margin": "23px 23px"}
+            width="100%", style={"margin": "23px 0px", "background": "none"}
         )
-        self.css_background_color = "lightgray"
         self.main_container.append(self.content_container, "content")
 
-        # self.instantiate_performers()
         self.manage_sub_apps()
         return self.main_container
 
@@ -39,50 +40,46 @@ class MyApp(remi.server.App):
         """
 
         def _recursively_manage_sub_apps(
-            performer_hierarchy: PerformerHierarchy,
+            subapp_hierarchy: SubAppHierarchy,
             parent_container: remi.gui.Container,
         ):
             """
             Does the following for any given sub-app:
                 Case 1:
-                    If the performer should render and is not already on the stage:
+                    If the sub-appshould render and is not already on the stage:
                         1. Put it on the stage
-                        2. Recurse into the performer's sub-performers
-                        3. call the performer's do_stuff method
+                        2. Recurse into the sub-app's sub-performers
+                        3. call the sub-app's do_stuff method
                 Case 2:
-                    If the performer should not render and is already on the stage:
+                    If the sub-app should not render and is already on the stage:
                         1. Take it off the stage
-                        2. DON'T recurse into the performer's sub-performers...
-                        (a child performer should not be on the stage if its parent is not on the stage)
+                        2. DON'T recurse into the sub-app's children...
+                        (a child sub-app should not be on the stage if its parent is not on the stage)
                 Case 3:
-                    If the performer should render and is already on the stage:
-                        1. Do nothing (the performer is already where it should be)
-                        2. Recurse into the performer's sub-performers
-                        3. call the performer's do_stuff method
+                    If the sub-app should render and is already on the stage:
+                        1. Do nothing (the sub-app is already where it should be)
+                        2. Recurse into the sub-app's sub-app
+                        3. call the sub-app's do_stuff method
             """
-            for performer, sub_performer_hierarchy in performer_hierarchy.items():
+            for subapp, child_hierarchy in subapp_hierarchy.items():
                 # case 1
                 if (
-                    performer.should_be_on_stage()
-                    and performer.container not in parent_container.children
+                    subapp.should_be_on_stage()
+                    and subapp.container not in parent_container.children
                 ):
-                    parent_container.append(performer.container, performer.name)
-                    _recursively_manage_sub_apps(
-                        sub_performer_hierarchy, performer.container
-                    )
-                    performer.do_stuff()
+                    parent_container.append(subapp.container, subapp.name)
+                    _recursively_manage_sub_apps(child_hierarchy, subapp.container)
+                    subapp.do_stuff()
                 # case 2
                 elif (
-                    not performer.should_be_on_stage()
-                    and performer.container in parent_container.children.values()
+                    not subapp.should_be_on_stage()
+                    and subapp.container in parent_container.children.values()
                 ):
-                    parent_container.remove_child(performer.container)
+                    parent_container.remove_child(subapp.container)
                 # case 3
                 else:
-                    _recursively_manage_sub_apps(
-                        sub_performer_hierarchy, performer.container
-                    )
-                    performer.do_stuff()
+                    _recursively_manage_sub_apps(child_hierarchy, subapp.container)
+                    subapp.do_stuff()
 
         # first, call the header's do_stuff method
         self.header.do_stuff()

@@ -1,8 +1,8 @@
-from typing import Dict, Type
+from typing import Dict
 
 from subapps.subapp import SubApp
-from subapps.conditional_subapp import ConditionalSubApp
+from subapps.alarm import Alarm
 
-PerformerHierarchy = Dict[SubApp, "PerformerHierarchy"]
+SubAppHierarchy = Dict[SubApp, "SubAppHierarchy"]
 
-PERFORMER_HIERARCHY = {ConditionalSubApp(name="conditional_performer"): {}}
+SUBAPP_HIERARCHY = {Alarm(name="alarm"): {}}

@@ -140,8 +140,7 @@ class HeaderContainer(remi.gui.HBox):
 
 class Header(SubApp):
     def __init__(self, name: str):
-        self.name = name
-        self.container = HeaderContainer()
+        SubApp.__init__(self, name=name, container=HeaderContainer())
 
     def should_be_on_stage(self):
         # We want the header to always be "on stage"

@@ -35,6 +35,7 @@ class State:
 
     def __set__(self, instance, value):
         """Sets the value of the state, if it should be stored to disk it will be stored in the shelf."""
+        logger.debug(f"State {self.name} set to {value}")
         if self._store_to_disk:
             with shelve.open(self._shelf_path) as shelf:
                 shelf[self.name] = value
@@ -56,8 +57,9 @@ class States:
     morning_programming_is_running = State(default_value=False, store_to_disk=True)
     morning_programming_is_finished = State(default_value=False, store_to_disk=True)
     # alarm
-    alarm_on = State(default_value=False, store_to_disk=True)
-    alarm_time = State(default_value=False, store_to_disk=True)
+    alarm_is_on = State(default_value=False, store_to_disk=True)
+    alarm_hour = State(default_value=0, store_to_disk=True)
+    alarm_minute = State(default_value=0, store_to_disk=True)
 
     def __init__(self):
         logger.debug(f"Created states: {self.__str__()}")
