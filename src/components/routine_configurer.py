@@ -1,6 +1,6 @@
 import remi
 
-from components.primitive.centered_label import CenteredLabel
+from components.primitives.centered_label import CenteredLabel
 from components.scheduler import Scheduler
 from schema.routine_configurations import RoutineConfigurations
 

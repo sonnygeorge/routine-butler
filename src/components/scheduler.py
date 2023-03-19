@@ -1,8 +1,8 @@
 import remi
 
-from components.primitive.button import Button
-from components.primitive.centered_label import CenteredLabel
-from components.primitive.configurer import Configurer
+from components.primitives.button import Button
+from components.primitives.centered_label import CenteredLabel
+from components.primitives.configurer import Configurer
 from schema.schedule import Schedule
 
 BUTTON_BOX_WIDTH = "15%"

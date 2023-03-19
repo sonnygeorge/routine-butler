@@ -3,7 +3,7 @@ from typing import List
 import remi
 from loguru import logger
 
-from components.primitive.button import Button
+from components.primitives.button import Button
 
 
 class CollapsibleVBox(remi.gui.VBox):

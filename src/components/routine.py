@@ -1,6 +1,6 @@
 import remi
 
-from components.primitive.collapsible_vbox import CollapsibleVBox
+from components.primitives.collapsible_vbox import CollapsibleVBox
 from components.routine_configurer import RoutineConfigurer
 from schema.routine_configurations import RoutineConfigurations
 
