@@ -66,8 +66,8 @@ make run
 
 The app is currently written with naming that corresponds to the following analogy:
 
-![images/TheaterAnalogy-1.png](images/TheaterAnalogy-1.png)
-![images/TheaterAnalogy-2.png](images/TheaterAnalogy-2.png)
-![images/TheaterAnalogy-3.png](images/TheaterAnalogy-3.png)
-![images/TheaterAnalogy-4.png](images/TheaterAnalogy-4.png)
-![images/TheaterAnalogy-5.png](images/TheaterAnalogy-5.png)
+![images/TheaterAnalogy-1.png](readme_images/TheaterAnalogy-1.png)
+![images/TheaterAnalogy-2.png](readme_images/TheaterAnalogy-2.png)
+![images/TheaterAnalogy-3.png](readme_images/TheaterAnalogy-3.png)
+![images/TheaterAnalogy-4.png](readme_images/TheaterAnalogy-4.png)
+![images/TheaterAnalogy-5.png](readme_images/TheaterAnalogy-5.png)
