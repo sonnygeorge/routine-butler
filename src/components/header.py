@@ -2,8 +2,6 @@ import time
 
 import remi
 
-from states import states
-from subapps.subapp import SubApp
 from utils import get_fancy_clock_string
 
 LOGO_TEXT = r"""
@@ -42,7 +40,7 @@ def fill_vbox_with_multiline_text(
             vbox.append(row)
 
 
-class HeaderContainer(remi.gui.HBox):
+class Header(remi.gui.HBox):
     def __init__(self):
         remi.gui.Widget.__init__(
             self, style={"box-shadow": "0px 0px 10px rgba(0, 0, 0, 0.5)"}
@@ -115,17 +113,6 @@ class HeaderContainer(remi.gui.HBox):
 
         self.update_datetime()
 
-    def on_button_clicked(self, _):
-        button_was_already_clicked = states.header_button_was_clicked
-        if button_was_already_clicked:
-            # We "unclickify" the button
-            states.header_button_was_clicked = False
-            self.button.text = "not clicked"
-        else:
-            # We "clickify" the button
-            states.header_button_was_clicked = True
-            self.button.text = "clicked"
-
     def update_datetime(self):
         t = time.localtime()
         t_str = time.asctime(t)
@@ -137,14 +124,5 @@ class HeaderContainer(remi.gui.HBox):
             f"{t_str.split(' ')[0]}\n{t_str.split(' ')[1]} {t_str.split(' ')[2]}",
         )
 
-
-class Header(SubApp):
-    def __init__(self, name: str):
-        SubApp.__init__(self, name=name, container=HeaderContainer())
-
-    def should_be_on_stage(self):
-        # We want the header to always be "on stage"
-        return True
-
-    def do_stuff(self):
-        self.container.update_datetime()
+    def update(self):
+        self.update_datetime()
