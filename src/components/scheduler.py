@@ -3,7 +3,7 @@ import remi
 from components.primitives.button import Button
 from components.primitives.centered_label import CenteredLabel
 from components.primitives.configurer import Configurer
-from schema.schedule import Schedule
+from database import ScheduleModel
 
 BUTTON_BOX_WIDTH = "15%"
 
@@ -11,7 +11,7 @@ BUTTON_BOX_WIDTH = "15%"
 class Scheduler(Configurer):
     """A component that offers controls to configure a Schedule object."""
 
-    def __init__(self, schedule: Schedule):
+    def __init__(self, schedule: ScheduleModel):
         Configurer.__init__(self)
 
         self.schedule = schedule
@@ -90,18 +90,23 @@ class Scheduler(Configurer):
     def on_hour_plus(self, _):
         self.increment_hour()
         self.update_alarm_time_label()
+        return self.schedule
 
     def on_hour_minus(self, _):
         self.decrement_hour()
         self.update_alarm_time_label()
+        return self.schedule
 
     def on_minute_plus(self, _):
         self.increment_minute()
         self.update_alarm_time_label()
+        return self.schedule
 
     def on_minute_minus(self, _):
         self.decrement_minute()
         self.update_alarm_time_label()
+        return self.schedule
 
     def on_is_on_checkbox(self, _, is_checked):
         self.schedule.is_active = is_checked
+        return self.schedule

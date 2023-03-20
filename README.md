@@ -71,3 +71,39 @@ The app is currently written with naming that corresponds to the following analo
 ![images/TheaterAnalogy-3.png](readme_images/TheaterAnalogy-3.png)
 ![images/TheaterAnalogy-4.png](readme_images/TheaterAnalogy-4.png)
 ![images/TheaterAnalogy-5.png](readme_images/TheaterAnalogy-5.png)
+
+Short question:
+
+How do you vary the naming of data model classes and functional classes that correspond to the same thing? Is there a convention? Is there a way to make them the same class?
+
+Long question:
+
+If I have an app where any given user has an indeterminate number of "X” modules (like say maybe how a user has non-fixed number of posts or something), and in my code, I have an “X” class that contains all of the actual functionality for the module…
+
+```python
+class X:
+    def __init__(self):
+        ...
+    def do_stuff(self):
+        ...
+```
+
+I want the database to store the necessary unique attributes for their “X” modules, so that when they re-open the app, it will retrieve this information and instantiate their “X” objects.
+
+My current idea is to create a database-corresponding data model class for “X” module that the “X” Class would contain and manage. However, I am struggling with what I would name this class since the name “X” is already taken ("XAttrs"? "XConfigs”? “XData"?)… You’d imagine that the table in DB would simply be named “X” after the module that it serializes… So it feels strange having a deviant naming for the corresponding dataclass in my code…
+
+```python
+class XAttrs:
+    """Data model for X module attributes--could be Pydantic/SQLModel/etc."""
+    characteristic_1: str
+    characteristic_2: int
+    ...
+
+class X:
+    def __init__(self, attrs: XAttrs):
+        self.attrs = attrs
+    def do_stuff(self):
+        ...
+```
+
+I’m certain this is a situation that others have encountered. How might I approach this?

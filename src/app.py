@@ -6,11 +6,11 @@ from components.body_container import BodyContainer
 from typing import List
 
 from components.routine import Routine
-from schema.user import User
+from database import UserModel, Database
 
 
 class App(remi.server.App):
-    user: User = User()  # TEMP: default user for now
+    user: UserModel = Database().get(UserModel, 1)  # TEMP: default user for development
     routines: List[Routine] = []
 
     def main(self):
@@ -18,7 +18,7 @@ class App(remi.server.App):
         # main container
         self.topmost_container = TopmostContainer()
 
-        # header container
+        # header containerD
         self.header = Header()
         self.topmost_container.append(self.header, "header")
 
@@ -34,26 +34,28 @@ class App(remi.server.App):
         """Gets called every update_interval seconds"""
         self.header.update()
         self.update_content()
+        # since all models are children of the user, this persists all changes to the db
+        Database().update(self.user)
 
     def instantiate_routines(self):
         """Instantiates the routines from user's configurations"""
-        for routine_configurations in self.user.routine_configurations:
-            self.routines.append(Routine(routine_configurations))
+        for routine_data in self.user.routines:
+            self.routines.append(Routine(routine_data))
 
     def update_content(self):
         """Updates the content of the app"""
         for routine in self.routines:
-            routine_id = routine.routine_configurations.routine_id
+            routine_id = routine.routine_model.id
             # if routine should be on stage and is not already on stage
             if (
-                routine.should_be_on_stage()
+                routine.should_be_on_screen()
                 and routine not in self.body_container.children.values()
             ):
                 self.body_container.append(routine, routine_id)
                 routine.update()
             # if routine should not be on stage and is already on stage
             elif (
-                not routine.should_be_on_stage()
+                not routine.should_be_on_screen()
                 and routine in self.body_container.children.values()
             ):
                 self.body_container.remove_child(routine)

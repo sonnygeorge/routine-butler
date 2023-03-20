@@ -1,3 +1,4 @@
 remi
 rich
 loguru
+sqlmodel
