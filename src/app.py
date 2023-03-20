@@ -6,11 +6,11 @@ from components.body_container import BodyContainer
 from typing import List
 
 from components.routine import Routine
-from database import UserModel, Database
+from database import UserModel, database
 
 
 class App(remi.server.App):
-    user: UserModel = Database().get(UserModel, 1)  # TEMP: test user for development
+    user: UserModel = database.get(UserModel, 1)  # TEMP: test user for development
     routines: List[Routine] = []
 
     def main(self):
@@ -35,7 +35,7 @@ class App(remi.server.App):
         self.header.update()
         self.update_content()
         # since all models are children of the user, this persists all changes to the db
-        Database().update(self.user)
+        database.update(self.user)
 
     def instantiate_routines(self):
         """Instantiates the routines from user's configurations"""
