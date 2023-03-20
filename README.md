@@ -14,6 +14,17 @@
 ╚═════════════════════════════════════════════════════════════╝ 
 ```
 
+## TODO
+
+- [ ] Change nomenclature of ORM models to be the entities themselves (without "Model" suffix) and change the components to have "Component" suffix if 1-1 with orm entity
+- [ ] Seperate models into their own files
+- [ ] Add new/delete schedule buttons in RoutineConfigurer
+- [ ] Is their a way to async the database i/o? ... perhaps some sort of caching to help performance?
+- [ ] Add "program" entities to the app: two very simple ones could be "readtext" and "promptcontinue"
+- [ ] Add functionality to check for actively scheduled routines and run them with alarm sound at beginning
+- [ ] Document everything with doc strings, mermaid diagrams, etc.
+- [ ] Get a full-on, paid code review from one or more relevant people
+
 ## ❓ About
 
 This repo currently exists to help me test and plan the theory behind the "kiosk-style" app that I will run on my raspberry pi and use to accomplish a variety of tasks including but not limited to:
