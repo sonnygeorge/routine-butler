@@ -16,6 +16,7 @@
 
 ## TODO
 
+- [ ] Somehow use inheritance / ABCs / protocol to more systematically make sure that all data models have an id integer field
 - [ ] Change nomenclature of ORM models to be the entities themselves (without "Model" suffix) and change the components to have "Component" suffix if 1-1 with orm entity
 - [ ] Seperate models into their own files
 - [ ] Add new/delete schedule buttons in RoutineConfigurer
