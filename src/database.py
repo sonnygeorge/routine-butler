@@ -44,7 +44,7 @@ class ScheduleModel(SQLModel, table=True):
 
 
 def ascertain_db():
-    """Creates the database if it doesn't exist"""
+    """Creates the database with necessary tables if it doesn't exist"""
     engine = create_engine("sqlite:///db.sqlite")
     SQLModel.metadata.create_all(engine)
     logger.debug(f'Ascertained Database with necessary tables at "{DB_URL}"')
@@ -82,7 +82,8 @@ class Database:
 
 
 TEST_USER_DEFAULT = UserModel(
-    id=1, routines=[RoutineModel(id=1, schedules=[ScheduleModel(id=1)])]
+    id=1,
+    routines=[RoutineModel(id=1, schedules=[ScheduleModel(id=1), ScheduleModel()])],
 )
 
 

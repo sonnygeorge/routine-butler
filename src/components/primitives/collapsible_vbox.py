@@ -23,11 +23,10 @@ class CollapsibleVBox(remi.gui.VBox):
         self.title = title
 
         # header
-        self.header = remi.gui.HBox()
+        self.header = remi.gui.HBox(style={"vertical-align": "top"})
         self.header.css_width = "100%"
         self.header.css_height = "30px"
         self.header.css_align_items = "center"
-        self.header.css_float = "top"
         self.append(self.header, "header")
 
         # title

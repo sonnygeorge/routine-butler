@@ -17,21 +17,28 @@ class RoutineConfigurer(remi.gui.GridBox):
         self.css_border_color = "red"
         self.css_border_width = "2px"
         self.css_border_style = "solid"
-        self.set_column_sizes(["30%", "70%"])
-        self.set_style({"grid-template-rows": "50px"})
 
         # schedulers
-        self.scheduler_label = CenteredLabel("Schedule:")
         self.schedulers = [
             Scheduler(schedule) for schedule in self.routine_model.schedules
         ]
-        self.schedule_labels = [
+        self.scheduler_labels = [
             CenteredLabel(f"Schedule {i + 1}:") for i in range(len(self.schedulers))
         ]
-        grid_definition = [["scheduler_label", "scheduler"]] * len(self.schedulers)
+        grid_definition = [
+            [f"scheduler_label_{i}", f"scheduler_{i}"]
+            for i in range(len(self.schedulers))
+        ]
 
         self.define_grid(grid_definition)
+        self.set_column_sizes(["30%", "70%"])
+        # this makes the rows the same height for each scheduler
+        self.set_style(
+            {"grid-template-rows": " ".join(["40px" for _ in self.schedulers])}
+        )
 
-        for schedule_label, scheduler in zip(self.schedule_labels, self.schedulers):
-            self.append(schedule_label, "scheduler_label")
-            self.append(scheduler, "scheduler")
+        for i, (schedule_label, scheduler) in enumerate(
+            zip(self.scheduler_labels, self.schedulers)
+        ):
+            self.append(schedule_label, f"scheduler_label_{i}")
+            self.append(scheduler, f"scheduler_{i}")

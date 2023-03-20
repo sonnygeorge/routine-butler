@@ -10,7 +10,7 @@ from database import UserModel, Database
 
 
 class App(remi.server.App):
-    user: UserModel = Database().get(UserModel, 1)  # TEMP: default user for development
+    user: UserModel = Database().get(UserModel, 1)  # TEMP: test user for development
     routines: List[Routine] = []
 
     def main(self):
