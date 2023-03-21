@@ -12,8 +12,8 @@ class Configurer(remi.gui.HBox):
         column 2: the Configurer component for configuring it
     """
 
-    def __init__(self):
-        remi.gui.HBox.__init__(self)
+    def __init__(self, *args, **kwargs):
+        remi.gui.HBox.__init__(self, *args, **kwargs)
         self.css_align_self = "center"
         self.css_height = "100%"
         self.css_width = "100%"

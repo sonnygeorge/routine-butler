@@ -2,3 +2,4 @@ remi
 rich
 loguru
 sqlmodel
+pytest

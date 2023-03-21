@@ -5,20 +5,20 @@ from components.topmost_container import TopmostContainer
 from components.body_container import BodyContainer
 from typing import List
 
-from components.routine import Routine
-from database import UserModel, database
+from components.routine_component import RoutineComponent
+from database import User, database
 
 
 class App(remi.server.App):
-    user: UserModel = database.get(UserModel, 1)  # TEMP: test user for development
-    routines: List[Routine] = []
+    user: User = database.get(User, 1)  # TEMP: test user for development
+    routine_components: List[RoutineComponent] = []
 
     def main(self):
         """Gets called when the app is started"""
         # main container
         self.topmost_container = TopmostContainer()
 
-        # header containerD
+        # header container
         self.header = Header()
         self.topmost_container.append(self.header, "header")
 
@@ -26,42 +26,46 @@ class App(remi.server.App):
         self.body_container = BodyContainer()
         self.topmost_container.append(self.body_container, "body")
 
-        self.instantiate_routines()
-        self.update_content()
+        self.instantiate_routine_components()
+        self.manage_body_components_and_run_idle_funcs()
         return self.topmost_container
+
+    def instantiate_routine_components(self):
+        """Instantiates the routines from user's routines"""
+        for routine in self.user.routines:
+            self.routine_components.append(RoutineComponent(routine))
 
     def idle(self):
         """Gets called every update_interval seconds"""
-        self.header.update()
-        self.update_content()
+        # header component idle function
+        self.header.idle()
+        # add/remove body components and run their idle functions
+        self.manage_body_components_and_run_idle_funcs()
         # since all models are children of the user, this persists all changes to the db
-        database.update(self.user)
+        database.commit(self.user)
 
-    def instantiate_routines(self):
-        """Instantiates the routines from user's configurations"""
-        for routine_data in self.user.routines:
-            self.routines.append(Routine(routine_data))
-
-    def update_content(self):
-        """Updates the content of the app"""
-        for routine in self.routines:
-            routine_id = routine.routine_model.id
-            # if routine should be on stage and is not already on stage
+    def manage_body_components_and_run_idle_funcs(self):
+        """Adds/removes body components and runs their idle functions"""
+        for routine_component in self.routine_components:
+            # if routine component should be on the screen and is not already on the screen
             if (
-                routine.should_be_on_screen()
-                and routine not in self.body_container.children.values()
+                routine_component.should_be_on_screen()
+                and routine_component not in self.body_container.children.values()
             ):
-                self.body_container.append(routine, routine_id)
-                routine.update()
-            # if routine should not be on stage and is already on stage
+                self.body_container.append(
+                    routine_component, key=routine_component.routine.id
+                )
+                routine_component.idle()
+
+            # if routine component should not be on the screen and is already on the screen
             elif (
-                not routine.should_be_on_screen()
-                and routine in self.body_container.children.values()
+                not routine_component.should_be_on_screen()
+                and routine_component in self.body_container.children.values()
             ):
-                self.body_container.remove_child(routine)
-            # if routine should be on stage and is already on stage
+                self.body_container.remove_child(routine_component)
+            # if routine component should be on the screen and is already on the screen
             else:
-                routine.update()
+                routine_component.idle()
 
 
 if __name__ == "__main__":

@@ -27,6 +27,7 @@ SIDE_PADDING = "20px"
 def fill_vbox_with_multiline_text(
     vbox: remi.gui.VBox, text: str, text_align: str = "right"
 ):
+    """Takes a VBox, clears it, and fills it with a multiline text"""
     if len(vbox.children) != 0:
         children = list(vbox.children.values())
         for child in children:
@@ -114,6 +115,7 @@ class Header(remi.gui.HBox):
         self.update_datetime()
 
     def update_datetime(self):
+        """Updates the text in header's date and clock display"""
         t = time.localtime()
         t_str = time.asctime(t)
         fill_vbox_with_multiline_text(
@@ -124,5 +126,6 @@ class Header(remi.gui.HBox):
             f"{t_str.split(' ')[0]}\n{t_str.split(' ')[1]} {t_str.split(' ')[2]}",
         )
 
-    def update(self):
+    def idle(self):
+        """Gets called every update_interval seconds"""
         self.update_datetime()

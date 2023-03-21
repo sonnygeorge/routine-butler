@@ -3,7 +3,7 @@ import remi
 from components.primitives.button import Button
 from components.primitives.centered_label import CenteredLabel
 from components.primitives.configurer import Configurer
-from database import ScheduleModel
+from database import Schedule
 
 BUTTON_BOX_WIDTH = "15%"
 
@@ -11,10 +11,12 @@ BUTTON_BOX_WIDTH = "15%"
 class Scheduler(Configurer):
     """A component that offers controls to configure a Schedule object."""
 
-    def __init__(self, schedule: ScheduleModel):
+    trashed: bool = False
+
+    def __init__(self, schedule: Schedule):
         Configurer.__init__(self)
 
-        self.schedule = schedule
+        self.schedule: Schedule = schedule
 
         # hour buttons
         self.hour_buttons = remi.gui.HBox(height="100%", width=BUTTON_BOX_WIDTH)
@@ -57,6 +59,15 @@ class Scheduler(Configurer):
         self.is_active_checkbox = remi.gui.CheckBox(checked=self.schedule.is_active)
         self.is_active_checkbox.onchange.connect(self.on_is_on_checkbox)
         self.append(self.is_active_checkbox, "is_on_checkbox")
+
+        # trash button
+        self.trash_button = Button("🗑️")
+        self.trash_button.onclick.connect(self.on_trash_button)
+        self.trash_button.set_style({"text-shadow": "0px 0px 3px #FFFFFF"})
+        self.trash_button.css_background_color = "red"
+        self.trash_button.css_height = "23px"
+        self.trash_button.css_width = "23px"
+        self.append(self.trash_button, "on_trash_button")
 
     def update_alarm_time_label(self):
         self.time_label.set_text(f"{self.schedule.hour:02d}:{self.schedule.minute:02d}")
@@ -105,3 +116,6 @@ class Scheduler(Configurer):
 
     def on_is_on_checkbox(self, _, is_checked):
         self.schedule.is_active = is_checked
+
+    def on_trash_button(self, _):
+        self.trashed = True
