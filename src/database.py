@@ -106,12 +106,10 @@ class DatabaseWrapper:
         callable: Callable[[sqlalchemy.orm.session.Session, SQLModel], Any],
     ) -> None:
         """
-        When called elsewhere, this function will recursively apply the callable to all
-        children of the original model_object. It will not, however, apply the callable
-        to the original model_object itself.
+        Applies the callable to the model_object and all children recursively.
 
-        An important detail is that this function will apply the callable starting with
-        the innermost children and work back to the direct children of the original.
+        Applies the callable beginning with the innermost children and works back up
+        to the original model_object.
 
         args:
             session: the SQLAlchemy session to use
