@@ -3,6 +3,9 @@ import pytest
 from src.database import Schedule, Routine, User, database
 
 
+# TODO: mock a test database for tests
+
+
 class TestDatabase:
     @pytest.mark.parametrize("data_model", [User(), Routine(), Schedule()])
     def test_gets_nothing_after_delete(self, data_model):

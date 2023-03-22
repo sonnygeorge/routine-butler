@@ -1,7 +1,9 @@
-from typing import List, Optional, Type
+from typing import List, Optional, Type, Callable, Any
 
 from sqlmodel import SQLModel, Field, Relationship, Session, create_engine
 from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
+import sqlalchemy.orm.session
+from sqlalchemy.orm.exc import DetachedInstanceError
 from sqlalchemy import inspect
 from loguru import logger
 
@@ -60,13 +62,17 @@ Session = scoped_session(sessionmaker())
 Session.configure(bind=engine, expire_on_commit=False)
 
 
-class Database:
-    """Collection of wrapper functions for interacting with the database"""
+# TODO: Document better and consider design
 
-    def num_rows_in_table(self, Model: Type[SQLModel]):
-        with Session() as session:
-            count = session.query(Model).count()
-        return count
+
+class DatabaseWrapper:
+    """
+    A collection of wrapper functions for interacting with the database.
+
+    This strategies in this wrapper only work if:
+     - All models/tables in the DB have a single primary key titled "id"
+     - All relationships in the DB are are parent->children/one->zero-or-many
+    """
 
     def _in_db(self, session, model_object) -> bool:
         """
@@ -77,11 +83,94 @@ class Database:
         )
         return session.query(q.exists()).scalar()
 
+    def _add_or_merge(self, session, model_object):
+        is_new = True
+        if model_object.id is not None:
+            # Check if id already exists in the database
+            if self._in_db(session, model_object):
+                session.merge(model_object)
+                is_new = False
+        if is_new:
+            session.add(model_object)
+        session.commit()
+
+    def _delete(self, session, model_object):
+        if self._in_db(session, model_object):
+            session.delete(model_object)
+            session.commit()
+
+    def _apply_recursively(
+        self,
+        session: sqlalchemy.orm.session.Session,
+        model_object: SQLModel,
+        callable: Callable[[sqlalchemy.orm.session.Session, SQLModel], Any],
+    ) -> None:
+        """
+        When called elsewhere, this function will recursively apply the callable to all
+        children of the original model_object. It will not, however, apply the callable
+        to the original model_object itself.
+
+        An important detail is that this function will apply the callable starting with
+        the innermost children and work back to the direct children of the original.
+
+        args:
+            session: the SQLAlchemy session to use
+            model_object: the SQLModel model object to apply the callable to
+            callable: The callable to apply--must have a signature of:
+                Callable[[sqlalchemy.orm.session.Session, SQLModel], Any]
+
+        returns:
+            None
+        """
+        for relationship in model_object.__sqlmodel_relationships__.keys():
+            # Skip relationships that aren't attached to the session
+            try:
+                getattr(model_object, relationship)
+            except DetachedInstanceError:
+                continue
+
+            def is_children(model_object, relationship):
+                # Since the DB only has parent->children/one->many relationships,
+                # we can assume that if a relationship comes back as a list, it
+                # is children.
+                return isinstance(getattr(model_object, relationship), list)
+
+            if is_children(model_object, relationship):
+                # Manually set empty children relationships to empty lists, since
+                # they otherwise, don't seem to be "eager loaded" and persisted
+                # outside of session context.
+                if getattr(model_object, relationship) == []:
+                    setattr(model_object, relationship, [])
+                    continue  # no need to proceed, no children to recurse into
+
+                # Finally, for each child, we can recurse
+                for child in getattr(model_object, relationship):
+                    self._apply_recursively(session, child, callable)
+
+        # After resurcing into this model's children, we can now apply the callable
+        callable(session, model_object)
+
+    def commit(self, model_object: SQLModel):
+        """
+        Adds a new or updates an existing model in the database.
+        """
+
+        with Session() as session:
+            self._apply_recursively(session, model_object, self._add_or_merge)
+            logger.debug(f"Committed {model_object} and all children to the database.")
+
+    def delete(self, model_object: SQLModel):
+        """
+        Deletes a model object and all children from the database. Parents are not be deleted.
+        """
+
+        with Session() as session:
+            self._apply_recursively(session, model_object, self._delete)
+            logger.debug(f"Deleted {model_object} and all children from the database.")
+
     def get(self, Model: Type[SQLModel], id: int):
         """
-        Gets a model from the database given its id.
-
-        joinedload("*") is used to eager load all relationships.
+        Eagerly gets a model and all child relationships from the database given an id.
         """
         with Session() as session:
             user = (
@@ -89,55 +178,19 @@ class Database:
             )
         return user
 
-    def get_all(self, Model: Type[SQLModel]):
+    def get_all(self, Model: Type[SQLModel]) -> List[SQLModel]:
         """
-        Gets all models of a given type from the database.
-
-        joinedload("*") is used to eager load all relationships.
+        Eagerly gets all model objects (with their nested child relationships) from a table.
         """
         with Session() as session:
             users = session.query(Model).options(joinedload("*")).all()
         return users
 
-    def commit(self, model_object: SQLModel):
-        """
-        Adds a new or updates an existing model in the database.
-        """
+    def num_rows_in_table(self, Model: Type[SQLModel]) -> int:
+        """Returns the number of rows in a table."""
         with Session() as session:
-            is_new = True
-            if model_object.id is not None:
-                # Check if id already exists in the database
-                if self._in_db(session, model_object):
-                    session.merge(model_object)
-                    is_new = False
-            if is_new:
-                session.add(model_object)
-            session.commit()
-            logger.debug(f"Committed {model_object} to the database.")
-
-    def delete(self, model_object: SQLModel):
-        """
-        Deletes a model from the database.
-
-        Recursively deletes all children of the model.
-
-        Parents are not be deleted.
-        """
-
-        def recursively_delete_children(session, model_object):
-            for relationship in model_object.__sqlmodel_relationships__.keys():
-                unloaded_properties = inspect(model_object).unloaded
-                if relationship not in unloaded_properties:
-                    for child in getattr(model_object, relationship):
-                        if issubclass(child.__class__, SQLModel):
-                            recursively_delete_children(session, child)
-                            if self._in_db(session, child):
-                                session.delete(child)
-
-        with Session() as session:
-            recursively_delete_children(session, model_object)
-            session.delete(model_object)
-            session.commit()
+            count = session.query(Model).count()
+        return count
 
 
 TEST_USER_DEFAULT = User(
@@ -146,7 +199,7 @@ TEST_USER_DEFAULT = User(
 )
 
 
-def ascertain_test_user(repo: Database):
+def ascertain_test_user(repo: DatabaseWrapper):
     """
     Ascertains the existence of the test user (user_id = 1) in the DB by checking for it
     first, then creating it if it doesn't exist.
@@ -158,6 +211,6 @@ def ascertain_test_user(repo: Database):
     logger.debug(f"Ascertained the presence of the test user in the DB: {user}")
 
 
-database = Database()
+database = DatabaseWrapper()
 
 ascertain_test_user(database)
