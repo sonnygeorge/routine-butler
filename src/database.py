@@ -1,68 +1,55 @@
-from typing import List, Optional, Type, Callable, Any
+"""database module
 
-from sqlmodel import SQLModel, Field, Relationship, Session, create_engine
-from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
+This module exists to abstract away the details of interacting with the database.
+
+Upon import, this module will:
+    - if it does not already exist, create the database file with tables for all
+      SQLModel models in the models dir
+    - if no user with id == 1, populate the database with a default user for id == 1
+
+Usage:
+    from database import database
+    from models import User
+
+    # Get a model (and all children) from the database
+    user = database.get(User, 1)
+
+    # Add a model (and all children) to the database
+    database.commit(user)
+
+    # Update a model (and all chilidren) in the database
+    database.commit(user)
+
+    # Delete a model (and all children) from the database
+    database.delete(user)
+"""
+
+
+from typing import Any, Callable, List, Type
+
 import sqlalchemy.orm.session
-from sqlalchemy.orm.exc import DetachedInstanceError
-from sqlalchemy import inspect
 from loguru import logger
+from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
+from sqlalchemy.orm.exc import DetachedInstanceError
+from sqlmodel import Session, SQLModel, create_engine
+
+# * is used to decouple this file from defining new models
+from models import *
 
 DB_URL = "sqlite:///db.sqlite"
-
-# Models
-
-
-class User(SQLModel, table=True):
-    """SQLModel for "User" objects"""
-
-    id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
-    routines: List["Routine"] = Relationship(back_populates="user")
-
-
-class Routine(SQLModel, table=True):
-    """SQLModel for "Routine" objects"""
-
-    id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
-    title: Optional[str] = Field(default="New Routine")
-
-    schedules: List["Schedule"] = Relationship(back_populates="routine")
-
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
-    user: Optional[User] = Relationship(back_populates="routines")
-
-
-class Schedule(SQLModel, table=True):
-    """SQLModel for "Schedule" objects"""
-
-    id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
-    hour: int = Field(default=0)
-    minute: int = Field(default=0)
-    is_active: bool = Field(default=False)
-
-    routine_id: Optional[int] = Field(default=None, foreign_key="routine.id")
-    routine: Optional[Routine] = Relationship(back_populates="schedules")
-
+TEST_USER_DEFAULT = User(
+    id=1,
+    routines=[Routine(id=1, schedules=[Schedule(id=1)])],
+)
 
 # Ascertain the necessary database and create engine
+engine = create_engine("sqlite:///db.sqlite")
+# Create all tables in the database given all models imported
+SQLModel.metadata.create_all(engine)
 
-
-def ascertain_db():
-    """Creates the database with necessary tables if it doesn't exist"""
-    engine = create_engine("sqlite:///db.sqlite")
-    SQLModel.metadata.create_all(engine)
-    logger.debug(f'Ascertained Database with necessary tables at "{DB_URL}"')
-    return engine
-
-
-engine = ascertain_db()
-
-# Database interface
-
+# Redefine Session with SQLAlchemy's scoped_session in order for it to be thread-safe
 Session = scoped_session(sessionmaker())
 Session.configure(bind=engine, expire_on_commit=False)
-
-
-# TODO: Document better and consider design
 
 
 class DatabaseWrapper:
@@ -74,28 +61,38 @@ class DatabaseWrapper:
      - All relationships in the DB are are parent->children/one->zero-or-many
     """
 
-    def _in_db(self, session, model_object) -> bool:
+    def _model_row_w_same_id_in_db(self, session, model_object) -> bool:
         """
-        Checks if a model is already in the database.
+        Takes a model_object and checks if there is already a row the with the
+        same id in the respective table in the DB.
         """
         q = session.query(model_object.__class__.id).filter(
             model_object.__class__.id == model_object.id
         )
         return session.query(q.exists()).scalar()
 
-    def _add_or_merge(self, session, model_object):
+    def _add_or_merge_to_session_and_commit(self, session, model_object) -> None:
+        """
+        Takes a session and a model object. If the model object has an id that is
+        already in the database, the model object is merged into the session. Else,
+        the model object is added to the session. The session is then committed.
+        """
         is_new = True
         if model_object.id is not None:
-            # Check if id already exists in the database
-            if self._in_db(session, model_object):
+            if self._model_row_w_same_id_in_db(session, model_object):
                 session.merge(model_object)
                 is_new = False
         if is_new:
             session.add(model_object)
         session.commit()
 
-    def _delete(self, session, model_object):
-        if self._in_db(session, model_object):
+    def _delete_from_session_and_commit(self, session, model_object):
+        """
+        Takes a session and a model object. If the model object has an id that is
+        already in the database, the model object is deleted from the session. The
+        session is then committed.
+        """
+        if self._model_row_w_same_id_in_db(session, model_object):
             session.delete(model_object)
             session.commit()
 
@@ -145,30 +142,49 @@ class DatabaseWrapper:
                 for child in getattr(model_object, relationship):
                     self._apply_recursively(session, child, callable)
 
-        # After resurcing into this model's children, we can now apply the callable
+        # After recursing into this model's children, we can now apply the callable
         callable(session, model_object)
 
-    def commit(self, model_object: SQLModel):
+    def commit(self, model_object: SQLModel) -> None:
         """
-        Adds a new or updates an existing model in the database.
+        Adds a new or updates an existing model_object in the database. All children of
+        the model are added or updated as well.
+
+        IMPORTANT: This function will NOT delete any children that were removed from the
+        model_object. The only way to delete anything from the database is to use the delete
+        function. If you commit a model object that has children that have been removed, the
+        children will not be deleted, but rather orphaned in the DB with a foreign key of
+        NULL.
         """
 
         with Session() as session:
-            self._apply_recursively(session, model_object, self._add_or_merge)
-            logger.debug(f"Committed {model_object} and all children to the database.")
+            self._apply_recursively(
+                session, model_object, self._add_or_merge_to_session_and_commit
+            )
 
-    def delete(self, model_object: SQLModel):
+    def delete(self, model_object: SQLModel) -> None:
         """
-        Deletes a model object and all children from the database. Parents are not be deleted.
+        Deletes a model object and all children from the database. Parents are not be
+        deleted.
+
+        IMPORTANT: This function is the only way designed for any rows to be deleted from
+        the database. If you commit a model object that has children that have been removed,
+        the children will not be deleted, but rather orphaned in the DB with a foreign key
+        of NULL.
         """
 
         with Session() as session:
-            self._apply_recursively(session, model_object, self._delete)
-            logger.debug(f"Deleted {model_object} and all children from the database.")
+            self._apply_recursively(
+                session, model_object, self._delete_from_session_and_commit
+            )
+            logger.debug(
+                f"Deleted {model_object.__class__.__name__} id: {model_object.id} and all"
+                f"children from the database."
+            )
 
-    def get(self, Model: Type[SQLModel], id: int):
+    def get(self, Model: Type[SQLModel], id: int) -> SQLModel:
         """
-        Eagerly gets a model and all child relationships from the database given an id.
+        Given an id, eagerly gets a model object with all of its children nested inside.
         """
         with Session() as session:
             user = (
@@ -178,7 +194,8 @@ class DatabaseWrapper:
 
     def get_all(self, Model: Type[SQLModel]) -> List[SQLModel]:
         """
-        Eagerly gets all model objects (with their nested child relationships) from a table.
+        Eagerly gets ALL model objects from a table. For each model object, all of its
+        children are retieved as well and nested inside.
         """
         with Session() as session:
             users = session.query(Model).options(joinedload("*")).all()
@@ -191,24 +208,29 @@ class DatabaseWrapper:
         return count
 
 
-TEST_USER_DEFAULT = User(
-    id=1,
-    routines=[Routine(id=1, schedules=[Schedule(id=1)])],
-)
-
-
-def ascertain_test_user(repo: DatabaseWrapper):
+def ascertain_test_user(database: DatabaseWrapper):
     """
     Ascertains the existence of the test user (user_id = 1) in the DB by checking for it
     first, then creating it if it doesn't exist.
     """
-    user = repo.get(User, id=1)
+    user = database.get(User, id=1)
     if user is None:
         user = TEST_USER_DEFAULT
-        repo.commit(user)
+        database.commit(user)
     logger.debug(f"Ascertained the presence of the test user in the DB: {user}")
 
 
 database = DatabaseWrapper()
 
 ascertain_test_user(database)
+
+# user with one routine with one schedule
+schedule = Schedule()
+routine = Routine(schedules=[schedule])
+user = User(routines=[routine])
+# add user to db
+database.commit(user)
+# remove schedule from routine
+routine.schedules.remove(schedule)
+# commit user
+database.commit(user)

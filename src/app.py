@@ -1,12 +1,13 @@
-import remi
-
-from components.header import Header
-from components.topmost_container import TopmostContainer
-from components.body_container import BodyContainer
 from typing import List
 
+import remi
+
+from components.body_container import BodyContainer
+from components.header import Header
 from components.routine_component import RoutineComponent
-from database import User, database
+from components.topmost_container import TopmostContainer
+from database import database
+from models import User
 
 
 class App(remi.server.App):

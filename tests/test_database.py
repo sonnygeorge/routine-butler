@@ -1,6 +1,7 @@
 import pytest
 
-from src.database import Schedule, Routine, User, database
+from models import Schedule, Routine, User
+from database import database
 
 
 # TODO: mock a test database for tests
@@ -173,7 +174,7 @@ class TestDatabase:
         assert num_schedules_before == num_schedules_after
         assert num_routines_before == num_routines_after
 
-    def test_appended_to_children_list_has_id_after_parent_commit(self):
+    def test_child_appended_to_children_list_has_id_after_parent_commit(self):
         # user with one routine
         routine = Routine()
         user = User(routines=[routine])
@@ -189,7 +190,7 @@ class TestDatabase:
         # delete user
         database.delete(user)
 
-    def test_appended_to_children_list_comes_back_same_after_parent_commit(self):
+    def test_child_appended_to_children_list_comes_back_same_after_parent_commit(self):
         # user with one routine
         routine = Routine()
         user = User(routines=[routine])
@@ -204,3 +205,21 @@ class TestDatabase:
         assert database.get(Schedule, schedule.id) == schedule
         # delete user
         database.delete(user)
+
+    def test_child_removed_before_parent_committed_has_foreign_key_none(self):
+        # user with one routine with one schedule
+        schedule = Schedule()
+        routine = Routine(schedules=[schedule])
+        user = User(routines=[routine])
+        # add user to db
+        database.commit(user)
+        # store schedule id for later retrieval
+        schedule_id = schedule.id
+        # remove schedule from routine
+        routine.schedules.remove(schedule)
+        # commit user
+        database.commit(user)
+        # retrieve supposedly orphaned schedule
+        orphaned_schedule = database.get(Schedule, schedule_id)
+        # check that schedule has no foreign key
+        assert orphaned_schedule.routine_id == None
