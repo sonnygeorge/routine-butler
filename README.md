@@ -17,6 +17,7 @@
 ## TODO
 
 - [ ] Somehow implement an abc of protocol to more formally/logistically enforce models to have an id primary key
+- [ ] pre-commit hooks
 - [ ] Get DB Wrapper roasted?
 - [ ] Seperate models into their own files
 - [ ] Add "program" entities to the app: two very simple ones could be "readtext" and "promptcontinue"
