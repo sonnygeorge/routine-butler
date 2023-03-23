@@ -5,11 +5,11 @@ import remi
 from utils import get_fancy_clock_string
 
 LOGO_TEXT = r"""
- ██████  █████  ███████ ███████ ██ ██    ██ ███████ 
-██      ██   ██ ██      ██      ██ ██    ██ ██      
-██      ███████ ███████ ███████ ██ ██    ██ ███████ 
-██      ██   ██      ██      ██ ██ ██    ██      ██ 
- ██████ ██   ██ ███████ ███████ ██  ██████  ███████ 
+ ██████  █████  ███████ ███████ ██ ██    ██ ███████
+██      ██   ██ ██      ██      ██ ██    ██ ██
+██      ███████ ███████ ███████ ██ ██    ██ ███████
+██      ██   ██      ██      ██ ██ ██    ██      ██
+ ██████ ██   ██ ███████ ███████ ██  ██████  ███████
 """
 
 LOGO_TEXT = LOGO_TEXT.replace(" ", " ")
@@ -20,7 +20,7 @@ CLOCK_FONT_SIZE = "4.5px"
 LOGO_FONT_SIZE = "4.5px"
 DATE_FONT_SIZE = "15px"
 MOYAI_FONT_SIZE = "38px"
-MOYAI_SHADOW = f"0px 0px 3px rgb(0, 0, 0, .2)"
+MOYAI_SHADOW = "0px 0px 3px rgb(0, 0, 0, .2)"
 SIDE_PADDING = "20px"
 
 
@@ -36,7 +36,11 @@ def fill_vbox_with_multiline_text(
         if line.strip():
             row = remi.gui.Label(
                 line,
-                style={"width": "100%", "margin": "0px 0px", "text-align": text_align},
+                style={
+                    "width": "100%",
+                    "margin": "0px 0px",
+                    "text-align": text_align,
+                },
             )
             vbox.append(row)
 
@@ -93,7 +97,9 @@ class Header(remi.gui.HBox):
         self.clock = remi.gui.VBox()
         self.clock.css_align_self = "flex-end"
         self.clock.css_background_color = COLOR
-        fill_vbox_with_multiline_text(self.clock, get_fancy_clock_string("00:00:00"))
+        fill_vbox_with_multiline_text(
+            self.clock, get_fancy_clock_string("00:00:00")
+        )
         self.clock_box.append(self.clock)
         self.append(self.clock_box, "clock")
 

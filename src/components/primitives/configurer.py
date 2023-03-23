@@ -3,7 +3,8 @@ import remi
 
 class Configurer(remi.gui.HBox):
     """
-    Extension of remi.gui.HBox with default css values set for configurers across the app.
+    Extension of remi.gui.HBox with default css values set for configurers across
+    the app.
 
     A configurer is a component that allows the user to configure a setting.
 

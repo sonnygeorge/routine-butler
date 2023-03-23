@@ -1,5 +1,3 @@
-import remi
-
 from components.primitives.collapsible_vbox import CollapsibleVBox
 from components.routine_configurer import RoutineConfigurer
 from database import Routine
@@ -18,7 +16,10 @@ class RoutineComponent(CollapsibleVBox):
     routine: Routine
 
     def __init__(self, routine: Routine = Routine()):
-        """In the GUI, a Routine is a CollapsibleVBox with logic to know what to render inside"""
+        """
+        In the GUI, a Routine is a CollapsibleVBox with logic to know what to render
+        inside
+        """
         self.routine = routine
         CollapsibleVBox.__init__(self, title=self.routine.title)
 

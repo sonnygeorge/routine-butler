@@ -1,7 +1,7 @@
 import remi
 
-from components.primitives.centered_label import CenteredLabel
 from components.primitives.button import Button
+from components.primitives.centered_label import CenteredLabel
 from components.scheduler import Scheduler
 from database import Routine, Schedule, database
 
@@ -18,9 +18,12 @@ class RoutineConfigurer(remi.gui.VBox):
         self.css_border_style = "solid"
 
         # schedulers
-        self.schedulers = [Scheduler(schedule) for schedule in self.routine.schedules]
+        self.schedulers = [
+            Scheduler(schedule) for schedule in self.routine.schedules
+        ]
         self.scheduler_labels = [
-            CenteredLabel(f"Schedule {i + 1}:") for i in range(len(self.schedulers))
+            CenteredLabel(f"Schedule {i + 1}:")
+            for i in range(len(self.schedulers))
         ]
 
         # schedulers grid
@@ -58,7 +61,9 @@ class RoutineConfigurer(remi.gui.VBox):
     def check_and_clean_up_trashed_schedules(self):
         """if any of the schedulers have been trashed, remove them"""
         should_update_grid = False
-        for scheduler_label, scheduler in zip(self.scheduler_labels, self.schedulers):
+        for scheduler_label, scheduler in zip(
+            self.scheduler_labels, self.schedulers
+        ):
             if scheduler.trashed:
                 self.thoroughly_delete_schedule(scheduler_label, scheduler)
                 should_update_grid = True

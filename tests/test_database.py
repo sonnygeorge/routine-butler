@@ -1,8 +1,7 @@
 import pytest
 
-from models import Schedule, Routine, User
 from database import database
-
+from models import Routine, Schedule, User
 
 # TODO: mock a test database for tests
 
@@ -15,7 +14,7 @@ class TestDatabase:
         # delete data model
         database.delete(data_model)
         # check that data model is no longer in db
-        assert database.get(data_model.__class__, data_model.id) == None
+        assert database.get(data_model.__class__, data_model.id) is None
 
     def test_delete_deletes_children_too(self):
         # user with one routine with one schedule
@@ -27,11 +26,11 @@ class TestDatabase:
         # delete user
         database.delete(user)
         # check that user is no longer in db
-        assert database.get(User, user.id) == None
+        assert database.get(User, user.id) is None
         # check that routine is no longer in db
-        assert database.get(Routine, routine.id) == None
+        assert database.get(Routine, routine.id) is None
         # check that schedule is no longer in db
-        assert database.get(Schedule, schedule.id) == None
+        assert database.get(Schedule, schedule.id) is None
 
     def test_delete_does_not_delete_parents(self):
         # user with one routine with one schedule
@@ -43,11 +42,11 @@ class TestDatabase:
         # delete schedule
         database.delete(schedule)
         # check that user is still in db
-        assert database.get(User, user.id) != None
+        assert database.get(User, user.id) is not None
         # check that routine is still in db
-        assert database.get(Routine, routine.id) != None
+        assert database.get(Routine, routine.id) is not None
         # check that schedule is no longer in db
-        assert database.get(Schedule, schedule.id) == None
+        assert database.get(Schedule, schedule.id) is None
         # clean up leftover user and routine from db
         database.delete(user)
 
@@ -56,7 +55,7 @@ class TestDatabase:
         # add data model to db
         database.commit(data_model)
         # check that data model now has an id
-        assert data_model.id != None
+        assert data_model.id is not None
         # delete data model
         database.delete(data_model)
 
@@ -68,8 +67,8 @@ class TestDatabase:
         # add user to db
         database.commit(user)
         # check that routine and schedule have ids
-        assert routine.id != None
-        assert schedule.id != None
+        assert routine.id is not None
+        assert schedule.id is not None
         # delete user
         database.delete(user)
 
@@ -186,11 +185,13 @@ class TestDatabase:
         # commit user
         database.commit(user)
         # check that schedule has an id
-        assert schedule.id != None
+        assert schedule.id is not None
         # delete user
         database.delete(user)
 
-    def test_child_appended_to_children_list_comes_back_same_after_parent_commit(self):
+    def test_child_appended_to_children_list_comes_back_same_after_parent_commit(
+        self,
+    ):
         # user with one routine
         routine = Routine()
         user = User(routines=[routine])
@@ -222,4 +223,4 @@ class TestDatabase:
         # retrieve supposedly orphaned schedule
         orphaned_schedule = database.get(Schedule, schedule_id)
         # check that schedule has no foreign key
-        assert orphaned_schedule.routine_id == None
+        assert orphaned_schedule.routine_id is None

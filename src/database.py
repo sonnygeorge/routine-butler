@@ -31,10 +31,9 @@ import sqlalchemy.orm.session
 from loguru import logger
 from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
 from sqlalchemy.orm.exc import DetachedInstanceError
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import SQLModel, create_engine
 
-# * is used to decouple this file from defining new models
-from models import *
+from models import Routine, Schedule, User
 
 DB_URL = "sqlite:///db.sqlite"
 TEST_USER_DEFAULT = User(
@@ -71,7 +70,9 @@ class DatabaseWrapper:
         )
         return session.query(q.exists()).scalar()
 
-    def _add_or_merge_to_session_and_commit(self, session, model_object) -> None:
+    def _add_or_merge_to_session_and_commit(
+        self, session, model_object
+    ) -> None:
         """
         Takes a session and a model object. If the model object has an id that is
         already in the database, the model object is merged into the session. Else,
@@ -147,14 +148,14 @@ class DatabaseWrapper:
 
     def commit(self, model_object: SQLModel) -> None:
         """
-        Adds a new or updates an existing model_object in the database. All children of
-        the model are added or updated as well.
+        Adds a new or updates an existing model_object in the database. All children
+        of the model are added or updated as well.
 
-        IMPORTANT: This function will NOT delete any children that were removed from the
-        model_object. The only way to delete anything from the database is to use the delete
-        function. If you commit a model object that has children that have been removed, the
-        children will not be deleted, but rather orphaned in the DB with a foreign key of
-        NULL.
+        IMPORTANT: This function will NOT delete any children that were removed from
+        the model_object. The only way to delete anything from the database is to use
+        the delete function. If you commit a model object that has children that have
+        been removed, the children will not be deleted, but rather orphaned in the DB
+        with a foreign key of NULL.
         """
 
         with Session() as session:
@@ -167,10 +168,10 @@ class DatabaseWrapper:
         Deletes a model object and all children from the database. Parents are not be
         deleted.
 
-        IMPORTANT: This function is the only way designed for any rows to be deleted from
-        the database. If you commit a model object that has children that have been removed,
-        the children will not be deleted, but rather orphaned in the DB with a foreign key
-        of NULL.
+        IMPORTANT: This function is the only way designed for any rows to be deleted
+        from the database. If you commit a model object that has children that have
+        been removed, the children will not be deleted, but rather orphaned in the DB
+        with a foreign key of NULL.
         """
 
         with Session() as session:
@@ -178,8 +179,8 @@ class DatabaseWrapper:
                 session, model_object, self._delete_from_session_and_commit
             )
             logger.debug(
-                f"Deleted {model_object.__class__.__name__} id: {model_object.id} and all"
-                f"children from the database."
+                f"Deleted {model_object.__class__.__name__} id: {model_object.id} "
+                f"and all children from the database."
             )
 
     def get(self, Model: Type[SQLModel], id: int) -> SQLModel:
@@ -188,7 +189,10 @@ class DatabaseWrapper:
         """
         with Session() as session:
             model_object = (
-                session.query(Model).options(joinedload("*")).filter_by(id=id).first()
+                session.query(Model)
+                .options(joinedload("*"))
+                .filter_by(id=id)
+                .first()
             )
         return model_object
 
@@ -210,14 +214,16 @@ class DatabaseWrapper:
 
 def ascertain_test_user(database: DatabaseWrapper):
     """
-    Ascertains the existence of the test user (user_id = 1) in the DB by checking for it
-    first, then creating it if it doesn't exist.
+    Ascertains the existence of the test user (user_id = 1) in the DB by checking for
+    it first, then creating it if it doesn't exist.
     """
     user = database.get(User, id=1)
     if user is None:
         user = TEST_USER_DEFAULT
         database.commit(user)
-    logger.debug(f"Ascertained the presence of the test user in the DB: {user}")
+    logger.debug(
+        f"Ascertained the presence of the test user in the DB: {user}"
+    )
 
 
 database = DatabaseWrapper()

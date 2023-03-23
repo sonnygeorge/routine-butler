@@ -10,14 +10,18 @@ class CollapsibleVBox(remi.gui.VBox):
     """
     An extension of Remi's VBox that is collapsable/expandable.
 
-    Is initialized with a title, which is always displayed at the top of the box alongside the button to collapse/expand the box.
+    Is initialized with a title, which is always displayed at the top of the box
+    alongside the button to collapse/expand the box.
     """
 
     collapsed: bool = False
     collapsed_content: List[remi.gui.Container] = []
 
     def __init__(self, title: str = "Untitled"):
-        """Adds a header container with the title and the collapse/expand button inside of it."""
+        """
+        Adds a header container with the title and the collapse/expand button
+        inside of it.
+        """
 
         remi.gui.VBox.__init__(self)
         self.title = title
@@ -59,8 +63,11 @@ class CollapsibleVBox(remi.gui.VBox):
         self.collapsed = not self.collapsed
 
     def collapse(self):
-        """Collapses by removing all children (except header) and storing them for later expansion"""
-        # temp list to avoid RuntimeError: dictionary changed size during iteration
+        """
+        Collapses by removing all children (except header) and storing them for
+        later expansion
+        """
+        # list to avoid RuntimeError: dictionary changed size during iteration
         children = list(self.children.values())
         # remove all children except header
         for child in children:

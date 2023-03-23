@@ -6,5 +6,7 @@ class BodyContainer(remi.gui.VBox):
 
     def __init__(self):
         remi.gui.VBox.__init__(
-            self, width="100%", style={"margin": "23px 0px", "background": "none"}
+            self,
+            width="100%",
+            style={"margin": "23px 0px", "background": "none"},
         )

@@ -2,7 +2,10 @@ import remi
 
 
 class Button(remi.gui.Button):
-    """Extension of remi.gui.Button with default css values set for buttons across the app."""
+    """
+    Extension of remi.gui.Button with default css values set for buttons across
+    the app.
+    """
 
     def __init__(self, *args, **kwargs):
         remi.gui.Button.__init__(self, *args, **kwargs)

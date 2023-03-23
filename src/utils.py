@@ -1,89 +1,89 @@
 ZERO = """
- █████  
-██   ██ 
-██   ██ 
-██   ██ 
- █████  
+ █████
+██   ██
+██   ██
+██   ██
+ █████
 """
 
 ONE = """
-  ███   
- ████   
-██ ██   
-   ██   
-███████ 
+  ███
+ ████
+██ ██
+   ██
+███████
 """
 
 TWO = """
-██████  
-     ██ 
-  ███   
-██      
-███████ 
+██████
+     ██
+  ███
+██
+███████
 """
 
 THREE = """
-██████  
-     ██ 
- █████  
-     ██ 
-██████  
+██████
+     ██
+ █████
+     ██
+██████
 """
 
 FOUR = """
-  ██ ██ 
- ██  ██ 
-██   ██ 
-███████ 
-     ██ 
+  ██ ██
+ ██  ██
+██   ██
+███████
+     ██
 """
 
 FIVE = """
-███████ 
-██      
-██████  
-     ██ 
-██████  
+███████
+██
+██████
+     ██
+██████
 """
 
 SIX = """
- █████  
-██      
-██████  
-██   ██ 
- █████  
+ █████
+██
+██████
+██   ██
+ █████
 """
 
 SEVEN = """
-███████ 
-     ██ 
-    ██  
-   ██   
-  ██    
+███████
+     ██
+    ██
+   ██
+  ██
 """
 
 EIGHT = """
- █████  
-██   ██ 
- █████  
-██   ██ 
- █████  
+ █████
+██   ██
+ █████
+██   ██
+ █████
 """
 
 NINE = """
- █████  
-██   ██ 
- ██████ 
-     ██ 
- █████  
+ █████
+██   ██
+ ██████
+     ██
+ █████
 """
 
 COLON = """
-██ 
-   
-   
-   
-██ 
+██
+
+
+
+██
 """
 
 _FANCY_CLOCK_ENCODER_VALS = [
@@ -99,9 +99,25 @@ _FANCY_CLOCK_ENCODER_VALS = [
     NINE,
     COLON,
 ]
-_FANCY_CLOCK_ENCODER_VALS = [c.replace(" ", " ") for c in _FANCY_CLOCK_ENCODER_VALS]
-_FANCY_CLOCK_ENCODER_KEYS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":"]
-_FANCY_CLOCK_ENCODER = dict(zip(_FANCY_CLOCK_ENCODER_KEYS, _FANCY_CLOCK_ENCODER_VALS))
+_FANCY_CLOCK_ENCODER_VALS = [
+    c.replace(" ", " ") for c in _FANCY_CLOCK_ENCODER_VALS
+]
+_FANCY_CLOCK_ENCODER_KEYS = [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    ":",
+]
+_FANCY_CLOCK_ENCODER = dict(
+    zip(_FANCY_CLOCK_ENCODER_KEYS, _FANCY_CLOCK_ENCODER_VALS)
+)
 
 
 def side_by_side(string_one: str, string_two: str):
@@ -112,7 +128,9 @@ def side_by_side(string_one: str, string_two: str):
     striing_one_lines = string_one.split("\n")
     string_two_lines = string_two.split("\n")
     result = []
-    for string_one_line, string_two_line in zip(striing_one_lines, string_two_lines):
+    for string_one_line, string_two_line in zip(
+        striing_one_lines, string_two_lines
+    ):
         result.append(f"{string_one_line}{string_two_line}")
     return "\n".join(result)
 

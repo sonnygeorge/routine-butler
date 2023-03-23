@@ -19,7 +19,9 @@ class Scheduler(Configurer):
         self.schedule: Schedule = schedule
 
         # hour buttons
-        self.hour_buttons = remi.gui.HBox(height="100%", width=BUTTON_BOX_WIDTH)
+        self.hour_buttons = remi.gui.HBox(
+            height="100%", width=BUTTON_BOX_WIDTH
+        )
         self.append(self.hour_buttons, "hour_buttons")
 
         # hour plus button
@@ -38,25 +40,33 @@ class Scheduler(Configurer):
         self.append(self.time_label, "time_label")
 
         # minute buttons
-        self.minute_buttons = remi.gui.HBox(height="100%", width=BUTTON_BOX_WIDTH)
+        self.minute_buttons = remi.gui.HBox(
+            height="100%", width=BUTTON_BOX_WIDTH
+        )
         self.append(self.minute_buttons, "minute_buttons")
 
         # minute plus button
         self.minute_plus_button = Button("+")
         self.minute_plus_button.onclick.connect(self.on_minute_plus)
-        self.minute_buttons.append(self.minute_plus_button, "minute_plus_button")
+        self.minute_buttons.append(
+            self.minute_plus_button, "minute_plus_button"
+        )
 
         # minute minus button
         self.minute_minus_button = Button("-")
         self.minute_minus_button.onclick.connect(self.on_minute_minus)
-        self.minute_buttons.append(self.minute_minus_button, "minute_minus_button")
+        self.minute_buttons.append(
+            self.minute_minus_button, "minute_minus_button"
+        )
 
         # is active label
         self.is_active_label = CenteredLabel("Is Active:")
         self.append(self.is_active_label, "is_active_label")
 
         # is active checkbox
-        self.is_active_checkbox = remi.gui.CheckBox(checked=self.schedule.is_active)
+        self.is_active_checkbox = remi.gui.CheckBox(
+            checked=self.schedule.is_active
+        )
         self.is_active_checkbox.onchange.connect(self.on_is_on_checkbox)
         self.append(self.is_active_checkbox, "is_on_checkbox")
 
@@ -70,7 +80,9 @@ class Scheduler(Configurer):
         self.append(self.trash_button, "on_trash_button")
 
     def update_alarm_time_label(self):
-        self.time_label.set_text(f"{self.schedule.hour:02d}:{self.schedule.minute:02d}")
+        self.time_label.set_text(
+            f"{self.schedule.hour:02d}:{self.schedule.minute:02d}"
+        )
 
     def increment_hour(self):
         if self.schedule.hour == 23:

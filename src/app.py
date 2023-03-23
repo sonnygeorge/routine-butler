@@ -42,29 +42,30 @@ class App(remi.server.App):
         self.header.idle()
         # add/remove body components and run their idle functions
         self.manage_body_components_and_run_idle_funcs()
-        # since all models are children of the user, this persists all changes to the db
+        # since all models are children of user, this persists all changes to the db
         database.commit(self.user)
 
     def manage_body_components_and_run_idle_funcs(self):
         """Adds/removes body components and runs their idle functions"""
         for routine_component in self.routine_components:
-            # if routine component should be on the screen and is not already on the screen
+            # if routine component should be on the screen and is not already
             if (
                 routine_component.should_be_on_screen()
-                and routine_component not in self.body_container.children.values()
+                and routine_component
+                not in self.body_container.children.values()
             ):
                 self.body_container.append(
                     routine_component, key=routine_component.routine.id
                 )
                 routine_component.idle()
 
-            # if routine component should not be on the screen and is already on the screen
+            # if routine component should not be on the screen and is already
             elif (
                 not routine_component.should_be_on_screen()
                 and routine_component in self.body_container.children.values()
             ):
                 self.body_container.remove_child(routine_component)
-            # if routine component should be on the screen and is already on the screen
+            # if routine component should be on the screen and is already
             else:
                 routine_component.idle()
 

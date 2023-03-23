@@ -2,7 +2,10 @@ import remi
 
 
 class CenteredLabel(remi.gui.VBox):
-    """Intended as an extention of remi.gui.label, but with text centered horizontally and vertically out-of-the-box."""
+    """
+    Intended as an extention of remi.gui.label, but with text centered horizontally
+    and vertically out-of-the-box.
+    """
 
     def __init__(self, text: str):
         remi.gui.VBox.__init__(self)

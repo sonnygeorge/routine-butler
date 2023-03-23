@@ -1,1 +1,1 @@
-from .models import User, Routine, Schedule
+from .models import Routine, Schedule, User
