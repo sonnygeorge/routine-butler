@@ -47,7 +47,7 @@ engine = create_engine("sqlite:///db.sqlite")
 # Create all tables in the database given all models imported
 SQLModel.metadata.create_all(engine)
 
-# Redefine Session with SQLAlchemy's scoped_session in order for it to be thread-safe
+# Redefine Session with SQLAlchemy's scoped_session for it to be thread-local/safe
 Session = scoped_session(sessionmaker())
 Session.configure(bind=engine, expire_on_commit=False)
 
@@ -187,10 +187,10 @@ class DatabaseWrapper:
         Given an id, eagerly gets a model object with all of its children nested inside.
         """
         with Session() as session:
-            user = (
+            model_object = (
                 session.query(Model).options(joinedload("*")).filter_by(id=id).first()
             )
-        return user
+        return model_object
 
     def get_all(self, Model: Type[SQLModel]) -> List[SQLModel]:
         """
@@ -198,8 +198,8 @@ class DatabaseWrapper:
         children are retieved as well and nested inside.
         """
         with Session() as session:
-            users = session.query(Model).options(joinedload("*")).all()
-        return users
+            model_objects = session.query(Model).options(joinedload("*")).all()
+        return model_objects
 
     def num_rows_in_table(self, Model: Type[SQLModel]) -> int:
         """Returns the number of rows in a table."""
