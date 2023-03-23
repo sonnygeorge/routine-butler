@@ -48,6 +48,15 @@ class RoutineConfigurer(remi.gui.VBox):
     def thoroughly_delete_schedule(
         self, scheduler_label: CenteredLabel, scheduler: Scheduler
     ):
+        """
+        Thoroughly deletes a schedule object from the app and database
+
+        IMPORTANT: We remove the the schedule from the database before removing it
+        from the routine model object. This is because the app's idle loop is
+        constantly commit the user (and all its children objects, the routines) to
+        the database. If per chance, the idle loop commits our routine before we
+        remove the schedule from the routine, theoretically, the schedule wi
+        """
         # remove from class lists
         self.scheduler_labels.remove(scheduler_label)
         self.schedulers.remove(scheduler)

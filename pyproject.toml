@@ -3,6 +3,7 @@ addopts = [
     "--import-mode=importlib",
 ]
 pythonpath = "src"
+filterwarnings = ["ignore:.*expected to delete 1 row\\(s\\); 0 were matched.*:sqlalchemy.exc.SAWarning"]
 
 [tool.black]
 line-length = 79

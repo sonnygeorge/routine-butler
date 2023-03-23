@@ -7,18 +7,27 @@ class User(SQLModel, table=True):
     """SQLModel for "User" objects"""
 
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
-    routines: List["Routine"] = Relationship(back_populates="user")
+    routines: List["Routine"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={
+            "cascade": "all, delete, delete-orphan, save-update"
+        },
+    )
 
 
 class Routine(SQLModel, table=True):
     """SQLModel for "Routine" objects"""
 
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
+    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     title: Optional[str] = Field(default="New Routine")
 
-    schedules: List["Schedule"] = Relationship(back_populates="routine")
-
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    schedules: List["Schedule"] = Relationship(
+        back_populates="routine",
+        sa_relationship_kwargs={
+            "cascade": "all, delete, delete-orphan, save-update"
+        },
+    )
     user: Optional[User] = Relationship(back_populates="routines")
 
 

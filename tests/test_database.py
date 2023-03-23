@@ -207,7 +207,7 @@ class TestDatabase:
         # delete user
         database.delete(user)
 
-    def test_child_removed_before_parent_committed_has_foreign_key_none(self):
+    def test_removed_child_is_removed_after_parent_commit(self):
         # user with one routine with one schedule
         schedule = Schedule()
         routine = Routine(schedules=[schedule])
@@ -223,4 +223,4 @@ class TestDatabase:
         # retrieve supposedly orphaned schedule
         orphaned_schedule = database.get(Schedule, schedule_id)
         # check that schedule has no foreign key
-        assert orphaned_schedule.routine_id is None
+        assert orphaned_schedule is None
