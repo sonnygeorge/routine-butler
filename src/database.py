@@ -11,16 +11,16 @@ Usage:
     from database import database
     from models import User
 
-    # Get a model (and all children) from the database
+    # Get a model (and all children) from the database:
     user = database.get(User, 1)
 
-    # Add a model (and all children) to the database
+    # Add a model (and all children) to the database:
     database.commit(user)
 
-    # Update a model (and all chilidren) in the database
-    database.commit(user)
+    # Update a model (and all chilidren) in the database:
+    database.commit(user)  # (same as adding)
 
-    # Delete a model (and all children) from the database
+    # Delete a model (and all children) from the database:
     database.delete(user)
 """
 
