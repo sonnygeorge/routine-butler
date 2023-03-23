@@ -2,19 +2,9 @@ import time
 
 import remi
 
-from utils import get_fancy_clock_string
+from utils import LOGO_TEXT_ART, get_fancy_clock_string
 
-LOGO_TEXT = r"""
- ██████  █████  ███████ ███████ ██ ██    ██ ███████
-██      ██   ██ ██      ██      ██ ██    ██ ██
-██      ███████ ███████ ███████ ██ ██    ██ ███████
-██      ██   ██      ██      ██ ██ ██    ██      ██
- ██████ ██   ██ ███████ ███████ ██  ██████  ███████
-"""
-
-LOGO_TEXT = LOGO_TEXT.replace(" ", " ")
-
-
+LOGO_TEXT_ART = LOGO_TEXT_ART.replace(" ", " ")
 COLOR = "#007399"
 CLOCK_FONT_SIZE = "4.5px"
 LOGO_FONT_SIZE = "4.5px"
@@ -82,7 +72,7 @@ class Header(remi.gui.HBox):
         self.logo = remi.gui.VBox()
         self.logo.css_align_self = "flex-start"
         self.logo.css_background_color = COLOR
-        fill_vbox_with_multiline_text(self.logo, LOGO_TEXT)
+        fill_vbox_with_multiline_text(self.logo, LOGO_TEXT_ART)
         self.logo_box.append(self.logo)
         self.append(self.logo_box, "logo")
 
