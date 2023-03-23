@@ -223,14 +223,3 @@ def ascertain_test_user(database: DatabaseWrapper):
 database = DatabaseWrapper()
 
 ascertain_test_user(database)
-
-# user with one routine with one schedule
-schedule = Schedule()
-routine = Routine(schedules=[schedule])
-user = User(routines=[routine])
-# add user to db
-database.commit(user)
-# remove schedule from routine
-routine.schedules.remove(schedule)
-# commit user
-database.commit(user)
