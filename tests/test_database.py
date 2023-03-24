@@ -224,3 +224,20 @@ class TestDatabase:
         orphaned_schedule = database.get(Schedule, schedule_id)
         # check that schedule has no foreign key
         assert orphaned_schedule is None
+
+    def test_update_parent_after_append_child_adds_child(self):
+        # user with one routine with one schedule
+        schedule = Schedule()
+        routine = Routine(schedules=[schedule])
+        user = User(routines=[routine])
+        # add user to db
+        database.commit(user)
+        # add routine to user
+        new_routine = Routine()
+        user.routines.append(new_routine)
+        # commit user
+        database.commit(user)
+        assert new_routine.id is not None
+        assert database.get(Routine, new_routine.id) == new_routine
+        # delete user
+        database.delete(user)

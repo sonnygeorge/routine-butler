@@ -14,6 +14,7 @@ class CollapsibleVBox(remi.gui.VBox):
     alongside the button to collapse/expand the box.
     """
 
+    trashed: bool = False
     collapsed: bool = False
     collapsed_content: List[remi.gui.Container] = []
 
@@ -54,6 +55,15 @@ class CollapsibleVBox(remi.gui.VBox):
         self.collapse_button.onclick.do(self.toggle_collapse)
         self.header.append(self.collapse_button, "collapse_button")
 
+        # trash button
+        self.trash_button = Button("🗑️")
+        self.trash_button.onclick.connect(self.on_trash_button)
+        self.trash_button.set_style({"text-shadow": "0px 0px 3px #FFFFFF"})
+        self.trash_button.css_background_color = "red"
+        self.trash_button.css_height = "23px"
+        self.trash_button.css_width = "23px"
+        self.header.append(self.trash_button, "on_trash_button")
+
     def toggle_collapse(self, widget: remi.gui.Widget):
         """Toggles the collapsed state of the CollapsibleVBox"""
         if self.collapsed:
@@ -88,3 +98,8 @@ class CollapsibleVBox(remi.gui.VBox):
         # change direction of button triangle to up
         self.collapse_button.set_text("▲")
         logger.debug(f"Expanded CollapsibleVBox {self.title}...")
+
+    def on_trash_button(self, widget: remi.gui.Widget):
+        """Sets the trashed attribute to True"""
+        self.trashed = True
+        logger.debug(f"Trashed CollapsibleVBox {self.title}...")

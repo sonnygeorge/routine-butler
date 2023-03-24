@@ -2,6 +2,10 @@ from typing import List, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
+PARENT_CHILD_SA_RELATIONSHIP_KWARGS = {
+    "cascade": "all, delete, delete-orphan, save-update"
+}
+
 
 class User(SQLModel, table=True):
     """SQLModel for "User" objects"""
@@ -9,9 +13,7 @@ class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
     routines: List["Routine"] = Relationship(
         back_populates="user",
-        sa_relationship_kwargs={
-            "cascade": "all, delete, delete-orphan, save-update"
-        },
+        sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
 
 
@@ -24,9 +26,7 @@ class Routine(SQLModel, table=True):
 
     schedules: List["Schedule"] = Relationship(
         back_populates="routine",
-        sa_relationship_kwargs={
-            "cascade": "all, delete, delete-orphan, save-update"
-        },
+        sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
     user: Optional[User] = Relationship(back_populates="routines")
 

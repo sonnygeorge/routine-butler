@@ -77,10 +77,10 @@ class DatabaseWrapper:
         with Session() as session:
             session.delete(model_object)
             session.commit()
-            logger.debug(
-                f"Deleted {model_object.__class__.__name__} id: {model_object.id} "
-                f"and all children from the database."
-            )
+        logger.debug(
+            f"Deleted {model_object.__class__.__name__} id: {model_object.id} "
+            f"and all children from the database."
+        )
 
     def get(self, Model: Type[SQLModel], id: int) -> SQLModel:
         """Given an id, eagerly gets a model object"""

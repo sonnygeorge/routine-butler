@@ -3,7 +3,7 @@ import remi
 from components.primitives.button import Button
 from components.primitives.centered_label import CenteredLabel
 from components.scheduler import Scheduler
-from database import Routine, Schedule, database
+from database import Routine, Schedule
 
 
 class RoutineConfigurer(remi.gui.VBox):
@@ -50,12 +50,6 @@ class RoutineConfigurer(remi.gui.VBox):
     ):
         """
         Thoroughly deletes a schedule object from the app and database
-
-        IMPORTANT: We remove the the schedule from the database before removing it
-        from the routine model object. This is because the app's idle loop is
-        constantly commit the user (and all its children objects, the routines) to
-        the database. If per chance, the idle loop commits our routine before we
-        remove the schedule from the routine, theoretically, the schedule wi
         """
         # remove from class lists
         self.scheduler_labels.remove(scheduler_label)
@@ -63,9 +57,6 @@ class RoutineConfigurer(remi.gui.VBox):
 
         # remove from routine
         self.routine.schedules.remove(scheduler.schedule)
-
-        # remove from database
-        database.delete(scheduler.schedule)
 
     def check_and_clean_up_trashed_schedules(self):
         """if any of the schedulers have been trashed, remove them"""
