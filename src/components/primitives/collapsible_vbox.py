@@ -4,7 +4,8 @@ import remi
 from loguru import logger
 
 from components.primitives.button import Button
-from components.trash_button import TrashButton
+
+HEADER_HEIGHT = "30px"
 
 
 class CollapsibleVBox(remi.gui.VBox):
@@ -29,41 +30,25 @@ class CollapsibleVBox(remi.gui.VBox):
         self.title = title
         self.collapsed_content = []
 
+        # header and collapse button
+        self._header = remi.gui.HBox(style={"vertical-align": "top"})
+        self._header.css_width = "100%"
+        self._header.css_height = HEADER_HEIGHT
+        self.append(self._header, "_header")
+
         # header
         self.header = remi.gui.HBox(style={"vertical-align": "top"})
         self.header.css_width = "100%"
-        self.header.css_height = "30px"
+        self.header.css_height = "100%"
         self.header.css_align_items = "center"
-        self.append(self.header, "header")
-
-        # title
-        self.title_box = remi.gui.VBox(style={"padding-left": "5px"})
-        self.title_box.css_width = "92%"
-        self.title_box.css_font_size = "20px"
-        self.title_box.css_align_self = "flex-start"
-        self.title_box.css_float = "left"
-        self.title_text_input = remi.gui.TextInput(single_line=True)
-        self.title_text_input.set_value(self.title)
-        self.title_text_input.css_width = "50%"
-        self.title_text_input.css_font_size = "20px"
-        self.title_text_input.css_font_weight = "bold"
-        self.title_text_input.css_align_self = "flex-start"
-        self.title_text_input.css_float = "left"
-        self.title_box.append(self.title_text_input, "title_label")
-        self.header.append(self.title_box, "title_label_box")
+        self._header.append(self.header, "header")
 
         # collapse button
         self.collapse_button_text = "▼" if self.collapsed else "▲"
         self.collapse_button = Button(self.collapse_button_text)
-        self.title_box.css_float = "right"
         self.collapse_button.css_width = "8%"
         self.collapse_button.onclick.do(self.toggle_collapse)
-        self.header.append(self.collapse_button, "collapse_button")
-
-        # trash button
-        self.trash_button = TrashButton()
-        self.trash_button.onclick.connect(self.on_trash_button)
-        self.header.append(self.trash_button, "on_trash_button")
+        self._header.append(self.collapse_button, "collapse_button")
 
     def toggle_collapse(self, widget: remi.gui.Widget):
         """Toggles the collapsed state of the CollapsibleVBox"""
@@ -82,7 +67,7 @@ class CollapsibleVBox(remi.gui.VBox):
         children = list(self.children.values())
         # remove all children except header
         for child in children:
-            if child != self.header:
+            if child != self._header:
                 self.remove_child(child)
                 self.collapsed_content.append(child)
         # change direction of button triangle to down

@@ -235,7 +235,7 @@ class RoutineProgrammer(remi.gui.VBox):
         """update the vbox of program_setters"""
         program_setters = list(self.program_setters_vbox.children.values())
         for program_setter in program_setters:
-            if program_setter.trasheds:
+            if program_setter.trashed:
                 self.program_setters_vbox.remove_child(program_setter)
                 self.routine.routine_programs.remove(
                     program_setter.routine_program

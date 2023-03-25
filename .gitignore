@@ -164,3 +164,6 @@ db.sqlite
 
 # DS_Store
 .DS_Store
+
+# my scratch file
+scratch.py
