@@ -16,6 +16,7 @@
 
 ## TODO
 
+- [ ] Program titles not updating in DB
 - [ ] Change name of a "Program"?
 - [ ] Change RoutineProgram to ProgramInRoutine?
 - [ ] Add a target-minutes field to the routine model and routine configurer

@@ -145,8 +145,8 @@ class ProgramSetter(remi.gui.HBox):
         # program chooser dropdown
         self.program_chooser = remi.gui.DropDown()
         self.program_chooser.css_width = "25%"
-        self.program_chooser.append(remi.gui.DropDownItem("drink .5l water"))
-        self.program_chooser.append(remi.gui.DropDownItem("20 pushups"))
+        self.program_chooser.append(remi.gui.DropDownItem("Prompt & Continue"))
+        self.program_chooser.append(remi.gui.DropDownItem("Exercise Program"))
         self.append(self.program_chooser, "program_chooser")
 
         # priority dropdown

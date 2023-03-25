@@ -42,7 +42,7 @@ if __name__ == "__main__":
         App,
         address="0.0.0.0",
         port=0,
-        start_browser=True,
+        start_browser=False,
         username=None,
         password=None,
         update_interval=1,
