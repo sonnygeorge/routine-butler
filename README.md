@@ -16,6 +16,8 @@
 
 ## TODO
 
+- [ ] Change name of a "Program"?
+- [ ] Change RoutineProgram to ProgramInRoutine?
 - [ ] Add a target-minutes field to the routine model and routine configurer
 - [ ] Make more things drop-downs? Make the programs / schedules drop downs?
 - [ ] Have no mutables as defaults outside of __init__ methods
