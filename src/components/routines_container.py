@@ -5,11 +5,9 @@ from components.primitives.button import Button
 from components.routine_component import RoutineComponent
 from models import Routine, User
 
-MARGIN = "23px 23px 23px 23px"
-
 
 class RoutinesContainer(remi.gui.VBox):
-    """VBox-style container for the routine components of the app."""
+    """VBox-style container for the routine components of the app/user."""
 
     user: User
     routine_component_directory: list[RoutineComponent] = []
@@ -30,7 +28,7 @@ class RoutinesContainer(remi.gui.VBox):
         self.routines_vbox = remi.gui.VBox(
             width="100%",
             style={
-                "margin": MARGIN,
+                "margin": "23px 23px 23px 23px",
                 "background": "none",
                 "justify-content": "space-between",
             },
@@ -43,7 +41,7 @@ class RoutinesContainer(remi.gui.VBox):
 
         # add routine button
         self.add_routine_button = Button(
-            "+", style={"margin": MARGIN, "font-size": "30px"}
+            "+", style={"margin": "12px", "font-size": "30px"}
         )
         self.add_routine_button.css_width = "9%"
         self.add_routine_button.onclick.connect(self.on_add_routine)
@@ -52,7 +50,21 @@ class RoutinesContainer(remi.gui.VBox):
     def populate_routine_component_directory(self):
         """Instantiates the routines from user's routines"""
         for routine in self.user.routines:
-            self.routine_component_directory.append(RoutineComponent(routine))
+            self.routine_component_directory.append(
+                RoutineComponent(routine, self.user)
+            )
+
+    def on_add_routine(self, _):
+        """Called when the user clicks on the add_routine_button."""
+        logger.debug("Adding new routine")
+        # create new routine
+        routine = Routine()
+        # add routine to user
+        self.user.routines.append(routine)
+        # add routine component to routines_vbox
+        routine_component = RoutineComponent(routine, self.user)
+        self.routine_component_directory.append(routine_component)
+        self.routines_vbox.append(routine_component, key=routine.id)
 
     def idle(self):
         """Called every update_interval seconds."""
@@ -61,31 +73,28 @@ class RoutinesContainer(remi.gui.VBox):
             routine_component.idle()
 
     def conduct_screen_management(self):
-        """Iterates through all routine components and "manages the stage"..."""
-        for routine_component in self.routine_component_directory:
-            self.handle_routine_component(routine_component)
-
-    def handle_routine_component(self, routine_comp: RoutineComponent):
         """
-        1. Holds and applies the logic to either:
-            a. Add a routine component to the screen
-            b. Temporarily remove a routine component from the screen
-            c. Delete a routine component and object altogether
+        Iterates through all routine components and "manages the stage" by either:
+            1. Adding a routine component to the screen
+            2. Hiding a routine component from the screen
+            3. Deleting a routine component and object altogether
         """
         on_screen = lambda r: r in self.routines_vbox.children.values()
 
-        if routine_comp.trashed:
-            self.permanently_delete_routine(routine_comp)
-        elif routine_comp.should_be_on_screen() and not on_screen(
-            routine_comp
-        ):
-            self.add_routine_to_screen(routine_comp)
-        elif (
-            on_screen(routine_comp) and not routine_comp.should_be_on_screen()
-        ):
-            self.hide_routine(routine_comp)
+        for routine_comp in self.routine_component_directory:
+            if routine_comp.trashed:
+                self.delete_routine_altogether(routine_comp)
+            elif routine_comp.should_be_on_screen() and not on_screen(
+                routine_comp
+            ):
+                self.add_routine_to_screen(routine_comp)
+            elif (
+                on_screen(routine_comp)
+                and not routine_comp.should_be_on_screen()
+            ):
+                self.hide_routine_from_screen(routine_comp)
 
-    def permanently_delete_routine(self, routine_component: RoutineComponent):
+    def delete_routine_altogether(self, routine_component: RoutineComponent):
         """Thoroughly deletes a routine object from the app and database"""
         # remove from screen
         self.routines_vbox.remove_child(routine_component)
@@ -104,18 +113,6 @@ class RoutinesContainer(remi.gui.VBox):
         if routine_component not in self.routine_component_directory:
             self.routine_component_directory.append(routine_component)
 
-    def hide_routine(self, routine_component):
+    def hide_routine_from_screen(self, routine_component):
         """Temporarily removes a routine from the screen"""
         self.routines_vbox.remove_child(routine_component)
-
-    def on_add_routine(self, _):
-        """Called when the user clicks on the add_routine_button."""
-        logger.debug("Adding new routine")
-        # create new routine
-        routine = Routine()
-        # add routine to user
-        self.user.routines.append(routine)
-        # add routine component to routines_vbox
-        routine_component = RoutineComponent(routine)
-        self.routine_component_directory.append(routine_component)
-        self.routines_vbox.append(routine_component, key=routine.id)

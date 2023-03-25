@@ -16,6 +16,10 @@
 
 ## TODO
 
+- [ ] Have no mutables as defaults outside of __init__ methods
+- [ ] Make trash buttons actually call parental delete and get rid of idle checking
+- [ ] Trashable base class? Inheriting two models at once?
+- [ ] Put UI settings into central UI configs file
 - [ ] Somehow implement an abc of protocol to more formally/logistically enforce models to have an id primary key
 - [ ] pre-commit hooks
 - [ ] Get DB Wrapper roasted?
@@ -40,3 +44,45 @@ This repo contains the WIP "kiosk-style" app that I will run on my raspberry pi 
 I have successfully written an app structure that seems to accomplish the current goal.
 
 Currently working toward an MVP that I will use as an alarm clock and perhaps get formally code reviewed.
+
+## Current Domain Model
+
+```mermaid
+classDiagram
+    class Routine {
+        id: Optional[int]
+        title: Optional[str]
+        user_id: Optional[int]
+    }
+
+    class Schedule {
+        id: Optional[int]
+        hour: int
+        minute: int
+        is_on: bool
+        routine_id: Optional[int]
+    }
+
+    class User {
+        id: Optional[int]
+    }
+
+    class RoutineProgram {
+        id: Optional[int]
+        order_index: int
+        routine_id: Optional[int]
+        program_id: Optional[int]
+    }
+
+    class Program {
+        id: Optional[int]
+        title: Optional[str]
+        user_id: Optional[int]
+    }
+
+    User "1" --> "0..*" Routine
+    Routine "1" --> "0..*" RoutineProgram
+    Routine "1" --> "0..*" Schedule
+    Program "1" --> "0..*" RoutineProgram
+    User "1" --> "0..*" Program
+```

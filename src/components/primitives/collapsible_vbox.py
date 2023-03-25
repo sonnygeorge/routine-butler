@@ -4,6 +4,7 @@ import remi
 from loguru import logger
 
 from components.primitives.button import Button
+from components.trash_button import TrashButton
 
 
 class CollapsibleVBox(remi.gui.VBox):
@@ -16,7 +17,7 @@ class CollapsibleVBox(remi.gui.VBox):
 
     trashed: bool = False
     collapsed: bool = False
-    collapsed_content: List[remi.gui.Container] = []
+    collapsed_content: List[remi.gui.Container]
 
     def __init__(self, title: str = "Untitled"):
         """
@@ -26,6 +27,7 @@ class CollapsibleVBox(remi.gui.VBox):
 
         remi.gui.VBox.__init__(self)
         self.title = title
+        self.collapsed_content = []
 
         # header
         self.header = remi.gui.HBox(style={"vertical-align": "top"})
@@ -35,33 +37,32 @@ class CollapsibleVBox(remi.gui.VBox):
         self.append(self.header, "header")
 
         # title
-        self.title_label_box = remi.gui.VBox(style={"padding-left": "5px"})
-        self.title_label_box.css_width = "92%"
-        self.title_label_box.css_font_size = "20px"
-        self.title_label_box.css_align_self = "flex-start"
-        self.title_label_box.css_float = "left"
-        self.title_label = remi.gui.Label(self.title)
-        self.title_label.css_font_size = "20px"
-        self.title_label.css_font_weight = "bold"
-        self.title_label.css_align_self = "flex-start"
-        self.title_label_box.append(self.title_label, "title_label")
-        self.header.append(self.title_label_box, "title_label_box")
+        self.title_box = remi.gui.VBox(style={"padding-left": "5px"})
+        self.title_box.css_width = "92%"
+        self.title_box.css_font_size = "20px"
+        self.title_box.css_align_self = "flex-start"
+        self.title_box.css_float = "left"
+        self.title_text_input = remi.gui.TextInput(single_line=True)
+        self.title_text_input.set_value(self.title)
+        self.title_text_input.css_width = "50%"
+        self.title_text_input.css_font_size = "20px"
+        self.title_text_input.css_font_weight = "bold"
+        self.title_text_input.css_align_self = "flex-start"
+        self.title_text_input.css_float = "left"
+        self.title_box.append(self.title_text_input, "title_label")
+        self.header.append(self.title_box, "title_label_box")
 
         # collapse button
         self.collapse_button_text = "▼" if self.collapsed else "▲"
         self.collapse_button = Button(self.collapse_button_text)
-        self.title_label_box.css_float = "right"
+        self.title_box.css_float = "right"
         self.collapse_button.css_width = "8%"
         self.collapse_button.onclick.do(self.toggle_collapse)
         self.header.append(self.collapse_button, "collapse_button")
 
         # trash button
-        self.trash_button = Button("🗑️")
+        self.trash_button = TrashButton()
         self.trash_button.onclick.connect(self.on_trash_button)
-        self.trash_button.set_style({"text-shadow": "0px 0px 3px #FFFFFF"})
-        self.trash_button.css_background_color = "red"
-        self.trash_button.css_height = "23px"
-        self.trash_button.css_width = "23px"
         self.header.append(self.trash_button, "on_trash_button")
 
     def toggle_collapse(self, widget: remi.gui.Widget):

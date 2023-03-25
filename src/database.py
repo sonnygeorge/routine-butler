@@ -31,7 +31,7 @@ from loguru import logger
 from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
 from sqlmodel import SQLModel, create_engine
 
-from models import Routine, Schedule, User
+from models import Routine, RoutineProgram, Schedule, User
 
 # Suppress this warning from deleting a parent after deleting a child
 warnings.filterwarnings(
@@ -42,7 +42,13 @@ warnings.filterwarnings(
 DB_URL = "sqlite:///db.sqlite"
 TEST_USER_DEFAULT = User(
     id=1,
-    routines=[Routine(id=1, schedules=[Schedule(id=1)])],
+    routines=[
+        Routine(
+            id=1,
+            schedules=[Schedule(id=1)],
+            routine_programs=[RoutineProgram(id=1)],
+        )
+    ],
 )
 
 # Ascertain the necessary database and create engine
@@ -123,20 +129,3 @@ def ascertain_test_user(database: DatabaseWrapper):
 database = DatabaseWrapper()
 
 ascertain_test_user(database)
-
-# user with one routine with one schedule
-schedule = Schedule()
-routine = Routine(schedules=[schedule])
-user = User(routines=[routine])
-# add user to db
-database.commit(user)
-# delete schedule
-database.delete(schedule)
-# check that user is still in db
-assert database.get(User, user.id) is not None
-# check that routine is still in db
-assert database.get(Routine, routine.id) is not None
-# check that schedule is no longer in db
-assert database.get(Schedule, schedule.id) is None
-# clean up leftover user and routine from db
-database.delete(user)

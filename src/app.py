@@ -8,10 +8,10 @@ from models import User
 
 
 class App(remi.server.App):
-    user: User = database.get(User, 1)  # TEMP: test user for development
-
     def main(self):
         """Gets called when the app is started"""
+        self.user: User = database.get(User, 1)  # test user for development
+
         # main container
         self.topmost_container = TopmostContainer()
 
@@ -19,7 +19,7 @@ class App(remi.server.App):
         self.header = Header()
         self.topmost_container.append(self.header, "header")
 
-        # body container
+        # routines container
         self.routines_container = RoutinesContainer(self.user)
         self.topmost_container.append(
             self.routines_container, "routines_container"

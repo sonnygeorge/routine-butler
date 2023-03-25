@@ -1,9 +1,15 @@
 import pytest
+from sqlmodel import SQLModel
 
 from database import database
-from models import Routine, Schedule, User
+from models import Routine, RoutineProgram, Schedule, User
 
 # TODO: mock a test database for tests
+
+
+def get_parent_new_context(child: SQLModel, parent_attr_name: str) -> SQLModel:
+    """Checks that a parent is accessible from child in this context"""
+    return getattr(child, parent_attr_name)
 
 
 class TestDatabase:
@@ -31,6 +37,25 @@ class TestDatabase:
         assert database.get(Routine, routine.id) is None
         # check that schedule is no longer in db
         assert database.get(Schedule, schedule.id) is None
+
+    def test_parent_relationship_accessible_from_child_in_new_context(self):
+        # user with one routine with one schedule and one program
+        schedule = Schedule()
+        routine_program = RoutineProgram()
+        routine = Routine(schedules=[schedule], programs=[routine_program])
+        user = User(routines=[routine])
+        # add user to db
+        database.commit(user)
+        # check that user is accessible from routine
+        assert isinstance(get_parent_new_context(routine, "user"), User)
+        # check that routine is accessible from schedule
+        assert isinstance(get_parent_new_context(schedule, "routine"), Routine)
+        # check that routine is accessible from program
+        assert isinstance(
+            get_parent_new_context(routine_program, "routine"), Routine
+        )
+        # delete user
+        database.delete(user)
 
     def test_delete_does_not_delete_parents(self):
         # user with one routine with one schedule
