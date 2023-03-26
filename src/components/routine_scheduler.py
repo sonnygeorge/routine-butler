@@ -2,20 +2,19 @@ import remi
 
 from components.primitives.button import Button
 from components.primitives.centered_label import CenteredLabel
-from components.primitives.configurer import Configurer
 from components.trash_button import TrashButton
 from database import Routine, Schedule
 
 BUTTON_BOX_WIDTH = "15%"
 
 
-class ScheduleSetter(Configurer):
+class ScheduleSetter(remi.gui.HBox):
     """A component that offers controls to configure a Schedule object."""
 
     trashed: bool = False
 
     def __init__(self, schedule: Schedule):
-        Configurer.__init__(self)
+        remi.gui.HBox.__init__(self)
 
         self.schedule: Schedule = schedule
 

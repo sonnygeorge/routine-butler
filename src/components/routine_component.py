@@ -23,20 +23,15 @@ class RoutineComponent(CollapsibleVBox):
     def __init__(self, routine: Routine, user: User):
         self.routine = routine
         self.user = user
-        CollapsibleVBox.__init__(self, title=self.routine.title)
 
+        CollapsibleVBox.__init__(self, title=self.routine.title)
         self.css_margin = "12px"
         self.css_width = "78%"
-        self.css_border_color = "yellow"
-        self.css_border_width = "2px"
-        self.css_border_style = "solid"
 
         # title input text in header
         self.title_box = remi.gui.VBox(style={"padding-left": "5px"})
         self.title_box.css_width = "92%"
         self.title_box.css_font_size = "20px"
-        # self.title_box.css_align_self = "flex-start"
-        # self.title_box.css_float = "left"
         self.title_text_input = remi.gui.TextInput(single_line=True)
         self.title_text_input.set_value(self.title)
         self.title_text_input.css_width = "50%"

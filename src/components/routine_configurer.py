@@ -9,13 +9,9 @@ class RoutineConfigurer(remi.gui.VBox):
     """A component that offers controls to Configure a Routine"""
 
     def __init__(self, routine: Routine, user: User):
-        remi.gui.VBox.__init__(self, width="100%")
         self.routine = routine
         self.user = user
-
-        self.css_border_color = "red"
-        self.css_border_width = "2px"
-        self.css_border_style = "solid"
+        remi.gui.VBox.__init__(self, width="100%")
 
         self.routine_scheduler = RoutineScheduler(self.routine)
         self.append(self.routine_scheduler, "routine_scheduler")

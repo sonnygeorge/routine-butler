@@ -11,13 +11,9 @@ class CenteredLabel(remi.gui.VBox):
         remi.gui.VBox.__init__(self)
         self.css_height = "100%"
 
+        # label to display text
         self.inner_label = remi.gui.Label(text)
-
         self.append(self.inner_label)
-
-        self.css_border_color = "purple"
-        self.css_border_width = "2px"
-        self.css_border_style = "solid"
 
     def set_text(self, text: str):
         self.inner_label.set_text(text)

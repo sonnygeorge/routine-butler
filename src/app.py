@@ -41,7 +41,7 @@ if __name__ == "__main__":
     remi.start(
         App,
         address="0.0.0.0",
-        port=0,
+        port=8080,
         start_browser=False,
         username=None,
         password=None,

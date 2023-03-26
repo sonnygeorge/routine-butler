@@ -5,7 +5,6 @@ from loguru import logger
 
 from components.primitives.button import Button
 from components.primitives.centered_label import CenteredLabel
-from components.primitives.configurer import Configurer
 from components.trash_button import TrashButton
 from database import database
 from models import PriorityLevel, Program, Routine, RoutineProgram, User
@@ -95,10 +94,11 @@ class ProgramSetter(remi.gui.HBox):
     pending_order_displacement: int = 0
 
     def __init__(self, routine_program: RoutineProgram, user: User):
-        Configurer.__init__(self)
-
         self.routine_program = routine_program
         self.user = user
+
+        remi.gui.HBox.__init__(self)
+        self.css_width = "100%"
 
         # self.program
         if self.routine_program.program_id is None:
