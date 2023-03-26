@@ -1,7 +1,11 @@
 import remi
 
-from components.routines_frame.routine_programmer import RoutineProgrammer
-from components.routines_frame.routine_scheduler import RoutineScheduler
+from components.routines_frame.routine_configurer.routine_programmer import (
+    RoutineProgrammer,
+)
+from components.routines_frame.routine_configurer.routine_scheduler import (
+    RoutineScheduler,
+)
 from database import Routine, User
 
 
