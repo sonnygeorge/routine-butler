@@ -1,8 +1,9 @@
 import shelve
 import threading
 
-import rich.pretty
 from loguru import logger
+
+from utils import BaseWithPrettyStrMethod
 
 
 class State:
@@ -62,7 +63,7 @@ class State:
         )
 
 
-class States:
+class States(BaseWithPrettyStrMethod):
     # example
     header_button_was_clicked = State(default_value=False, store_to_disk=False)
     # lockbox
@@ -84,22 +85,6 @@ class States:
     alarm_hour = State(default_value=0, store_to_disk=True)
     alarm_minute = State(default_value=0, store_to_disk=True)
 
-    def __init__(self):
-        logger.debug(f"Created states: {self.__str__()}")
-
-    def __str__(self):
-        _dict = {
-            attr: getattr(self, attr)
-            for attr in dir(self)
-            if not callable(getattr(self, attr)) and not attr.startswith("__")
-        }
-        out = f"<class '{self.__class__.__module__}.{self.__class__.__name__}'>\n"
-        out += (
-            rich.pretty.pretty_repr(_dict)
-            .replace("{\n", "")
-            .replace("\n}", "")
-        )
-        return out
-
 
 states = States()
+logger.debug(f"Created states: {states}")

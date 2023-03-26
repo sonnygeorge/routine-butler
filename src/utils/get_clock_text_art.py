@@ -61,7 +61,11 @@ def side_by_side(string_one: str, string_two: str):
     return "\n".join(result)
 
 
-def get_fancy_clock_string(clock_string) -> str:
+def get_clock_text_art(clock_string) -> str:
+    """
+    Takes a string of the form "HH:MM" and returns fancy text art that feels
+    like the text of a digital clock
+    """
     whitelist = "0123456789:"
     assert all(
         char in whitelist for char in clock_string

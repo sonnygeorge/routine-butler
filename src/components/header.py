@@ -2,7 +2,7 @@ import time
 
 import remi
 
-from utils import LOGO_TEXT_ART, get_fancy_clock_string
+from utils import LOGO_TEXT_ART, get_clock_text_art
 
 LOGO_TEXT_ART = LOGO_TEXT_ART.replace(" ", " ")
 COLOR = "#007399"
@@ -88,7 +88,7 @@ class Header(remi.gui.HBox):
         self.clock.css_align_self = "flex-end"
         self.clock.css_background_color = COLOR
         fill_vbox_with_multiline_text(
-            self.clock, get_fancy_clock_string("00:00:00")
+            self.clock, get_clock_text_art("00:00:00")
         )
         self.clock_box.append(self.clock)
         self.append(self.clock_box, "clock")
@@ -115,7 +115,7 @@ class Header(remi.gui.HBox):
         t = time.localtime()
         t_str = time.asctime(t)
         fill_vbox_with_multiline_text(
-            self.clock, get_fancy_clock_string(t_str.split(" ")[3])
+            self.clock, get_clock_text_art(t_str.split(" ")[3])
         )
         fill_vbox_with_multiline_text(
             self.date,
