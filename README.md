@@ -91,3 +91,27 @@ classDiagram
     Program "1" --> "0..*" RoutineProgram
     User "1" --> "0..*" Program
 ```
+
+```mermaid
+flowchart TD
+    subgraph APP["App"]
+
+        subgraph RV["Routines VBox"]
+            RC1["Routine Component"]
+            RC2["Routine Component"]
+        end
+
+        subgraph RF["Routines Frame"]
+            RV
+            ARB["Add Routine Button"]
+        end
+
+        H["Header"] -.- RF
+
+        subgraph PM["Program Maker"]
+            T["Temp"]
+        end
+
+        RF -.- PM
+    end
+```

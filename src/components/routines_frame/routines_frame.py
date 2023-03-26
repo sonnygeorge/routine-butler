@@ -2,11 +2,11 @@ import remi
 from loguru import logger
 
 from components.primitives.button import Button
-from components.routine_component import RoutineComponent
+from components.routines_frame.routine_component import RoutineComponent
 from models import Routine, User
 
 
-class RoutinesContainer(remi.gui.VBox):
+class RoutinesFrame(remi.gui.VBox):
     """VBox-style container for the routine components of the app/user."""
 
     user: User
@@ -24,7 +24,7 @@ class RoutinesContainer(remi.gui.VBox):
         )
         self.user = user
 
-        # routines
+        # routines vbox
         self.routines_vbox = remi.gui.VBox(
             width="100%",
             style={

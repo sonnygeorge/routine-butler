@@ -1,10 +1,10 @@
 import remi
 from loguru import logger
 
+from components.misc.trash_button import TrashButton
 from components.primitives.button import Button
 from components.primitives.collapsible_vbox import CollapsibleVBox
-from components.routine_configurer import RoutineConfigurer
-from components.trash_button import TrashButton
+from components.routines_frame.routine_configurer import RoutineConfigurer
 from database import Routine, User
 
 

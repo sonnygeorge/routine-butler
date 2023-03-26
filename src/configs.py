@@ -9,4 +9,4 @@ class Configs(BaseWithPrettyStrMethod):
 
 
 configs = Configs()
-logger.debug(f"Created configs: {configs}")
+logger.debug(f"Configs: {configs}")

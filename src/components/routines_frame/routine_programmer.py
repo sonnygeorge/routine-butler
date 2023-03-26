@@ -3,9 +3,9 @@ from typing import List
 import remi
 from loguru import logger
 
+from components.misc.trash_button import TrashButton
 from components.primitives.button import Button
 from components.primitives.centered_label import CenteredLabel
-from components.trash_button import TrashButton
 from database import database
 from models import PriorityLevel, Program, Routine, RoutineProgram, User
 

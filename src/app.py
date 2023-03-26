@@ -1,8 +1,7 @@
 import remi
 
 from components.header import Header
-from components.routines_container import RoutinesContainer
-from components.topmost_container import TopmostContainer
+from components.routines_frame.routines_frame import RoutinesFrame
 from database import database
 from models import User
 
@@ -13,26 +12,28 @@ class App(remi.server.App):
         self.user: User = database.get(User, 1)  # test user for development
 
         # main container
-        self.topmost_container = TopmostContainer()
+        self.topmost_frame = remi.gui.Container()
+        self.topmost_frame.css_width = "100%"
+        self.topmost_frame.css_height = "100%"
+        self.topmost_frame.css_background_color = "lightgray"
+        self.topmost_frame.css_font_family = "Courier"
 
         # header container
         self.header = Header()
-        self.topmost_container.append(self.header, "header")
+        self.topmost_frame.append(self.header, "header")
 
-        # routines container
-        self.routines_container = RoutinesContainer(self.user)
-        self.topmost_container.append(
-            self.routines_container, "routines_container"
-        )
+        # routines frame
+        self.routines_frame = RoutinesFrame(self.user)
+        self.topmost_frame.append(self.routines_frame, "routines_frame")
 
-        return self.topmost_container
+        return self.topmost_frame
 
     def idle(self):
         """Gets called every update_interval seconds"""
         # header component idle function
         self.header.idle()
         # routine components idle function
-        self.routines_container.idle()
+        self.routines_frame.idle()
         # since all models are children of user, this persists all changes to the db
         database.commit(self.user)
 
