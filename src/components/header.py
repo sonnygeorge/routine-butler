@@ -6,9 +6,9 @@ from utils import LOGO_TEXT_ART, get_clock_text_art
 
 LOGO_TEXT_ART = LOGO_TEXT_ART.replace(" ", " ")
 COLOR = "#007399"
-CLOCK_FONT_SIZE = "4.5px"
-LOGO_FONT_SIZE = "4.5px"
-DATE_FONT_SIZE = "15px"
+CLOCK_FONT_SIZE = "5px"
+LOGO_FONT_SIZE = "10px"
+DATE_FONT_SIZE = "14px"
 MOYAI_FONT_SIZE = "38px"
 MOYAI_SHADOW = "0px 0px 3px rgb(0, 0, 0, .2)"
 SIDE_PADDING = "20px"
@@ -23,7 +23,7 @@ def fill_vbox_with_multiline_text(
         for child in children:
             vbox.remove_child(child)
     for line in text.split("\n"):
-        if line.strip():
+        if line.strip() or " " in line:
             row = remi.gui.Label(
                 line,
                 style={
@@ -73,6 +73,7 @@ class Header(remi.gui.HBox):
         self.logo.css_align_self = "flex-start"
         self.logo.css_background_color = COLOR
         fill_vbox_with_multiline_text(self.logo, LOGO_TEXT_ART)
+        self.logo.css_font_weight = "bold"
         self.logo_box.append(self.logo)
         self.append(self.logo_box, "logo")
 
