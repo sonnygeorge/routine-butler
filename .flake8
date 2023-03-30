@@ -5,3 +5,4 @@ per-file-ignores =
     database.py:F401
     text_art.py:W291, W293
     routines_frame.py:E731
+    header.py:E731
