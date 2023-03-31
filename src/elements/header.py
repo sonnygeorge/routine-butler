@@ -7,7 +7,7 @@ from elements.svg import SVG
 from utils.constants import clrs
 
 BUTTON_STYLE = "height: 45px; width: 45px;"
-APP_NAME = "RoutineBox"
+APP_NAME = "RoutineButler"
 APP_NAME_SIZE = "1.9rem"
 ROUTINES_SVG_SIZE: int = 30
 PROGRAMS_SVG_SIZE: int = 26

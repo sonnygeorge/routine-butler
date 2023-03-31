@@ -47,7 +47,7 @@ ORM models for the database.
 #         back_populates="routine",
 #         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
 #     )
-#     routine_programs: List["RoutineProgram"] = Relationship(
+#     routine_elements: List["RoutineElement"] = Relationship(
 #         back_populates="routine",
 #         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
 #     )
@@ -75,13 +75,13 @@ ORM models for the database.
 #     )
 
 
-# class RoutineProgram(SQLModel, table=True):
+# class RoutineElement(SQLModel, table=True):
 #     """
 #     SQLModel that extends a "Program" to contain the necessary information to be
 #     used in a "Routine"
 #     """
 
-#     __tablename__ = "routine_program"
+#     __tablename__ = "routine_element"
 
 #     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
 #     order_index: int = Field(default=0)
@@ -90,13 +90,13 @@ ORM models for the database.
 #     # Parents
 #     routine_id: Optional[int] = Field(default=None, foreign_key="routine.id")
 #     routine: Optional[Routine] = Relationship(
-#         back_populates="routine_programs",
+#         back_populates="routine_elements",
 #         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
 #     )
 
 #     program_id: Optional[int] = Field(default=None, foreign_key="program.id")
 #     program: Optional["Program"] = Relationship(
-#         back_populates="routine_programs",
+#         back_populates="routine_elements",
 #         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
 #     )
 
@@ -108,7 +108,7 @@ ORM models for the database.
 #     title: Optional[str] = Field(default="New Program")
 
 #     # Children
-#     routine_programs: List[RoutineProgram] = Relationship(
+#     routine_elements: List[RoutineElement] = Relationship(
 #         back_populates="program",
 #         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
 #     )

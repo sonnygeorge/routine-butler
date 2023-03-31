@@ -2,7 +2,7 @@
 # from sqlmodel import SQLModel
 
 # from database import database
-# from models import Routine, RoutineProgram, Schedule, User
+# from models import Routine, RoutineElement, Schedule, User
 
 # # TODO: mock a test database for tests
 
@@ -41,7 +41,7 @@
 #     def test_parent_relationship_accessible_from_child_in_new_context(self):
 #         # user with one routine with one schedule and one program
 #         schedule = Schedule()
-#         routine_program = RoutineProgram()
+#         routine_program = RoutineElement()
 #         routine = Routine(schedules=[schedule], programs=[routine_program])
 #         user = User(routines=[routine])
 #         # add user to db

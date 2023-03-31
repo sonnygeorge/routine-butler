@@ -1,5 +1,5 @@
-remi
 rich
 loguru
 sqlmodel
 pytest
+nicegui

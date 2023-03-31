@@ -24,5 +24,5 @@ def main():
     ui.run()
 
 
-if __name__ == "__main__":
+if __name__ in {"__main__", "__mp_main__"}:
     main()

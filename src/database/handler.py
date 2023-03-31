@@ -50,7 +50,7 @@ A CRUD-style handler for the database.
 #         Routine(
 #             id=1,
 #             schedules=[Schedule(id=1)],
-#             routine_programs=[RoutineProgram(id=1)],
+#             routine_programs=[RoutineElement(id=1)],
 #         )
 #     ],
 # )

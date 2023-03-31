@@ -4,7 +4,7 @@
 
 ### 👾 **1.1** What is the App?
 
-`RoutineBox` is an app that:
+`RoutineButler` is an app that:
 
 - 🥧 is designed to be run "kiosk-style" on a RaspberryPi connected to:
 
@@ -47,7 +47,7 @@ The app allows users to:
 
 #### 4️⃣ **RoutineItem**
 
-- A `RoutineItem` refers to a `Program`'s role within a `Routine`. A user might assign their `Program`, _"Drink Water"_ to be the second `RoutineProgram` in their `Routine`, _"Morning Routine"_. This means that the `Program` will be run second in the `Routine`.
+- A `RoutineItem` refers to a `Program`'s role within a `Routine`. A user might assign their `Program`, _"Drink Water"_ to be the second `RoutineElement` in their `Routine`, _"Morning Routine"_. This means that the `Program` will be run second in the `Routine`.
 
 ...
 
@@ -216,11 +216,11 @@ erDiagram
 
 ...
 
-Now, `RoutineBox` and Bob are ready to go! 🚀
+Now, `RoutineButler` and Bob are ready to go! 🚀
 
-🌆 At 9:00 PM, `RoutineBox` will annoy 👨‍💻 Bob with a sound 🔊 every 5 minutes (300 seconds) until he completes his `"Evening Routine"` (which includes locking his phone 📱 in the lockbox 📦). Once he completes the routine, he will be rewarded 🎁 with a queue of memes.
+🌆 At 9:00 PM, `RoutineButler` will annoy 👨‍💻 Bob with a sound 🔊 every 5 minutes (300 seconds) until he completes his `"Evening Routine"` (which includes locking his phone 📱 in the lockbox 📦). Once he completes the routine, he will be rewarded 🎁 with a queue of memes.
 
-🌅 In the morning at 7:30 AM, `RoutineBox` will annoy 👨‍💻 Bob with a sound 🔊 every .5 seconds until he completes his `"Morning Routine"`. If it takes him longer than 5 minutes, the second `"Personal Mantra"` program will be omitted since the `RoutineItem`'s `priority_level` is `"low"`. Once he completes the routine, he will be rewarded 🎁 with the unlocking of his phone 📱 from the lockbox. 📦
+🌅 In the morning at 7:30 AM, `RoutineButler` will annoy 👨‍💻 Bob with a sound 🔊 every .5 seconds until he completes his `"Morning Routine"`. If it takes him longer than 5 minutes, the second `"Personal Mantra"` program will be omitted since the `RoutineItem`'s `priority_level` is `"low"`. Once he completes the routine, he will be rewarded 🎁 with the unlocking of his phone 📱 from the lockbox. 📦
 
 ...
 
@@ -244,7 +244,7 @@ Now, `RoutineBox` and Bob are ready to go! 🚀
 
 - If we go with a relational database in which I have to create a new table for every new `ProgramPlugin`, I would like the suite of tests to be dynamic to the number of `ProgramPlugins` in the app (I.E. it collects all the `ProgramPlugin` classes and uses something like pytest's `parametrize` to have the DB tests run for all of them)... In fact, just as a general principle, I would like everything about the app to be dynamic to the number of `ProgramPlugins` so that I can add/remove them without much workload overhead.
 
-- It might even be an interesting topic of discussion to have `ProgramPlugins` be their own Github repos that `RoutineBox` pip-installs and imports...
+- It might even be an interesting topic of discussion to have `ProgramPlugins` be their own Github repos that `RoutineButler` pip-installs and imports...
 
 ## 🚀 Of Course, This is All "As Time Permits"
 
