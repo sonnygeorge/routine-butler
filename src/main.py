@@ -1,6 +1,8 @@
 from nicegui import ui
 
 from elements.header import Header
+from elements.routines_sidebar import RoutinesSidebar
+from elements.programs_sidebar import ProgramsSidebar
 
 
 class Time:
@@ -8,7 +10,12 @@ class Time:
 
 
 def build_ui():
-    Header()
+    header = Header()
+    routines_sidebar = RoutinesSidebar()
+    programs_sidebar = ProgramsSidebar()
+
+    header.routines_button.on("click", routines_sidebar.toggle)
+    header.programs_button.on("click", programs_sidebar.toggle)
 
     with ui.input("hours").props("filled").bind_value(Time, "time") as hours:
         with hours.add_slot("append"):

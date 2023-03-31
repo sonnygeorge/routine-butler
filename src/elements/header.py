@@ -6,7 +6,7 @@ from nicegui import ui
 from elements.svg import SVG
 from utils.constants import clrs
 
-BUTTON_STYLE = "height: 45px; width: 45px;"
+BUTTON_STYLE = "height: 45px; width: 45px; background-color: {clr} !important;"
 APP_NAME = "RoutineButler"
 APP_NAME_SIZE = "1.9rem"
 ROUTINES_SVG_SIZE: int = 30
@@ -59,10 +59,9 @@ class Header(ui.header):
             right_content = ui.row().style("align-items: center")
             with left_content:
                 # routines button
-                self.routines_button = ui.card()
-                styles = f"{BUTTON_STYLE} background-color: {clrs.dark_gray};"
-                self.routines_button.style(styles)
-                self.routines_button.classes("place-content-center")
+                self.routines_button = ui.button()
+                style = BUTTON_STYLE.format(clr=clrs.dark_gray)
+                self.routines_button.style(style)
                 with self.routines_button:
                     SVG(ROUTINE_SVG_FPATH, ROUTINES_SVG_SIZE)
                 # app name
@@ -71,9 +70,8 @@ class Header(ui.header):
                 # clock
                 Clock()
                 # programs button
-                self.programs_button = ui.card()
-                styles = f"{BUTTON_STYLE} background-color: {clrs.dark_gray};"
-                self.programs_button.style(styles)
-                self.programs_button.classes("place-content-center")
+                self.programs_button = ui.button()
+                style = BUTTON_STYLE.format(clr=clrs.dark_gray)
+                self.programs_button.style(style)
                 with self.programs_button:
                     SVG(PROGRAM_SVG_FPATH, PROGRAMS_SVG_SIZE)
