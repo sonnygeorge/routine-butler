@@ -1,7 +1,7 @@
 import rich.pretty
 
 
-class BaseWithPrettyStrMethod:
+class PrettyStrMixin:
     """Base class for classes to inherit from to get a pretty __str__ method"""
 
     def __str__(self):
