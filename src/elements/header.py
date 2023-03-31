@@ -24,8 +24,7 @@ class Clock(ui.column):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.classes("-space-y-1 gap-0")
-        self.style("align-items: center;")
+        self.classes("-space-y-1 gap-0 items-center")
 
         with self:
             # time
@@ -38,7 +37,7 @@ class Clock(ui.column):
 
             # date
             date = ui.label().style(f"font-size: {DATE_SIZE}")
-            date.classes("items-center;")
+            date.classes("items-center")
             set_date = lambda: date.set_text(
                 datetime.now().strftime("%b %d, %Y")
             )

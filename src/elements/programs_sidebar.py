@@ -1,6 +1,7 @@
 from nicegui import ui
 
 from utils.constants import clrs
+from database.models import User
 
 BUTTON_STYLE = "background-color: {clr} !important;"
 DRAWER_WIDTH = "300"
@@ -8,7 +9,9 @@ DRAWER_BREAKPOINT = "0"
 
 
 class ProgramsSidebar(ui.right_drawer):
-    def __init__(self):
+    def __init__(self, user: User):
+        self.user = user
+
         super().__init__()
         self.classes("space-y-4 text-center")
         self.props(f"breakpoint={DRAWER_BREAKPOINT} width={DRAWER_WIDTH}")
