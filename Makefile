@@ -14,7 +14,7 @@ install:
 
 # Run app
 run:
-	python3 app.py
+	python3 src/main.py
 
 # Clean up repo junk files
 cleanse:
