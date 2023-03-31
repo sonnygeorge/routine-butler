@@ -1,11 +1,13 @@
 import os
 from datetime import datetime
 
-from constants import clrs
-from elements.svg import SVG
 from nicegui import ui
 
+from elements.svg import SVG
+from utils.constants import clrs
+
 BUTTON_STYLE = "height: 45px; width: 45px;"
+APP_NAME = "RoutineBox"
 APP_NAME_SIZE = "1.9rem"
 ROUTINES_SVG_SIZE: int = 30
 PROGRAMS_SVG_SIZE: int = 26
@@ -64,7 +66,7 @@ class Header(ui.header):
                 with self.routines_button:
                     SVG(ROUTINE_SVG_FPATH, ROUTINES_SVG_SIZE)
                 # app name
-                ui.label("RoutineBox").style(f"font-size: {APP_NAME_SIZE}")
+                ui.label(APP_NAME).style(f"font-size: {APP_NAME_SIZE}")
             with right_content:
                 # clock
                 Clock()
