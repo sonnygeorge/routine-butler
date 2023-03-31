@@ -1,7 +1,8 @@
 from nicegui import ui
+from loguru import logger
 
 from utils.constants import clrs
-from database.models import User
+from database.models import User, Routine, Program, Schedule, RoutineItem
 
 BUTTON_STYLE = f"background-color: {clrs.dark_green} !important;"
 DRAWER_WIDTH = "400"
@@ -13,30 +14,52 @@ class Time:
 
 
 class ScheduleSetter(ui.row):
-    def __init__(self, schedule):
+    def __init__(self, schedule: Schedule, parent_element: ui.element):
         self.schedule = schedule
+        self.parent_element = parent_element
 
         super().__init__()
         self.classes("justify-between items-center")
 
         with self:
-            self.input = (
-                ui.input("hours").props("filled").bind_value(Time, "time")
-            )
-            with self.input as input:
+            # time input
+            self.time = ui.input(label="Time", value="12:00")
+            with self.time as input:
                 with input.add_slot("append"):
-                    with ui.icon("access_time").classes("cursor-pointer"):
-                        with ui.element("q-popup-proxy").props(
-                            'cover transition-show="scale" transition-hide="scale"'
-                        ):
-                            ui.time().bind_value(Time, "time")
+                    icon = ui.icon("access_time").classes("cursor-pointer")
+                    icon.on("click", lambda: menu.open())
+                    with ui.menu() as menu:
+                        time_setter = ui.time()
+                        time_setter.bind_value(self.time)
+            self.time.on(
+                "change", lambda: self.on_time_change(self.time.value)
+            )
 
-            self.trash_button = ui.button().props("icon=cancel")
-            self.trash_button.style(BUTTON_STYLE)
+            # toggle switch
+            switch = ui.switch()
+            switch.on("change", lambda: self.on_toggle(switch.value))
+
+            # delete button
+            self.delete_button = ui.button().props("icon=cancel")
+            self.delete_button.style(BUTTON_STYLE)
+            self.delete_button.on("click", self.on_delete)
+
+    def on_toggle(self, value: bool):
+        self.schedule.enabled = value
+        logger.debug(f"Schedule {self.schedule.id} enabled changed to {value}")
+
+    def on_time_change(self, new_time):
+        self.schedule.set_time(new_time)
+        logger.debug(f"Schedule {self.schedule.id} time changed to {new_time}")
+
+    def on_delete(self):
+        logger.debug(f"Deleting schedule {self.schedule.id}")
+        self.parent_element.remove(self)
+        del self
 
 
 class SchedulesConfigurer(ui.expansion):
-    def __init__(self, routine):
+    def __init__(self, routine: Routine):
         self.routine = routine
 
         super().__init__("Schedules", icon="schedule")
@@ -44,11 +67,20 @@ class SchedulesConfigurer(ui.expansion):
 
         with self:
             for schedule in self.routine.schedules:
-                ScheduleSetter(schedule)
+                ScheduleSetter(schedule, parent_element=self)
+
+            self.add_schedule_button = ui.button("Add Schedule")
+            self.add_schedule_button.on("click", self.on_add_schedule)
+
+    def on_add_schedule(self):
+        schedule = Schedule()
+        self.routine.schedules.append(schedule)
+        with self:
+            ScheduleSetter(schedule, parent_element=self)
 
 
 class RoutineItemsConfigurer(ui.expansion):
-    def __init__(self, routine):
+    def __init__(self, routine: Routine):
         self.routine = routine
 
         super().__init__("Schedules", icon="schedule")
@@ -59,7 +91,7 @@ class RoutineItemsConfigurer(ui.expansion):
 
 
 class TitleSetter(ui.row):
-    def __init__(self, routine):
+    def __init__(self, routine: Routine):
         self.routine = routine
 
         super().__init__()
@@ -75,7 +107,7 @@ class TitleSetter(ui.row):
 
 
 class RoutineConfigurer(ui.expansion):
-    def __init__(self, routine):
+    def __init__(self, routine: Routine):
         self.routine = routine
 
         super().__init__(routine.title, icon="settings")

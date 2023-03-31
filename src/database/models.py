@@ -109,7 +109,7 @@ class Schedule(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
     hour: int = Field(default=0)
     minute: int = Field(default=0)
-    is_on: bool = Field(default=False)
+    enabled: bool = Field(default=False)
 
     # Parent
     routine_id: Optional[int] = Field(default=None, foreign_key="routine.id")
@@ -117,3 +117,11 @@ class Schedule(SQLModel, table=True):
         back_populates="schedules",
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
     )
+
+    def set_time(self, str_time: str):
+        """Takes a string in the format "HH:MM" and sets the hour and minute"""
+        self.hour, self.minute = str_time.split(":")
+
+    def get_time(self) -> str:
+        """Returns a string in the format "HH:MM" from the hour and minute"""
+        return f"{self.hour}:{self.minute}"
