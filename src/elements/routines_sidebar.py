@@ -9,10 +9,6 @@ DRAWER_WIDTH = "400"
 DRAWER_BREAKPOINT = "0"
 
 
-class Time:
-    time = "03:10"
-
-
 class ScheduleSetter(ui.row):
     def __init__(self, schedule: Schedule, parent_element: ui.element):
         self.schedule = schedule
