@@ -256,7 +256,7 @@ I am not expecting you to do everything of course. I am just looking for you to 
 
 Altogether, I really think it boils down to:
 
-1. Helping me solidify my **data model**/how I will store the data (relational vs. non-relational)
+1. Helping me solidify my **data model** & how I will store the data (relational vs. non-relational)
 
 2. Helping me get off in the right direction with the CRUD-style wrapper for the DB and the tests for it
 

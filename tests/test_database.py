@@ -1,3 +1,7 @@
+"""
+And old file I had for testing aspects of my db handler
+"""
+
 # import pytest
 # from sqlmodel import SQLModel
 
