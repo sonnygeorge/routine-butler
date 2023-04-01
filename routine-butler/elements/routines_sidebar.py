@@ -9,6 +9,11 @@ DRAWER_WIDTH = "400"
 DRAWER_BREAKPOINT = "0"
 
 
+# TODO:
+# - https://nicegui.io/documentation#color_theming instead of curr approach
+# - use icon constants
+
+
 class ScheduleSetter(ui.row):
     def __init__(self, schedule: Schedule, parent_element: ui.element):
         self.schedule = schedule
