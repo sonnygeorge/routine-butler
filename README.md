@@ -85,7 +85,7 @@ erDiagram
         minute int
         annoy_volume int
         annoy_interval timedelta
-        is_on bool
+        enabled bool
         routine_id int FK
     }
 
