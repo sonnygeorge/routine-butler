@@ -14,6 +14,27 @@ TEST_ROUTINE = Routine(
 )
 TEST_USER = User(routines=[TEST_ROUTINE])
 
+class clrs:
+    primary = "#2e5cb8"  # buttons
+    secondary = "#5c85d6"  # header
+    accent = "#2399cf"
+    positive = "#23cf59"
+    negative = "#cf2342"
+    info = "#85d2ed"
+    warning = "#d6dd54"
+
+
+def set_colors():
+    ui.colors(
+        primary=clrs.primary,
+        secondary=clrs.secondary,
+        accent=clrs.accent,
+        positive=clrs.positive,
+        negative=clrs.negative,
+        info=clrs.info,
+        warning=clrs.warning,
+    )
+
 
 def build_ui():
     header = Header()
@@ -25,6 +46,7 @@ def build_ui():
 
 
 def main():
+    set_colors()
     build_ui()
     ui.run()
 

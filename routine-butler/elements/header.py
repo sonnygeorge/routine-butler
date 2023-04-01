@@ -6,11 +6,11 @@ from nicegui import ui
 from elements.svg import SVG
 from utils.constants import clrs
 
-BUTTON_STYLE = "height: 45px; width: 45px; background-color: {clr} !important;"
+BUTTON_STYLE = "height: 45px; width: 45px;"
 APP_NAME = "RoutineButler"
 APP_NAME_SIZE = "1.9rem"
 ROUTINES_SVG_SIZE: int = 30
-PROGRAMS_SVG_SIZE: int = 26
+PROGRAMS_SVG_SIZE: int = 25
 LOGO_SIZE = "2.6rem"
 TIME_SIZE = "1.1rem"
 DATE_SIZE = ".7rem"
@@ -47,11 +47,8 @@ class Clock(ui.column):
 class Header(ui.header):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.classes("justify-between items-center")
-        self.style(
-            f"background-color: {clrs.dark_green};"
-            f"box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);"
-        )
+        self.classes("justify-between items-center bg-secondary")
+        self.props("elevated")
 
         with self:
             left_content = ui.row().style("align-items: center")
@@ -59,10 +56,9 @@ class Header(ui.header):
             with left_content:
                 # routines button
                 self.routines_button = ui.button()
-                style = BUTTON_STYLE.format(clr=clrs.dark_gray)
-                self.routines_button.style(style)
+                self.routines_button.style(BUTTON_STYLE)
                 with self.routines_button:
-                    SVG(ROUTINE_SVG_FPATH, ROUTINES_SVG_SIZE)
+                    SVG(ROUTINE_SVG_FPATH, ROUTINES_SVG_SIZE, color="white")
                 # app name
                 ui.label(APP_NAME).style(f"font-size: {APP_NAME_SIZE}")
             with right_content:
@@ -70,7 +66,6 @@ class Header(ui.header):
                 Clock()
                 # programs button
                 self.programs_button = ui.button()
-                style = BUTTON_STYLE.format(clr=clrs.dark_gray)
-                self.programs_button.style(style)
+                self.programs_button.style(BUTTON_STYLE)
                 with self.programs_button:
-                    SVG(PROGRAM_SVG_FPATH, PROGRAMS_SVG_SIZE)
+                    SVG(PROGRAM_SVG_FPATH, PROGRAMS_SVG_SIZE, color="white")

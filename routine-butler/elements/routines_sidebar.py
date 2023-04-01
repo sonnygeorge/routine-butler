@@ -1,26 +1,68 @@
+import os
+from typing import Optional, Callable, Union
+
 from nicegui import ui
 from loguru import logger
 
 from utils.constants import clrs
 from database.models import User, Routine, Program, Schedule, RoutineItem
 
-BUTTON_STYLE = f"background-color: {clrs.dark_green} !important;"
-DRAWER_WIDTH = "400"
+from elements.svg import SVG
+
+DRAWER_WIDTH = "430"
 DRAWER_BREAKPOINT = "0"
+ROUTINES_SVG_SIZE: int = 28
+PROGRAMS_SVG_SIZE: int = 26
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROUTINE_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/routine-icon.svg")
+PROGRAM_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/program-icon.svg")
 
 
 # TODO:
-# - https://nicegui.io/documentation#color_theming instead of curr approach
+# - make routine "delete" and "add" delete and add
+# - build out RoutineItemsConfigurer
 # - use icon constants
+# - connect everything to the database
 
 
-class ScheduleSetter(ui.row):
+class SidebarExpansion(ui.expansion):
+    def __init__(
+        self,
+        title: str,
+        icon: Optional[Union[str, Callable]] = None,
+        icon_kwargs: Optional[dict] = None,
+    ):
+        with ui.element("q-list").props("bordered").classes(
+            "rounded-borders w-full"
+        ):
+            super().__init__("")
+            self.classes("w-full")
+
+            with self.add_slot("header"):
+                with ui.row().classes("justify-start items-center w-full"):
+                    if isinstance(icon, str):
+                        ui.icon(icon).props("size=sm")
+                    else:
+                        icon(**icon_kwargs)
+                    self.label = ui.label(title).classes("text-left")
+
+            with self:
+                ui.separator()
+
+
+class SidebarRow(ui.row):
+    def __init__(self):
+        super().__init__()
+        self.classes("justify-between items-center w-full px-4 pb-4")
+
+
+class ScheduleSetter(SidebarRow):
     def __init__(self, schedule: Schedule, parent_element: ui.element):
         self.schedule = schedule
         self.parent_element = parent_element
 
         super().__init__()
-        self.classes("justify-between items-center")
 
         with self:
             # time input
@@ -41,8 +83,8 @@ class ScheduleSetter(ui.row):
             switch.on("change", lambda: self.on_toggle(switch.value))
 
             # delete button
-            self.delete_button = ui.button().props("icon=cancel")
-            self.delete_button.style(BUTTON_STYLE)
+            self.delete_button = ui.button()
+            self.delete_button.props("icon=cancel color=negative")
             self.delete_button.on("click", self.on_delete)
 
     def on_toggle(self, value: bool):
@@ -56,31 +98,37 @@ class ScheduleSetter(ui.row):
     def on_delete(self):
         logger.debug(f"Deleting schedule {self.schedule.id}")
         self.parent_element.remove(self)
+        self.parent_element.update()
         del self
 
 
-class SchedulesConfigurer(ui.expansion):
+class SchedulesConfigurer(SidebarExpansion):
     def __init__(self, routine: Routine):
         self.routine = routine
 
         super().__init__("Schedules", icon="schedule")
-        self.classes("justify-between items-center")
 
         with self:
-            for schedule in self.routine.schedules:
-                ScheduleSetter(schedule, parent_element=self)
+            self.schedules_frame = ui.element("div")
+            with self.schedules_frame:
+                for schedule in self.routine.schedules:
+                    ScheduleSetter(
+                        schedule=schedule, parent_element=self.schedules_frame
+                    )
 
-            self.add_schedule_button = ui.button("Add Schedule")
-            self.add_schedule_button.on("click", self.on_add_schedule)
+            with SidebarRow():
+                self.add_schedule_button = ui.button().props("icon=add")
+                self.add_schedule_button.classes("w-full")
+                self.add_schedule_button.on("click", self.on_add_schedule)
 
     def on_add_schedule(self):
         schedule = Schedule()
         self.routine.schedules.append(schedule)
-        with self:
-            ScheduleSetter(schedule, parent_element=self)
+        with self.schedules_frame:
+            ScheduleSetter(schedule, parent_element=self.schedules_frame)
 
 
-class RoutineItemsConfigurer(ui.expansion):
+class RoutineItemsConfigurer(SidebarExpansion):
     def __init__(self, routine: Routine):
         self.routine = routine
 
@@ -91,12 +139,12 @@ class RoutineItemsConfigurer(ui.expansion):
             pass
 
 
-class TitleSetter(ui.row):
+class TitleSetter(SidebarRow):
     def __init__(self, routine: Routine):
         self.routine = routine
 
         super().__init__()
-        self.classes("justify-between items-center")
+        self.classes("px-4")
 
         with self:
             self.input = ui.input(
@@ -104,14 +152,18 @@ class TitleSetter(ui.row):
                 value=self.routine.title,
             )
             self.button = ui.button().props("icon=save")
-            self.button.style(BUTTON_STYLE)
 
 
-class RoutineConfigurer(ui.expansion):
+class RoutineConfigurer(SidebarExpansion):
     def __init__(self, routine: Routine):
         self.routine = routine
 
-        super().__init__(routine.title, icon="settings")
+        svg_kwargs = {
+            "fpath": ROUTINE_SVG_FPATH,
+            "size": ROUTINES_SVG_SIZE,
+            "color": "black",
+        }
+        super().__init__(routine.title, icon=SVG, icon_kwargs=svg_kwargs)
 
         with self:
             # title setter
@@ -120,11 +172,20 @@ class RoutineConfigurer(ui.expansion):
                 "click", lambda: self.on_title_update(title_setter.input.value)
             )
             # schedules configurer
-            SchedulesConfigurer(self.routine)
+            with SidebarRow():
+                SchedulesConfigurer(self.routine)
+
+            # buttons
+            with SidebarRow():
+                # start routine
+                self.start_button = ui.button().classes("w-3/4")
+                self.start_button.props("icon=play_arrow color=positive")
+                # delete routine
+                self.delete_button = ui.button().classes("w-1/5")
+                self.delete_button.props("icon=cancel color=negative")
 
     def on_title_update(self, new_title):
-        self._props["label"] = new_title
-        self.update()
+        self.label.set_text(new_title)
 
 
 class RoutinesSidebar(ui.left_drawer):
@@ -133,8 +194,9 @@ class RoutinesSidebar(ui.left_drawer):
 
         super().__init__()
         self.classes("space-y-4 text-center")
-        self.props(f"breakpoint={DRAWER_BREAKPOINT} width={DRAWER_WIDTH}")
-        self.style(f"background-color: {clrs.beige}")
+        self.props(
+            f"breakpoint={DRAWER_BREAKPOINT} width={DRAWER_WIDTH} bordered"
+        )
 
         with self:
             self.routines_frame = ui.element("div")
@@ -142,12 +204,11 @@ class RoutinesSidebar(ui.left_drawer):
                 for routine in self.user.routines:
                     RoutineConfigurer(routine)
 
-            ui.separator()
+            ui.separator().classes("space-y-4")
+
             # add routine button
-            add_routine_button = ui.button("Add Routine")
+            add_routine_button = ui.button().classes("w-1/2").props("icon=add")
             add_routine_button.on("click", self.add_routine)
-            style = BUTTON_STYLE
-            add_routine_button.style(style)
 
     def add_routine(self):
         with self.routines_frame:
