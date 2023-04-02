@@ -7,17 +7,15 @@ from routine_butler.database.models import (
     User,
     Routine,
     Program,
-    Schedule,
+    Alarm,
     RoutineItem,
 )
 
 
 TEST_PROGRAM = Program()
 TEST_ROUTINE_ITEM = RoutineItem(program=TEST_PROGRAM)
-TEST_SCHEDULE = Schedule()
-TEST_ROUTINE = Routine(
-    schedules=[TEST_SCHEDULE], routine_items=[TEST_ROUTINE_ITEM]
-)
+TEST_ALARM = Alarm()
+TEST_ROUTINE = Routine(alarms=[TEST_ALARM], routine_items=[TEST_ROUTINE_ITEM])
 TEST_USER = User(routines=[TEST_ROUTINE])
 
 

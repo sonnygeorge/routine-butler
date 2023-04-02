@@ -79,7 +79,7 @@ erDiagram
         routine_id int FK
     }
 
-    schedule {
+    alarm {
         id int PK
         hour int
         minute int
@@ -152,7 +152,7 @@ erDiagram
     user ||--o{ routine_run : has
     user ||--o{ program_run : has
 
-    routine ||--o{ schedule : has
+    routine ||--o{ alarm : has
     routine ||--o{ routine_item : has
 
     prompt_wait_continue_program |o--|| program : "is the plugin-specific data for a"
@@ -174,13 +174,13 @@ erDiagram
 
 👨‍💻 Bob creates a routine and titles it 🌆 `"Evening Routine"`.
 
-👨‍💻 Bob adds a schedule to the routine that triggers the routine `annoy()` method at 9:00 PM ⏰ and sets the 🔊 `annoy_volume` to .5 and the `annoy_interval_seconds` ⏱️ to 300 seconds.
+👨‍💻 Bob adds a alarm to the routine that triggers the routine `annoy()` method at 9:00 PM ⏰ and sets the 🔊 `annoy_volume` to .5 and the `annoy_interval_seconds` ⏱️ to 300 seconds.
 
 ...
 
 👨‍💻 Bob creates another routine and titles it 🌅 `"Morning Routine"`.
 
-👨‍💻 Bob adds a schedule to this routine at 7:30 AM. ⏰
+👨‍💻 Bob adds a alarm to this routine at 7:30 AM. ⏰
 
 👨‍💻 Since he will use this `annoy()` as his morning alarm ⏰, he sets the `annoy_volume` 🔊 to .9 and the `annoy_interval_seconds` ⏱️ to .5 seconds.
 

@@ -59,7 +59,7 @@ class Routine(SQLModel, table=True):
     target_duration_enabled: bool = Field(default=False)
 
     # Children
-    schedules: List["Schedule"] = Relationship(
+    alarms: List["Alarm"] = Relationship(
         back_populates="routine",
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
@@ -81,10 +81,12 @@ class PriorityLevel(str, Enum):
     MEDIUM = "medium"
     HIGH = "high"
 
+
 class SoundInterval(str, Enum):
     "Enum for a Alarm's sound interval"
     CONSTANT = "constant"
     PERIODIC = "periodic"
+
 
 class RoutineItem(SQLModel, table=True):
     """SQLModel for "RoutineItem" objects"""
@@ -109,8 +111,8 @@ class RoutineItem(SQLModel, table=True):
     )
 
 
-class Schedule(SQLModel, table=True):
-    """SQLModel for "Schedule" objects"""
+class Alarm(SQLModel, table=True):
+    """SQLModel for "Alarm" objects"""
 
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
     hour: int = Field(default=0)
@@ -122,7 +124,7 @@ class Schedule(SQLModel, table=True):
     # Parent
     routine_id: Optional[int] = Field(default=None, foreign_key="routine.id")
     routine: Optional[Routine] = Relationship(
-        back_populates="schedules",
+        back_populates="alarms",
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
     )
 

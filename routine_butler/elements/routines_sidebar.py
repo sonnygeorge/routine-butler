@@ -8,7 +8,7 @@ from routine_butler.database.models import (
     Program,
     Routine,
     RoutineItem,
-    Schedule,
+    Alarm,
     SoundInterval,
     User,
 )
@@ -61,9 +61,9 @@ class SidebarExpansion(ui.expansion):
                 ui.separator()
 
 
-class ScheduleSetter(ui.row):
-    def __init__(self, schedule: Schedule, parent_element: ui.element):
-        self.schedule = schedule
+class AlarmSetter(ui.row):
+    def __init__(self, alarm: Alarm, parent_element: ui.element):
+        self.alarm = alarm
         self.parent_element = parent_element
 
         super().__init__()
@@ -86,7 +86,7 @@ class ScheduleSetter(ui.row):
                         )
 
             # volume knob
-            vol_knob = ui.knob(self.schedule.volume, track_color="grey-2")
+            vol_knob = ui.knob(self.alarm.volume, track_color="grey-2")
             vol_knob.props("size=lg thickness=0.3")
             with vol_knob:
                 ui.icon("volume_up").props("size=xs")
@@ -97,7 +97,7 @@ class ScheduleSetter(ui.row):
             # sound interval select
             sound_interval_select = ui.select(
                 [e.value for e in SoundInterval],
-                value=self.schedule.sound_interval,
+                value=self.alarm.sound_interval,
             ).props(DFLT_INPUT_PROPS, remove="label")
             sound_interval_select.classes("w-1/4").style("width: 120px;")
             sound_interval_select.on(
@@ -117,63 +117,61 @@ class ScheduleSetter(ui.row):
             self.delete_button.on("click", self.on_delete)
 
     def on_time_change(self, new_time):
-        self.schedule.set_time(new_time)
-        logger.debug(f"Schedule {self.schedule.id} time changed to {new_time}")
+        self.alarm.set_time(new_time)
+        logger.debug(f"Alarm {self.alarm.id} time changed to {new_time}")
 
     def on_change_volume(self, new_volume):
-        self.schedule.volume = new_volume
+        self.alarm.volume = new_volume
         logger.debug(
-            f"Schedule {self.schedule.id} volume changed to " f"{new_volume}"
+            f"Alarm {self.alarm.id} volume changed to " f"{new_volume}"
         )
 
     def on_select_sound_interval(self, new_interval):
-        self.schedule.sound_interval = new_interval
+        self.alarm.sound_interval = new_interval
         logger.debug(
-            f"Schedule {self.schedule.id} sound interval changed to {new_interval}"
+            f"Alarm {self.alarm.id} sound interval changed to {new_interval}"
         )
 
     def on_toggle(self, value: bool):
-        self.schedule.enabled = value
-        logger.debug(f"Schedule {self.schedule.id} enabled changed to {value}")
+        self.alarm.enabled = value
+        logger.debug(f"Alarm {self.alarm.id} enabled changed to {value}")
 
     def on_delete(self):
-        logger.debug(f"Deleting schedule {self.schedule.id}")
+        logger.debug(f"Deleting alarm {self.alarm.id}")
         self.parent_element.remove(self)
         self.parent_element.update()
         del self
 
 
-class SchedulesConfigurer(SidebarExpansion):
+class AlarmsConfigurer(SidebarExpansion):
     def __init__(self, routine: Routine):
         self.routine = routine
 
-        super().__init__("Schedules", icon="schedule")
+        super().__init__("Alarms", icon="alarm")
 
         with self:
-            self.schedules_frame = ui.element("div")
-            with self.schedules_frame:
-                for schedule in self.routine.schedules:
-                    ScheduleSetter(
-                        schedule=schedule, parent_element=self.schedules_frame
-                    )
-            # add schedule button
+            self.alarms_frame = ui.element("div")
+            with self.alarms_frame:
+                for alarm in self.routine.alarms:
+                    AlarmSetter(alarm=alarm, parent_element=self.alarms_frame)
+            # add alarm button
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
-                self.add_schedule_button = ui.button().props("icon=add")
-                self.add_schedule_button.classes("w-full")
-                self.add_schedule_button.on("click", self.on_add_schedule)
+                self.add_alarm_button = ui.button().props("icon=add")
+                self.add_alarm_button.classes("w-full")
+                self.add_alarm_button.on("click", self.on_add_alarm)
 
-    def on_add_schedule(self):
-        schedule = Schedule()
-        self.routine.schedules.append(schedule)
-        with self.schedules_frame:
-            ScheduleSetter(schedule, parent_element=self.schedules_frame)
+    def on_add_alarm(self):
+        alarm = Alarm()
+        self.routine.alarms.append(alarm)
+        with self.alarms_frame:
+            AlarmSetter(alarm, parent_element=self.alarms_frame)
 
 
 class RoutineItemsConfigurer(SidebarExpansion):
     def __init__(self, routine: Routine):
         self.routine = routine
 
-        super().__init__("Schedules", icon="schedule")
+        super().__init__("Alarms", icon="alarm")
         self.classes("justify-between items-center")
 
         with self:
@@ -191,6 +189,7 @@ class RoutineConfigurer(SidebarExpansion):
             "color": "black",
         }
         super().__init__(routine.title, icon=SVG, icon_kwargs=svg_kwargs)
+        self.frame.classes(f"mt-{V_SPACE}")
 
         with self:
             # top row for setting title
@@ -208,9 +207,9 @@ class RoutineConfigurer(SidebarExpansion):
                     lambda: self.on_title_update(self.title_input.value),
                 )
 
-            # schedules configurer
+            # alarms configurer
             with ui.row().classes(DFLT_ROW_CLASSES):
-                SchedulesConfigurer(self.routine)
+                AlarmsConfigurer(self.routine)
 
             # row for target duration input
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
@@ -273,7 +272,7 @@ class RoutinesSidebar(ui.left_drawer):
         self.user = user
 
         super().__init__()
-        self.classes("space-y-4 text-center")
+        self.classes(f"space-y-{V_SPACE} text-center py-0")
         self.props(
             f"breakpoint={DRAWER_BREAKPOINT} width={DRAWER_WIDTH} bordered"
         )
@@ -284,7 +283,7 @@ class RoutinesSidebar(ui.left_drawer):
                 for routine in self.user.routines:
                     RoutineConfigurer(routine, self.routines_frame)
 
-            ui.separator().classes("space-y-4")
+            ui.separator()
 
             # add routine button
             add_routine_button = ui.button().classes("w-1/2").props("icon=add")

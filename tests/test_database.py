@@ -6,7 +6,7 @@ And old file I had for testing aspects of my db handler
 # from sqlmodel import SQLModel
 
 # from database import database
-# from models import Routine, RoutineElement, Schedule, User
+# from models import Routine, RoutineElement, Alarm, User
 
 # # TODO: mock a test database for tests
 
@@ -17,7 +17,7 @@ And old file I had for testing aspects of my db handler
 
 
 # class TestDatabase:
-#     @pytest.mark.parametrize("data_model", [User(), Routine(), Schedule()])
+#     @pytest.mark.parametrize("data_model", [User(), Routine(), Alarm()])
 #     def test_gets_nothing_after_delete(self, data_model):
 #         # add data model to db
 #         database.commit(data_model)
@@ -27,9 +27,9 @@ And old file I had for testing aspects of my db handler
 #         assert database.get(data_model.__class__, data_model.id) is None
 
 #     def test_delete_deletes_children_too(self):
-#         # user with one routine with one schedule
-#         schedule = Schedule()
-#         routine = Routine(schedules=[schedule])
+#         # user with one routine with one alarm
+#         alarm = Alarm()
+#         routine = Routine(alarms=[alarm])
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
@@ -39,21 +39,21 @@ And old file I had for testing aspects of my db handler
 #         assert database.get(User, user.id) is None
 #         # check that routine is no longer in db
 #         assert database.get(Routine, routine.id) is None
-#         # check that schedule is no longer in db
-#         assert database.get(Schedule, schedule.id) is None
+#         # check that alarm is no longer in db
+#         assert database.get(Alarm, alarm.id) is None
 
 #     def test_parent_relationship_accessible_from_child_in_new_context(self):
-#         # user with one routine with one schedule and one program
-#         schedule = Schedule()
+#         # user with one routine with one alarm and one program
+#         alarm = Alarm()
 #         routine_program = RoutineElement()
-#         routine = Routine(schedules=[schedule], programs=[routine_program])
+#         routine = Routine(alarms=[alarm], programs=[routine_program])
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
 #         # check that user is accessible from routine
 #         assert isinstance(get_parent_new_context(routine, "user"), User)
-#         # check that routine is accessible from schedule
-#         assert isinstance(get_parent_new_context(schedule, "routine"), Routine)
+#         # check that routine is accessible from alarm
+#         assert isinstance(get_parent_new_context(alarm, "routine"), Routine)
 #         # check that routine is accessible from program
 #         assert isinstance(
 #             get_parent_new_context(routine_program, "routine"), Routine
@@ -62,24 +62,24 @@ And old file I had for testing aspects of my db handler
 #         database.delete(user)
 
 #     def test_delete_does_not_delete_parents(self):
-#         # user with one routine with one schedule
-#         schedule = Schedule()
-#         routine = Routine(schedules=[schedule])
+#         # user with one routine with one alarm
+#         alarm = Alarm()
+#         routine = Routine(alarms=[alarm])
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
-#         # delete schedule
-#         database.delete(schedule)
+#         # delete alarm
+#         database.delete(alarm)
 #         # check that user is still in db
 #         assert database.get(User, user.id) is not None
 #         # check that routine is still in db
 #         assert database.get(Routine, routine.id) is not None
-#         # check that schedule is no longer in db
-#         assert database.get(Schedule, schedule.id) is None
+#         # check that alarm is no longer in db
+#         assert database.get(Alarm, alarm.id) is None
 #         # clean up leftover user and routine from db
 #         database.delete(user)
 
-#     @pytest.mark.parametrize("data_model", [User(), Routine(), Schedule()])
+#     @pytest.mark.parametrize("data_model", [User(), Routine(), Alarm()])
 #     def test_model_has_id_after_add(self, data_model):
 #         # add data model to db
 #         database.commit(data_model)
@@ -89,19 +89,19 @@ And old file I had for testing aspects of my db handler
 #         database.delete(data_model)
 
 #     def test_children_have_id_after_add(self):
-#         # user with one routine with one schedule
-#         schedule = Schedule()
-#         routine = Routine(schedules=[schedule])
+#         # user with one routine with one alarm
+#         alarm = Alarm()
+#         routine = Routine(alarms=[alarm])
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
-#         # check that routine and schedule have ids
+#         # check that routine and alarm have ids
 #         assert routine.id is not None
-#         assert schedule.id is not None
+#         assert alarm.id is not None
 #         # delete user
 #         database.delete(user)
 
-#     @pytest.mark.parametrize("data_model", [User(), Routine(), Schedule()])
+#     @pytest.mark.parametrize("data_model", [User(), Routine(), Alarm()])
 #     def test_get_returns_same_model_after_add(self, data_model):
 #         # add data model to db
 #         database.commit(data_model)
@@ -111,16 +111,16 @@ And old file I had for testing aspects of my db handler
 #         database.delete(data_model)
 
 #     def test_get_returns_same_children_after_add(self):
-#         # user with one routine with one schedule
-#         schedule = Schedule()
-#         routine = Routine(schedules=[schedule])
+#         # user with one routine with one alarm
+#         alarm = Alarm()
+#         routine = Routine(alarms=[alarm])
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
 #         # check that database.get() returns the same routine
 #         assert database.get(Routine, routine.id) == routine
-#         # check that database.get() returns the same schedule
-#         assert database.get(Schedule, schedule.id) == schedule
+#         # check that database.get() returns the same alarm
+#         assert database.get(Alarm, alarm.id) == alarm
 #         # delete user
 #         database.delete(user)
 
@@ -138,25 +138,25 @@ And old file I had for testing aspects of my db handler
 #         database.delete(routine)
 
 #     def test_get_returns_updated_children_after_commit(self):
-#         # user with one routine with one schedule
-#         schedule = Schedule(hour=0, minute=0)
-#         routine = Routine(title="Old Title", schedules=[schedule])
+#         # user with one routine with one alarm
+#         alarm = Alarm(hour=0, minute=0)
+#         routine = Routine(title="Old Title", alarms=[alarm])
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
 #         # change routine title
 #         new_title = "New Title"
 #         routine.title = new_title
-#         # change schedule hour and minute
-#         schedule.hour = 5
-#         schedule.minute = 25
+#         # change alarm hour and minute
+#         alarm.hour = 5
+#         alarm.minute = 25
 #         # commit parent user
 #         database.commit(user)
 #         # check if routine comes back with new title
 #         assert database.get(Routine, routine.id).title == new_title
-#         # check if schedule comes back with new hour and minute
-#         assert database.get(Schedule, schedule.id).hour == 5
-#         assert database.get(Schedule, schedule.id).minute == 25
+#         # check if alarm comes back with new hour and minute
+#         assert database.get(Alarm, alarm.id).hour == 5
+#         assert database.get(Alarm, alarm.id).minute == 25
 #         # delete user
 #         database.delete(user)
 
@@ -177,29 +177,29 @@ And old file I had for testing aspects of my db handler
 #         assert num_rows_before == num_rows_after
 
 #     def test_commit_does_not_create_new_row_after_child_change(self):
-#         num_schedules_before = database.num_rows_in_table(Schedule)
+#         num_alarms_before = database.num_rows_in_table(Alarm)
 #         num_routines_before = database.num_rows_in_table(Routine)
-#         # user with one routine with one schedule
-#         schedule = Schedule(hour=0, minute=0)
-#         routine = Routine(title="Old Title", schedules=[schedule])
+#         # user with one routine with one alarm
+#         alarm = Alarm(hour=0, minute=0)
+#         routine = Routine(title="Old Title", alarms=[alarm])
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
 #         # change routine title
 #         new_title = "New Title"
 #         routine.title = new_title
-#         # change schedule hour and minute
-#         schedule.hour = 5
-#         schedule.minute = 25
+#         # change alarm hour and minute
+#         alarm.hour = 5
+#         alarm.minute = 25
 #         # commit parent user
 #         database.commit(user)
 #         # delete user
 #         database.delete(user)
 
-#         num_schedules_after = database.num_rows_in_table(Schedule)
+#         num_alarms_after = database.num_rows_in_table(Alarm)
 #         num_routines_after = database.num_rows_in_table(Routine)
 #         # if num rows is different, then a new row was created
-#         assert num_schedules_before == num_schedules_after
+#         assert num_alarms_before == num_alarms_after
 #         assert num_routines_before == num_routines_after
 
 #     def test_child_appended_to_children_list_has_id_after_parent_commit(self):
@@ -208,13 +208,13 @@ And old file I had for testing aspects of my db handler
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
-#         # add schedule to routine
-#         schedule = Schedule()
-#         routine.schedules.append(schedule)
+#         # add alarm to routine
+#         alarm = Alarm()
+#         routine.alarms.append(alarm)
 #         # commit user
 #         database.commit(user)
-#         # check that schedule has an id
-#         assert schedule.id is not None
+#         # check that alarm has an id
+#         assert alarm.id is not None
 #         # delete user
 #         database.delete(user)
 
@@ -226,38 +226,38 @@ And old file I had for testing aspects of my db handler
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
-#         # add schedule to routine
-#         schedule = Schedule()
-#         routine.schedules.append(schedule)
+#         # add alarm to routine
+#         alarm = Alarm()
+#         routine.alarms.append(alarm)
 #         # commit user
 #         database.commit(user)
-#         # check that schedule comes back the same
-#         assert database.get(Schedule, schedule.id) == schedule
+#         # check that alarm comes back the same
+#         assert database.get(Alarm, alarm.id) == alarm
 #         # delete user
 #         database.delete(user)
 
 #     def test_removed_child_is_removed_after_parent_commit(self):
-#         # user with one routine with one schedule
-#         schedule = Schedule()
-#         routine = Routine(schedules=[schedule])
+#         # user with one routine with one alarm
+#         alarm = Alarm()
+#         routine = Routine(alarms=[alarm])
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)
-#         # store schedule id for later retrieval
-#         schedule_id = schedule.id
-#         # remove schedule from routine
-#         routine.schedules.remove(schedule)
+#         # store alarm id for later retrieval
+#         alarm_id = alarm.id
+#         # remove alarm from routine
+#         routine.alarms.remove(alarm)
 #         # commit user
 #         database.commit(user)
-#         # retrieve supposedly orphaned schedule
-#         orphaned_schedule = database.get(Schedule, schedule_id)
-#         # check that schedule has no foreign key
-#         assert orphaned_schedule is None
+#         # retrieve supposedly orphaned alarm
+#         orphaned_alarm = database.get(Alarm, alarm_id)
+#         # check that alarm has no foreign key
+#         assert orphaned_alarm is None
 
 #     def test_update_parent_after_append_child_adds_child(self):
-#         # user with one routine with one schedule
-#         schedule = Schedule()
-#         routine = Routine(schedules=[schedule])
+#         # user with one routine with one alarm
+#         alarm = Alarm()
+#         routine = Routine(alarms=[alarm])
 #         user = User(routines=[routine])
 #         # add user to db
 #         database.commit(user)

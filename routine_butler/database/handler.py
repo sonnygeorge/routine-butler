@@ -35,7 +35,7 @@ A CRUD-style handler for the database.
 # from sqlalchemy.orm import joinedload, scoped_session, sessionmaker
 # from sqlmodel import SQLModel, create_engine
 
-# from models import Routine, RoutineProgram, Schedule, User
+# from models import Routine, RoutineProgram, Alarm, User
 
 # # Suppress this warning from deleting a parent after deleting a child
 # warnings.filterwarnings(
@@ -49,7 +49,7 @@ A CRUD-style handler for the database.
 #     routines=[
 #         Routine(
 #             id=1,
-#             schedules=[Schedule(id=1)],
+#             alarms=[Alarm(id=1)],
 #             routine_programs=[RoutineElement(id=1)],
 #         )
 #     ],
