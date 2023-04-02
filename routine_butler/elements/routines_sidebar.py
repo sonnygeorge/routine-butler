@@ -1,20 +1,19 @@
 import os
-from typing import Optional, Callable, Union
+from typing import Callable, Optional, Union
 
-from nicegui import ui
 from loguru import logger
+from nicegui import ui
 
-from utils.constants import clrs, icons
-from database.models import (
-    User,
-    Routine,
+from routine_butler.database.models import (
     Program,
-    Schedule,
+    Routine,
     RoutineItem,
+    Schedule,
     SoundInterval,
+    User,
 )
-
-from elements.svg import SVG
+from routine_butler.elements.svg import SVG
+from routine_butler.utils.constants import clrs, icons
 
 DRAWER_WIDTH = "490"
 DRAWER_BREAKPOINT = "0"

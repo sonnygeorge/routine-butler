@@ -1,6 +1,6 @@
 from nicegui import ui
 
-from database.models import User
+from routine_butler.database.models import User
 
 DRAWER_WIDTH = "300"
 DRAWER_BREAKPOINT = "0"

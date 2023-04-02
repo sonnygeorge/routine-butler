@@ -3,8 +3,8 @@ from datetime import datetime
 
 from nicegui import ui
 
-from elements.svg import SVG
-from utils.constants import clrs
+from routine_butler.elements.svg import SVG
+from routine_butler.utils.constants import clrs
 
 BUTTON_STYLE = "height: 45px; width: 45px;"
 APP_NAME = "RoutineButler"

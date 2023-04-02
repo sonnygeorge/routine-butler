@@ -1,9 +1,15 @@
 from nicegui import ui
 
-from elements.header import Header
-from elements.routines_sidebar import RoutinesSidebar
-from elements.programs_sidebar import ProgramsSidebar
-from database.models import User, Routine, Program, Schedule, RoutineItem
+from routine_butler.elements.header import Header
+from routine_butler.elements.routines_sidebar import RoutinesSidebar
+from routine_butler.elements.programs_sidebar import ProgramsSidebar
+from routine_butler.database.models import (
+    User,
+    Routine,
+    Program,
+    Schedule,
+    RoutineItem,
+)
 
 
 TEST_PROGRAM = Program()
@@ -13,6 +19,7 @@ TEST_ROUTINE = Routine(
     schedules=[TEST_SCHEDULE], routine_items=[TEST_ROUTINE_ITEM]
 )
 TEST_USER = User(routines=[TEST_ROUTINE])
+
 
 class clrs:
     primary = "#2e5cb8"  # buttons
@@ -49,7 +56,3 @@ def main():
     set_colors()
     build_ui()
     ui.run()
-
-
-if __name__ in {"__main__", "__mp_main__"}:
-    main()
