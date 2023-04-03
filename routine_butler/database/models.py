@@ -55,7 +55,7 @@ class Routine(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
     title: Optional[str] = Field(default="New Routine")
-    target_duration: Optional[int] = Field(default=0)
+    target_duration: Optional[int] = Field(default=10)
     target_duration_enabled: bool = Field(default=False)
 
     # Children

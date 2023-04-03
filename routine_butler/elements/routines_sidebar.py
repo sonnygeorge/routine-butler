@@ -161,6 +161,7 @@ class AlarmsConfigurer(SidebarExpansion):
                 self.add_alarm_button.on("click", self.on_add_alarm)
 
     def on_add_alarm(self):
+        logger.debug("Adding alarm")
         alarm = Alarm()
         self.routine.alarms.append(alarm)
         with self.alarms_frame:
@@ -212,9 +213,9 @@ class RoutineConfigurer(SidebarExpansion):
                 AlarmsConfigurer(self.routine)
 
             # row for target duration input
-            with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
-                ui.label("Target duration:")
-                # target minutes slider
+            with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE} no-wrap"):
+                ui.label("Target Duration:").style("width: 120px;")
+                # target duration slider
                 target_duration_slider = ui.slider(
                     min=0, max=120, value=self.routine.target_duration
                 ).classes("w-1/3")
@@ -225,18 +226,21 @@ class RoutineConfigurer(SidebarExpansion):
                     ),
                 )
                 # target duration label
-                target_duration_label = ui.label()
+                target_duration_label = ui.label().style("width: 35px;")
                 target_duration_label.bind_text_from(
                     target_duration_slider, "value"
                 )
                 target_duration_label.set_text(
                     str(self.routine.target_duration)
                 )
-                ui.label("minutes")
-                # target duration enabled switch
-                target_duration_switch = ui.switch().props("dense")
-                target_duration_switch.on(
-                    "change", lambda: logger.debug("switch")
+                ui.label("minutes").style("width: 52px;").classes("text-left")
+                # target duration enabled toggle
+                target_duration_toggle = ui.switch().props("dense")
+                target_duration_toggle.on(
+                    "click",
+                    lambda: self.on_toggle_target_duration(
+                        target_duration_toggle.value
+                    ),
                 )
 
             ui.separator()
@@ -252,12 +256,21 @@ class RoutineConfigurer(SidebarExpansion):
                 self.delete_button.on("click", self.on_delete)
 
     def on_title_update(self, new_title):
+        logger.debug(
+            f'Updating title of routine {self.routine.id} to "{new_title}"'
+        )
         self.header_label.set_text(new_title)
 
     def on_target_duration_change(self, new_duration):
         self.routine.target_duration = new_duration
         logger.debug(
             f"Target duration of routine {self.routine.id} changed to {new_duration}"
+        )
+
+    def on_toggle_target_duration(self, value: bool):
+        self.routine.target_duration_enabled = value
+        logger.debug(
+            f"Target duration enabled of routine {self.routine.id} changed to {value}"
         )
 
     def on_delete(self):
