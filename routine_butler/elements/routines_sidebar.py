@@ -12,8 +12,9 @@ from routine_butler.database.models import (
     SoundInterval,
     User,
 )
+from routine_butler.database.repository import Repository
 from routine_butler.elements.svg import SVG
-from routine_butler.utils.constants import clrs, icons
+from routine_butler.utils.constants import clrs, icons  # TODO: use
 
 DRAWER_WIDTH = "490"
 DRAWER_BREAKPOINT = "0"
@@ -116,27 +117,27 @@ class AlarmSetter(ui.row):
             self.delete_button.props("icon=cancel color=negative")
             self.delete_button.on("click", self.on_delete)
 
-    def on_time_change(self, new_time):
+    def on_time_change(self, new_time):  # TODO: DB update
         self.alarm.set_time(new_time)
         logger.debug(f"Alarm {self.alarm.id} time changed to {new_time}")
 
-    def on_change_volume(self, new_volume):
+    def on_change_volume(self, new_volume):  # TODO: DB update
         self.alarm.volume = new_volume
         logger.debug(
             f"Alarm {self.alarm.id} volume changed to " f"{new_volume}"
         )
 
-    def on_select_sound_interval(self, new_interval):
+    def on_select_sound_interval(self, new_interval):  # TODO: DB update
         self.alarm.sound_interval = new_interval
         logger.debug(
             f"Alarm {self.alarm.id} sound interval changed to {new_interval}"
         )
 
-    def on_toggle(self, value: bool):
+    def on_toggle(self, value: bool):  # TODO: DB update
         self.alarm.enabled = value
         logger.debug(f"Alarm {self.alarm.id} enabled changed to {value}")
 
-    def on_delete(self):
+    def on_delete(self):  # TODO: DB update
         logger.debug(f"Deleting alarm {self.alarm.id}")
         self.parent_element.remove(self)
         self.parent_element.update()
@@ -160,7 +161,7 @@ class AlarmsConfigurer(SidebarExpansion):
                 self.add_alarm_button.classes("w-full")
                 self.add_alarm_button.on("click", self.on_add_alarm)
 
-    def on_add_alarm(self):
+    def on_add_alarm(self):  # TODO: DB update
         logger.debug("Adding alarm")
         alarm = Alarm()
         self.routine.alarms.append(alarm)
@@ -255,25 +256,25 @@ class RoutineConfigurer(SidebarExpansion):
                 self.delete_button.props("icon=cancel color=negative")
                 self.delete_button.on("click", self.on_delete)
 
-    def on_title_update(self, new_title):
+    def on_title_update(self, new_title):  # TODO: DB update
         logger.debug(
             f'Updating title of routine {self.routine.id} to "{new_title}"'
         )
         self.header_label.set_text(new_title)
 
-    def on_target_duration_change(self, new_duration):
+    def on_target_duration_change(self, new_duration):  # TODO: DB update
         self.routine.target_duration = new_duration
         logger.debug(
             f"Target duration of routine {self.routine.id} changed to {new_duration}"
         )
 
-    def on_toggle_target_duration(self, value: bool):
+    def on_toggle_target_duration(self, value: bool):  # TODO: DB update
         self.routine.target_duration_enabled = value
         logger.debug(
             f"Target duration enabled of routine {self.routine.id} changed to {value}"
         )
 
-    def on_delete(self):
+    def on_delete(self):  # TODO: DB update
         logger.debug(f"Deleting routine {self.routine.id}")
         self.parent_element.remove(self.frame)
         self.parent_element.update()
@@ -281,8 +282,9 @@ class RoutineConfigurer(SidebarExpansion):
 
 
 class RoutinesSidebar(ui.left_drawer):
-    def __init__(self, user: User):
+    def __init__(self, user: User, repository: Repository):
         self.user = user
+        self.repository = repository
 
         super().__init__()
         self.classes(f"space-y-{V_SPACE} text-center py-0")
@@ -302,7 +304,8 @@ class RoutinesSidebar(ui.left_drawer):
             add_routine_button = ui.button().classes("w-1/2").props("icon=add")
             add_routine_button.on("click", self.add_routine)
 
-    def add_routine(self):
+    def add_routine(self):  # TODO: DB update
+        logger.debug("Adding routine")
         routine = Routine()
         self.user.routines.append(routine)
         with self.routines_frame:

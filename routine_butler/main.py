@@ -1,32 +1,14 @@
-from nicegui import ui
+from functools import partial
+
+from nicegui import ui, app
+from sqlmodel import SQLModel
 
 from routine_butler.elements.header import Header
 from routine_butler.elements.routines_sidebar import RoutinesSidebar
 from routine_butler.elements.programs_sidebar import ProgramsSidebar
-from routine_butler.database.models import (
-    User,
-    Routine,
-    Program,
-    Alarm,
-    RoutineItem,
-)
-
-
-TEST_PROGRAM = Program()
-TEST_ROUTINE_ITEM = RoutineItem(program=TEST_PROGRAM)
-TEST_ALARM = Alarm()
-TEST_ROUTINE = Routine(alarms=[TEST_ALARM], routine_items=[TEST_ROUTINE_ITEM])
-TEST_USER = User(routines=[TEST_ROUTINE])
-
-
-class clrs:
-    primary = "#2e5cb8"  # buttons
-    secondary = "#5c85d6"  # header
-    accent = "#2399cf"
-    positive = "#23cf59"
-    negative = "#cf2342"
-    info = "#85d2ed"
-    warning = "#d6dd54"
+from routine_butler.database.models import User
+from routine_butler.database.repository import Repository
+from routine_butler.utils.constants import clrs
 
 
 def set_colors():
@@ -41,16 +23,58 @@ def set_colors():
     )
 
 
-def build_ui():
+def main_page(user: User, repository: Repository):
+    assert user is not None
+
+    set_colors()
+
     header = Header()
-    routines_sidebar = RoutinesSidebar(user=TEST_USER)
-    programs_sidebar = ProgramsSidebar(user=TEST_USER)
+    routines_sidebar = RoutinesSidebar(user=user, repository=repository)
+    programs_sidebar = ProgramsSidebar(user=user, repository=repository)
 
     header.routines_button.on("click", routines_sidebar.toggle)
     header.programs_button.on("click", programs_sidebar.toggle)
 
 
-def main():
-    set_colors()
-    build_ui()
-    ui.run()
+class RoutineButler:
+    def __init__(self, repository: Repository):
+        self.repository = repository
+        self.user = None
+
+        set_colors()
+
+        with ui.card():
+            ui.label("Login")
+            ui.separator()
+            username_input = ui.input("Username")
+            login_button = ui.button("Login")
+
+        login_button.on(
+            "click", lambda: self.on_login_attempt(username_input.value)
+        )
+
+    def on_login_attempt(self, username):
+        user = self.repository.eagerly_get_user(username)
+
+        undecorated_users_page = partial(main_page, user, self.repository)
+        users_page = ui.page("/users_page")(undecorated_users_page)
+
+        if user is None:
+            ui.notify("Invalid username")
+        else:
+            self.user = user
+            ui.open(users_page)
+
+
+def main(testing: bool = False):
+    def _main(repository: Repository):
+        RoutineButler(repository=repository)
+        ui.run()
+
+    repository = Repository(testing=testing)
+
+    if testing:
+        _main(repository)
+        app.on_shutdown(lambda: SQLModel.metadata.drop_all(repository.engine))
+    else:
+        _main(repository)

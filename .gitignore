@@ -161,6 +161,7 @@ cython_debug/
 
 # Dev database
 db.sqlite
+testdb.sqlite
 
 # DS_Store
 .DS_Store

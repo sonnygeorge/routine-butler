@@ -2,12 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: app.py",
+            "name": "Python: run.py --testing",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/app.py",
+            "program": "${workspaceFolder}/run.py",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "args": ["--testing"]
         },
         {
             "name": "Python: Current File",

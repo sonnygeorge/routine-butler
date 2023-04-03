@@ -17,6 +17,7 @@ class User(SQLModel, table=True):
     """SQLModel for "User" objects"""
 
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
+    username: Optional[str] = Field(default="New User", unique=True)
 
     # Children
     routines: List["Routine"] = Relationship(
