@@ -1,13 +1,14 @@
 from functools import partial
 
 from nicegui import ui, app
+from loguru import logger
 from sqlmodel import SQLModel
 
 from routine_butler.elements.header import Header
 from routine_butler.elements.routines_sidebar import RoutinesSidebar
 from routine_butler.elements.programs_sidebar import ProgramsSidebar
 from routine_butler.database.models import User
-from routine_butler.database.repository import Repository
+from routine_butler.database.repository import Repository, TEST_USER_USERNAME
 from routine_butler.utils.constants import clrs
 
 
@@ -37,10 +38,17 @@ def main_page(user: User, repository: Repository):
 
 
 class RoutineButler:
-    def __init__(self, repository: Repository):
+    def __init__(self, repository: Repository, testing: bool = False):
         self.repository = repository
         self.user = None
 
+        if not testing:
+            self.login_card()
+        else:
+            button = ui.button("Log in as test user")
+            button.on("click", self.login_as_test_user)
+
+    def login_card(self):
         set_colors()
 
         with ui.card():
@@ -52,6 +60,10 @@ class RoutineButler:
         login_button.on(
             "click", lambda: self.on_login_attempt(username_input.value)
         )
+
+    def login_as_test_user(self):
+        logger.debug("Logging in as test user")
+        self.on_login_attempt(TEST_USER_USERNAME)
 
     def on_login_attempt(self, username):
         user = self.repository.eagerly_get_user(username)
@@ -68,7 +80,7 @@ class RoutineButler:
 
 def main(testing: bool = False):
     def _main(repository: Repository):
-        RoutineButler(repository=repository)
+        RoutineButler(repository=repository, testing=testing)
         ui.run()
 
     repository = Repository(testing=testing)

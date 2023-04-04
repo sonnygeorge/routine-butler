@@ -1,5 +1,4 @@
 import argparse
-
 from routine_butler.main import main
 
 
@@ -11,8 +10,6 @@ if __name__ in {"__main__", "__mp_main__"}:
 
     # Parse the arguments
     args = parser.parse_args()
-
-    print(args.testing)
 
     # pass the --testing argument through to main()
     main(testing=args.testing)
