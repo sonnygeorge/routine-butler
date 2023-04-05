@@ -50,6 +50,9 @@ class Program(SQLModel, table=True):
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
     )
 
+    def __str__(self):
+        return self.title
+
 
 class Routine(SQLModel, table=True):
     """SQLModel for "Routine" objects"""
@@ -97,6 +100,7 @@ class RoutineItem(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
     order_index: int = Field(default=0)
     priority_level: PriorityLevel = Field(default=PriorityLevel.MEDIUM)
+    is_reward: bool = Field(default=False)
 
     # Parents
     routine_id: Optional[int] = Field(default=None, foreign_key="routine.id")

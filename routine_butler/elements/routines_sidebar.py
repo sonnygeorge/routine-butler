@@ -5,7 +5,6 @@ from loguru import logger
 from nicegui import ui
 
 from routine_butler.database.models import (
-    Program,  # TODO: use
     Routine,
     RoutineItem,
     Alarm,
@@ -37,6 +36,16 @@ DFLT_INPUT_PROPS = "standout dense"
 # - actually have program select element select from user's programs
 # - use icon constants
 # - connect everything to the database
+
+# NICEGUI QUESTIONS
+# - getting arguments to page-decorated functions
+# - navigate to a page on startup?
+# - single-use timer?
+
+
+# Getting arguments to page decorated functions
+
+
 
 
 class SidebarExpansion(ui.expansion):
@@ -84,8 +93,9 @@ class AlarmSetter(ui.row):
                         time_setter = ui.time()
                         time_setter.bind_value(time_input)
                         time_setter.on(
-                            "change",
+                            "update:model-value",
                             lambda: self.on_time_change(time_input.value),
+                            throttle=0.5,
                         )
 
             # volume knob
@@ -104,7 +114,7 @@ class AlarmSetter(ui.row):
             ).props(DFLT_INPUT_PROPS, remove="label")
             sound_interval_select.classes("w-1/4").style("width: 120px;")
             sound_interval_select.on(
-                "change",
+                "update:model-value",
                 lambda: self.on_select_sound_interval(
                     sound_interval_select.value
                 ),
@@ -172,7 +182,9 @@ class AlarmsConfigurer(SidebarExpansion):
 
 
 class RoutineItemSetter(ui.row):
-    def __init__(self, routine_item: RoutineItem, parent_element: ui.element):
+    def __init__(
+        self, routine_item: RoutineItem, user: User, parent_element: ui.element
+    ):
         self.routine_item = routine_item
         self.parent_element = parent_element
 
@@ -182,10 +194,14 @@ class RoutineItemSetter(ui.row):
         with self:
             # program select
             program_select = ui.select(
-                ["lock box", "unlock box"],
+                user.programs,
                 value="unlock box",
             ).props(DFLT_INPUT_PROPS, remove="label")
             program_select.classes("w-1/4").style("width: 120px;")
+            program_select.on(
+                "update:model-value",
+                lambda: self.on_select_program(program_select.value),
+            )
 
             # priority level select
             priority_level_select = ui.select(
@@ -193,6 +209,12 @@ class RoutineItemSetter(ui.row):
                 value=self.routine_item.priority_level,
             ).props(DFLT_INPUT_PROPS, remove="label")
             priority_level_select.classes("w-1/4").style("width: 120px;")
+            priority_level_select.on(
+                "update:model-value",
+                lambda: self.on_select_priority_level(
+                    priority_level_select.value
+                ),
+            )
 
             # order buttons
             self.up_button = ui.button().props("icon=arrow_upward dense")
@@ -202,10 +224,24 @@ class RoutineItemSetter(ui.row):
             self.delete_button = ui.button()
             self.delete_button.props("icon=cancel color=negative dense")
 
+    def on_select_program(self, new_program):  # TODO: DB update
+        logger.debug(
+            f"Routine item {self.routine_item.id} program changed to {new_program}"
+        )
+        self.routine_item.program = new_program
+
+    def on_select_priority_level(self, new_priority_level):  # TODO: DB update
+        logger.debug(
+            f"Routine item {self.routine_item.id} priority level changed to "
+            f"{new_priority_level}"
+        )
+        self.routine_item.priority_level = new_priority_level
+
 
 class RoutineItemsConfigurer(SidebarExpansion):
-    def __init__(self, routine: Routine):
+    def __init__(self, routine: Routine, user: User):
         self.routine = routine
+        self.user = user
 
         super().__init__("Program Chronology", icon="list")
         self.classes("justify-between items-center")
@@ -275,6 +311,7 @@ class RoutineItemsConfigurer(SidebarExpansion):
     def _add_setter(self, routine_item: RoutineItem):
         setter = RoutineItemSetter(
             routine_item=routine_item,
+            user=self.user,
             parent_element=self.routine_items_frame,
         )
         setter.up_button.on(
@@ -289,8 +326,11 @@ class RoutineItemsConfigurer(SidebarExpansion):
 
 
 class RoutineConfigurer(SidebarExpansion):
-    def __init__(self, routine: Routine, parent_element: ui.element):
+    def __init__(
+        self, routine: Routine, user: User, parent_element: ui.element
+    ):
         self.routine = routine
+        self.user = user
         self.parent_element = parent_element
 
         svg_kwargs = {
@@ -323,7 +363,7 @@ class RoutineConfigurer(SidebarExpansion):
 
             # routine items configurer
             with ui.row().classes(DFLT_ROW_CLASSES):
-                RoutineItemsConfigurer(self.routine)
+                RoutineItemsConfigurer(self.routine, self.user)
 
             # row for target duration input
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE} no-wrap"):
@@ -337,6 +377,7 @@ class RoutineConfigurer(SidebarExpansion):
                     lambda: self.on_target_duration_change(
                         target_duration_slider.value
                     ),
+                    throttle=0.5,
                 )
                 # target duration label
                 target_duration_label = ui.label().style("width: 35px;")
@@ -408,7 +449,9 @@ class RoutinesSidebar(ui.left_drawer):
             self.routines_frame = ui.element("div")
             with self.routines_frame:
                 for routine in self.user.routines:
-                    RoutineConfigurer(routine, self.routines_frame)
+                    RoutineConfigurer(
+                        routine, self.user, parent_element=self.routines_frame
+                    )
 
             ui.separator()
 
@@ -421,4 +464,6 @@ class RoutinesSidebar(ui.left_drawer):
         routine = Routine()
         self.user.routines.append(routine)
         with self.routines_frame:
-            RoutineConfigurer(routine, parent_element=self.routines_frame)
+            RoutineConfigurer(
+                routine, self.user, parent_element=self.routines_frame
+            )

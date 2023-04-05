@@ -69,7 +69,7 @@ class RoutineButler:
         user = self.repository.eagerly_get_user(username)
 
         undecorated_users_page = partial(main_page, user, self.repository)
-        users_page = ui.page("/users_page")(undecorated_users_page)
+        users_page = ui.page("/main_page")(undecorated_users_page)
 
         if user is None:
             ui.notify("Invalid username")
