@@ -5,72 +5,33 @@ from sqlalchemy.orm import joinedload
 
 from routine_butler.database.models import User
 
-# DB urls
-TEST_DB_URL = "sqlite:///./testdb.sqlite"
-DB_URL = "sqlite:///./db.sqlite"
-
-TEST_USER_USERNAME = "test"
-
 
 class Repository:
-    """A singleton class contains the database engine and provides any useful
-    "repository"-style methods
-    """
+    """A singleton object that contains the database engine and provides any
+    helpful "repository"-style methods to reduce code duplication."""
 
-    def __init__(self, testing: bool = False):
-        if testing:
-            self.engine = create_engine(TEST_DB_URL)
-            SQLModel.metadata.create_all(self.engine)
-            self.ascertain_test_user()
-        else:
-            self.engine = create_engine(DB_URL)
-            SQLModel.metadata.create_all(self.engine)
+    def __init__(self):
+        self.engine = None
+
+    def create_db(self, url: str):
+        self.engine = create_engine(url)
+        SQLModel.metadata.create_all(self.engine)
 
     def session(self):
         """Returns a new session given the engine"""
         return Session(self.engine)
 
-    def ascertain_test_user(self, session: Optional[Session] = None):
-        """Adds a user to the DB with username=TEST_USER_USERNAME if not
-        already present
-        """
-
-        def _ascertain_test_user(session: Session):
-            user = (
-                session.query(User)
-                .filter_by(username=TEST_USER_USERNAME)
-                .first()
-            )
-            if user is None:
-                user = User(username=TEST_USER_USERNAME)
-                session.add(user)
-                session.commit()
-                session.refresh(user)
-
-        if session is None:
-            with Session(self.engine) as session:
-                _ascertain_test_user(session)
-        else:
-            _ascertain_test_user(session)
-
     def eagerly_get_user(
-        self, username: str, session: Optional[Session] = None
-    ):
-        """Eagerly loads a user (with all of their data) given their username"""
-
-        def _eagerly_get_user(session: Session):
-            return (
-                session.query(User)
-                .filter_by(username=username)
-                .options(joinedload("*"))
-                .first()
-            )
-
-        if session is None:
-            with Session(self.engine) as session:
-                return _eagerly_get_user(session)
-        else:
-            return _eagerly_get_user(session)
+        self, username: str, session: Session
+    ) -> Optional[User]:
+        """Eagerly loads a user from the database (with all of their subsequent
+        data) given a username. Returns None if no such username in DB."""
+        return (
+            session.query(User)
+            .filter_by(username=username)
+            .options(joinedload("*"))
+            .first()
+        )
 
 
 ## OLD CODE
