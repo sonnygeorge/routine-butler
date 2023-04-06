@@ -5,7 +5,7 @@ from routine_butler.database.repository import Repository
 
 DRAWER_WIDTH = "300"
 DRAWER_BREAKPOINT = "0"
-
+V_SPACE = 4
 
 class ProgramsSidebar(ui.right_drawer):
     def __init__(self, user: User, repository: Repository):
@@ -13,7 +13,7 @@ class ProgramsSidebar(ui.right_drawer):
         self.repository = repository
 
         super().__init__()
-        self.classes("space-y-4 text-center")
+        self.classes(f"space-y-{V_SPACE} text-center py-0")
         self.props(
             f"breakpoint={DRAWER_BREAKPOINT} width={DRAWER_WIDTH} bordered"
         )

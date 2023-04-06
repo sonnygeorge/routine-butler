@@ -13,7 +13,9 @@ from routine_butler.database.models import (
     User,
 )
 from routine_butler.database.repository import Repository
-from routine_butler.elements.svg import SVG
+from routine_butler.elements.primitives.svg import SVG
+from routine_butler.elements.primitives.sidebar_expansion import SidebarExpansion
+
 from routine_butler.utils.constants import clrs, icons  # TODO: use
 
 DRAWER_WIDTH = "500"
@@ -38,39 +40,7 @@ DFLT_INPUT_PROPS = "standout dense"
 # - connect everything to the database
 
 # NICEGUI QUESTIONS
-# - getting arguments to page-decorated functions
-# - navigate to a page on startup?
-# - single-use timer?
-
-
-# Getting arguments to page decorated functions
-
-
-
-
-class SidebarExpansion(ui.expansion):
-    def __init__(
-        self,
-        title: str,
-        icon: Optional[Union[str, Callable]] = None,
-        icon_kwargs: Optional[dict] = None,
-    ):
-        self.frame = ui.element("q-list").props("bordered")
-        self.frame.classes("rounded-borders w-full")
-        with self.frame:
-            super().__init__("")
-            self.classes("w-full")
-
-            with self.add_slot("header"):
-                with ui.row().classes("justify-start items-center w-full"):
-                    if isinstance(icon, str):
-                        ui.icon(icon).props("size=sm")
-                    else:
-                        icon(**icon_kwargs)
-                    self.header_label = ui.label(title).classes("text-left")
-
-            with self:
-                ui.separator()
+# - single-use timer w/ progress bar?
 
 
 class AlarmSetter(ui.row):
@@ -95,7 +65,6 @@ class AlarmSetter(ui.row):
                         time_setter.on(
                             "update:model-value",
                             lambda: self.on_time_change(time_input.value),
-                            throttle=0.5,
                         )
 
             # volume knob
@@ -274,10 +243,10 @@ class RoutineItemsConfigurer(SidebarExpansion):
         if up or down:
             index = self.routine.routine_items.index(setter.routine_item)
             if up and index == 0:
-                logger.debug("Cannot move routine item up")
+                logger.debug("Cannot move routine item upward")
                 return
             if down and index >= len(self.routine.routine_items) - 1:
-                logger.debug("Cannot move routine item down")
+                logger.debug("Cannot move routine item downward")
                 return
             if up:
                 idx1, idx2 = index - 1, index
@@ -377,7 +346,6 @@ class RoutineConfigurer(SidebarExpansion):
                     lambda: self.on_target_duration_change(
                         target_duration_slider.value
                     ),
-                    throttle=0.5,
                 )
                 # target duration label
                 target_duration_label = ui.label().style("width: 35px;")
