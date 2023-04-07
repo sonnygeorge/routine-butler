@@ -24,7 +24,6 @@ class User(SQLModel, table=True):
         back_populates="user",
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
-
     programs: List["Program"] = Relationship(
         back_populates="user",
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
@@ -42,7 +41,6 @@ class Program(SQLModel, table=True):
         back_populates="program",
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
-
     # Parent
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     user: Optional[User] = Relationship(
@@ -108,7 +106,6 @@ class RoutineItem(SQLModel, table=True):
         back_populates="routine_items",
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
     )
-
     program_id: Optional[int] = Field(default=None, foreign_key="program.id")
     program: Optional[Program] = Relationship(
         back_populates="routine_items",

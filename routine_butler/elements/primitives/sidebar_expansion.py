@@ -2,6 +2,7 @@ from typing import Callable, Optional, Union
 
 from nicegui import ui
 
+
 class SidebarExpansion(ui.expansion):
     def __init__(
         self,
@@ -9,9 +10,9 @@ class SidebarExpansion(ui.expansion):
         icon: Optional[Union[str, Callable]] = None,
         icon_kwargs: Optional[dict] = None,
     ):
-        self.frame = ui.element("q-list").props("bordered")
-        self.frame.classes("rounded-borders w-full")
-        with self.frame:
+        self.expansion_frame = ui.element("q-list").props("bordered")
+        self.expansion_frame.classes("rounded-borders w-full")
+        with self.expansion_frame:
             super().__init__("")
             self.classes("w-full")
 

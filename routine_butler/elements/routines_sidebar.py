@@ -14,18 +14,22 @@ from routine_butler.database.models import (
 )
 from routine_butler.database.repository import Repository
 from routine_butler.elements.primitives.svg import SVG
-from routine_butler.elements.primitives.sidebar_expansion import SidebarExpansion
+from routine_butler.elements.primitives.sidebar_expansion import (
+    SidebarExpansion,
+)
 
 from routine_butler.utils.constants import clrs, icons  # TODO: use
 
 DRAWER_WIDTH = "500"
 DRAWER_BREAKPOINT = "0"
-ROUTINES_SVG_SIZE: int = 28
-PROGRAMS_SVG_SIZE: int = 26
+ROUTINE_SVG_SIZE: int = 28
+PROGRAM_SVG_SIZE: int = 21
+REWARD_SVG_SIZE: int = 17
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROUTINE_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/routine-icon.svg")
 PROGRAM_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/program-icon.svg")
+REWARD_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/reward-icon.svg")
 
 V_SPACE = 4
 DFLT_ROW_CLASSES = "justify-evenly items-center w-full px-4 pt-4"
@@ -47,7 +51,6 @@ class AlarmSetter(ui.row):
     def __init__(self, alarm: Alarm, parent_element: ui.element):
         self.alarm = alarm
         self.parent_element = parent_element
-
         super().__init__()
         self.classes(DFLT_ROW_CLASSES + " no-wrap")
 
@@ -66,7 +69,6 @@ class AlarmSetter(ui.row):
                             "update:model-value",
                             lambda: self.on_time_change(time_input.value),
                         )
-
             # volume knob
             vol_knob = ui.knob(self.alarm.volume, track_color="grey-2")
             vol_knob.props("size=lg thickness=0.3")
@@ -88,11 +90,9 @@ class AlarmSetter(ui.row):
                     sound_interval_select.value
                 ),
             )
-
             # toggle switch
             switch = ui.switch().props("dense")
             switch.on("click", lambda: self.on_toggle(switch.value))
-
             # delete button
             self.delete_button = ui.button()
             self.delete_button.props("icon=cancel color=negative dense")
@@ -128,7 +128,6 @@ class AlarmSetter(ui.row):
 class AlarmsConfigurer(SidebarExpansion):
     def __init__(self, routine: Routine):
         self.routine = routine
-
         super().__init__("Alarms", icon="alarm")
 
         with self:
@@ -152,46 +151,76 @@ class AlarmsConfigurer(SidebarExpansion):
 
 class RoutineItemSetter(ui.row):
     def __init__(
-        self, routine_item: RoutineItem, user: User, parent_element: ui.element
+        self,
+        routine_item: RoutineItem,
+        user: User,
+        parent_element: ui.element,
     ):
         self.routine_item = routine_item
         self.parent_element = parent_element
-
         super().__init__()
-        self.classes(DFLT_ROW_CLASSES + " no-wrap space-x-0")
+        self.classes(DFLT_ROW_CLASSES + " gap-x-0")
+
+        btn_clr = "secondary" if self.routine_item.is_reward else "primary"
 
         with self:
+            # number
+            number = ui.element("div").style("width: 5%;")
+            number.classes("mx-0 self-start w-full")
+            number.classes(f"rounded bg-{btn_clr} w-full drop-shadow")
+            with number:
+                lbl = ui.label(f"{self.routine_item.order_index + 1}.")
+                lbl.style("height: 1.125rem;")
+                lbl.classes("text-white text-center text-xs text-bold")
+                lbl.classes("flex items-center justify-center")
             # program select
-            program_select = ui.select(
-                user.programs,
-                value="unlock box",
-            ).props(DFLT_INPUT_PROPS, remove="label")
-            program_select.classes("w-1/4").style("width: 120px;")
-            program_select.on(
-                "update:model-value",
-                lambda: self.on_select_program(program_select.value),
-            )
-
+            with ui.element("div").style("width: 32%;").classes("mx-0 w-auto"):
+                program_select = ui.select(
+                    user.programs,
+                    value="unlock box",
+                ).props(DFLT_INPUT_PROPS, remove="label")
+                program_select.classes("w-full")
+                program_select.on(
+                    "update:model-value",
+                    lambda: self.on_select_program(program_select.value),
+                )
             # priority level select
-            priority_level_select = ui.select(
-                [e.value for e in PriorityLevel],
-                value=self.routine_item.priority_level,
-            ).props(DFLT_INPUT_PROPS, remove="label")
-            priority_level_select.classes("w-1/4").style("width: 120px;")
-            priority_level_select.on(
-                "update:model-value",
-                lambda: self.on_select_priority_level(
-                    priority_level_select.value
-                ),
-            )
-
+            with ui.element("div").style("width: 27%;").classes("mx-0"):
+                if self.routine_item.is_reward:
+                    q_item = ui.element("q-item").props("dense")
+                    q_item.style("height: 2.5rem;")
+                    cls = "items-center justify-center border-secondary"
+                    cls += " rounded w-full border-dotted border-2"
+                    q_item.classes(cls)
+                    with q_item:
+                        SVG(
+                            REWARD_SVG_FPATH,
+                            size=REWARD_SVG_SIZE,
+                            color="#e5e5e5",
+                        )
+                else:
+                    priority_level_select = ui.select(
+                        [e.value for e in PriorityLevel],
+                        value=self.routine_item.priority_level,
+                    ).props(DFLT_INPUT_PROPS, remove="label")
+                    priority_level_select.classes("w-full")
+                    priority_level_select.on(
+                        "update:model-value",
+                        lambda: self.on_select_priority_level(
+                            priority_level_select.value
+                        ),
+                    )
             # order buttons
-            self.up_button = ui.button().props("icon=arrow_upward dense")
-            self.down_button = ui.button().props("icon=arrow_downward dense")
-
+            order_buttons_frame = ui.row().classes("gap-x-1 justify-center")
+            with order_buttons_frame.style("width: 18%;"):
+                self.up_button = ui.button().classes(f"bg-{btn_clr}")
+                self.up_button.props(f"icon=arrow_upward dense")
+                self.down_button = ui.button().classes(f"bg-{btn_clr}")
+                self.down_button.props(f"icon=arrow_downward dense")
             # delete button
-            self.delete_button = ui.button()
-            self.delete_button.props("icon=cancel color=negative dense")
+            with ui.element("div").style("width: 7%;").classes("mx-0"):
+                self.delete_button = ui.button()
+                self.delete_button.props("icon=cancel color=negative dense")
 
     def on_select_program(self, new_program):  # TODO: DB update
         logger.debug(
@@ -207,32 +236,46 @@ class RoutineItemSetter(ui.row):
         self.routine_item.priority_level = new_priority_level
 
 
-class RoutineItemsConfigurer(SidebarExpansion):
+class RoutineItemsConfigurer(SidebarExpansion):  # TODO: name to ...Expansion?
     def __init__(self, routine: Routine, user: User):
         self.routine = routine
         self.user = user
-
-        super().__init__("Program Chronology", icon="list")
+        is_reg = [not ri.is_reward for ri in self.routine.routine_items]
+        self.last_reg_idx = sum(is_reg) - 1
+        svg_kwargs = {
+            "fpath": PROGRAM_SVG_FPATH,
+            "size": PROGRAM_SVG_SIZE,
+            "color": "black",
+        }
+        super().__init__("Chronology", icon=SVG, icon_kwargs=svg_kwargs)
         self.classes("justify-between items-center")
 
         with self:
             self.routine_items_frame = ui.element("div")
             self.update_routine_items_frame()
 
-            # add routine item button
+            # bottom buttons
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
+                # add routine item button
                 self.add_routine_item_button = ui.button().props("icon=add")
-                self.add_routine_item_button.classes("w-full")
+                self.add_routine_item_button.classes("w-3/4")
                 self.add_routine_item_button.on(
                     "click", self.on_add_routine_item
                 )
+                # add reward buttom
+                self.add_reward_button = ui.button().classes(
+                    "items-center w-1/5 bg-secondary"
+                )
+                with self.add_reward_button:
+                    SVG(REWARD_SVG_FPATH, size=REWARD_SVG_SIZE, color="white")
+                self.add_reward_button.on("click", self.on_add_reward)
 
     def update_routine_items_frame(self):
         # sort routine items in routine object by order index
         self.routine.routine_items.sort(key=lambda x: x.order_index)
-        # remove any setters in frame
+        # remove any setters currently in the frame
         self.routine_items_frame.clear()
-        # create new setters and add them to frame
+        # instantiate new setters within the frame
         with self.routine_items_frame:
             for routine_item in self.routine.routine_items:
                 self._add_setter(routine_item)
@@ -242,10 +285,13 @@ class RoutineItemsConfigurer(SidebarExpansion):
     ):
         if up or down:
             index = self.routine.routine_items.index(setter.routine_item)
-            if up and index == 0:
+            if up and (index == 0 or index == self.last_reg_idx + 1):
                 logger.debug("Cannot move routine item upward")
                 return
-            if down and index >= len(self.routine.routine_items) - 1:
+            if down and (
+                index >= len(self.routine.routine_items) - 1
+                or index == self.last_reg_idx
+            ):
                 logger.debug("Cannot move routine item downward")
                 return
             if up:
@@ -271,8 +317,30 @@ class RoutineItemsConfigurer(SidebarExpansion):
 
     def on_add_routine_item(self):  # TODO: DB update
         logger.debug("Adding routine item")
-        # add routine item to routine object with order index of the last item + 1
-        routine_item = RoutineItem(order_index=len(self.routine.routine_items))
+        # create routine item to routine object with order index of the last_reg_idx + 1
+        routine_item = RoutineItem(order_index=self.last_reg_idx + 1)
+        # increment postceding (reward) routine items' order indexes
+        for ri in self.routine.routine_items[self.last_reg_idx + 1 :]:
+            ri.order_index += 1
+        # insert into list at new index
+        self.routine.routine_items.insert(self.last_reg_idx + 1, routine_item)
+        # update self.last_reg_idx
+        self.last_reg_idx += 1
+        logger.debug(f"Last regular routine item idx now: {self.last_reg_idx}")
+        if any(ri.is_reward for ri in self.routine.routine_items):
+            # update the frame if an insertion is being made
+            self.update_routine_items_frame()
+        else:
+            # just add the setter
+            with self.routine_items_frame:
+                self._add_setter(routine_item)
+
+    def on_add_reward(self):  # TODO: DB update
+        logger.debug("Adding reward item")
+        # add reward item to routine object with order index of the last item + 1
+        routine_item = RoutineItem(
+            order_index=len(self.routine.routine_items), is_reward=True
+        )
         self.routine.routine_items.append(routine_item)
         with self.routine_items_frame:
             self._add_setter(routine_item)
@@ -301,14 +369,13 @@ class RoutineConfigurer(SidebarExpansion):
         self.routine = routine
         self.user = user
         self.parent_element = parent_element
-
         svg_kwargs = {
             "fpath": ROUTINE_SVG_FPATH,
-            "size": ROUTINES_SVG_SIZE,
+            "size": ROUTINE_SVG_SIZE,
             "color": "black",
         }
         super().__init__(routine.title, icon=SVG, icon_kwargs=svg_kwargs)
-        self.frame.classes(f"mt-{V_SPACE}")
+        self.expansion_frame.classes(f"mt-{V_SPACE}")
 
         with self:
             # top row for setting title
@@ -325,15 +392,12 @@ class RoutineConfigurer(SidebarExpansion):
                     "click",
                     lambda: self.on_title_update(self.title_input.value),
                 )
-
             # alarms configurer
             with ui.row().classes(DFLT_ROW_CLASSES):
                 AlarmsConfigurer(self.routine)
-
             # routine items configurer
             with ui.row().classes(DFLT_ROW_CLASSES):
                 RoutineItemsConfigurer(self.routine, self.user)
-
             # row for target duration input
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE} no-wrap"):
                 ui.label("Target Duration:").style("width: 120px;")
@@ -364,10 +428,8 @@ class RoutineConfigurer(SidebarExpansion):
                         target_duration_toggle.value
                     ),
                 )
-
-            ui.separator()
-
             # bottom buttons
+            ui.separator()
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
                 # start routine
                 self.start_button = ui.button().classes("w-3/4")
@@ -397,7 +459,7 @@ class RoutineConfigurer(SidebarExpansion):
 
     def on_delete(self):  # TODO: DB update
         logger.debug(f"Deleting routine {self.routine.id}")
-        self.parent_element.remove(self.frame)
+        self.parent_element.remove(self.expansion_frame)
         self.parent_element.update()
         del self
 
@@ -406,7 +468,6 @@ class RoutinesSidebar(ui.left_drawer):
     def __init__(self, user: User, repository: Repository):
         self.user = user
         self.repository = repository
-
         super().__init__()
         self.classes(f"space-y-{V_SPACE} text-center py-0")
         self.props(
@@ -420,10 +481,8 @@ class RoutinesSidebar(ui.left_drawer):
                     RoutineConfigurer(
                         routine, self.user, parent_element=self.routines_frame
                     )
-
-            ui.separator()
-
             # add routine button
+            ui.separator()
             add_routine_button = ui.button().classes("w-1/2").props("icon=add")
             add_routine_button.on("click", self.add_routine)
 
