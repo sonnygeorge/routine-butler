@@ -5,9 +5,13 @@ from routine_butler.database import models
 from routine_butler.database.repository import Repository
 
 
+TEST_DB_URL = "sqlite:///test_db.sqlite"
+
+
 @pytest.fixture(scope="session")
 def repository():
-    repository = Repository(testing=True)
+    repository = Repository()
+    repository.create_db(url=TEST_DB_URL)
     yield repository
     SQLModel.metadata.drop_all(repository.engine)
 

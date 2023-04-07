@@ -84,8 +84,8 @@ class PriorityLevel(str, Enum):
     HIGH = "high"
 
 
-class SoundInterval(str, Enum):
-    "Enum for a Alarm's sound interval"
+class SoundFrequency(str, Enum):
+    "Enum for a Alarm's sound frequency"
     CONSTANT = "constant"
     PERIODIC = "periodic"
 
@@ -121,7 +121,7 @@ class Alarm(SQLModel, table=True):
     minute: int = Field(default=0)
     enabled: bool = Field(default=False)
     volume: float = Field(default=0.5)
-    sound_interval: SoundInterval = Field(default=SoundInterval.CONSTANT)
+    sound_frequency: SoundFrequency = Field(default=SoundFrequency.CONSTANT)
 
     # Parent
     routine_id: Optional[int] = Field(default=None, foreign_key="routine.id")
