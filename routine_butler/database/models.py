@@ -16,8 +16,7 @@ CHILD_PARENT_SA_RELATIONSHIP_KWARGS = {"cascade": "save-update, merge"}
 class User(SQLModel, table=True):
     """SQLModel for "User" objects"""
 
-    id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
-    username: Optional[str] = Field(default="New User", unique=True)
+    username: Optional[str] = Field(default="New User", primary_key=True)
 
     # Children
     routines: List["Routine"] = Relationship(
@@ -42,7 +41,7 @@ class Program(SQLModel, table=True):
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
     # Parent
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    user_username: Optional[int] = Field(default=None, foreign_key="user.username")
     user: Optional[User] = Relationship(
         back_populates="programs",
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
@@ -70,7 +69,7 @@ class Routine(SQLModel, table=True):
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
     # Parent
-    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    user_username: Optional[int] = Field(default=None, foreign_key="user.username")
     user: Optional[User] = Relationship(
         back_populates="routines",
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,

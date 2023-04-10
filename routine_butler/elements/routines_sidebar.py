@@ -1,8 +1,10 @@
 import os
 from typing import Callable, Optional, Union, List
+from functools import partial
 
 from loguru import logger
 from nicegui import ui
+from sqlmodel import Session
 
 from routine_butler.database.models import (
     Routine,
@@ -37,8 +39,6 @@ DFLT_INPUT_PROPS = "standout dense"
 
 
 # TODO:
-# - RE-SORT INDEXES AFTER DELETE
-# - add an is reward checkbox to final routine item... or just a reward slot?
 # - fix on click listeners for input elements and select elements
 # - actually have program select element select from user's programs
 # - use icon constants
@@ -46,6 +46,11 @@ DFLT_INPUT_PROPS = "standout dense"
 
 # NICEGUI QUESTIONS
 # - single-use timer w/ progress bar?
+
+
+def invoke_w_session(func: Callable, repository: Repository, *args, **kwargs):
+    with repository.session() as session:
+        return func(*args, **kwargs, session=session)
 
 
 class AlarmRow(ui.row):
@@ -159,11 +164,17 @@ class RoutineItemRow(ui.row):
     def __init__(
         self,
         routine_item: RoutineItem,
-        user: User,
+        repository: Repository,
         parent_element: ui.element,
     ):
         self.routine_item = routine_item
         self.parent_element = parent_element
+        self.repository = repository
+        # reload user from database to populate relationships
+        with repository.session() as session:
+            self.user = repository.eagerly_get_user(
+                session=session, username=repository.current_username
+            )
         super().__init__()
         self.classes(DFLT_ROW_CLASSES + " gap-x-0")
 
@@ -182,7 +193,7 @@ class RoutineItemRow(ui.row):
             # program select
             with ui.element("div").style("width: 32%;"):
                 program_select = ui.select(
-                    user.programs,
+                    self.user.programs,
                     value="unlock box",  # TODO implement
                     label="program",
                 ).props(DFLT_INPUT_PROPS)
@@ -244,10 +255,9 @@ class RoutineItemRow(ui.row):
         self.routine_item.priority_level = new_priority_level
 
 
-class RoutineItemsExpansion(SidebarExpansion):  # TODO: name to ...Expansion?
-    def __init__(self, routine: Routine, user: User, repository: Repository):
+class RoutineItemsExpansion(SidebarExpansion):
+    def __init__(self, routine: Routine, repository: Repository):
         self.routine = routine
-        self.user = user
         self.repository = repository
         is_reg = [not ri.is_reward for ri in self.routine.routine_items]
         self.last_reg_idx = sum(is_reg) - 1
@@ -260,58 +270,75 @@ class RoutineItemsExpansion(SidebarExpansion):  # TODO: name to ...Expansion?
         self.classes("justify-between items-center")
 
         with self:
-            self.routine_items_frame = ui.element("div")
-            self._update_routine_items_frame()
+            self.items_frame = ui.element("div")
+            self._update_items_frame()
 
             # bottom buttons
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
                 # add routine item button
                 self.add_routine_item_button = ui.button().props("icon=add")
                 self.add_routine_item_button.classes("w-3/4")
-                self.add_routine_item_button.on("click", self.add_routine_item)
+                self.add_routine_item_button.on(
+                    "click",
+                    lambda: invoke_w_session(
+                        self.add_routine_item, self.repository
+                    ),
+                )
                 # add reward buttom
                 self.add_reward_button = ui.button().classes(
                     "items-center w-1/5 bg-secondary"
                 )
                 with self.add_reward_button:
                     SVG(REWARD_SVG_FPATH, size=REWARD_SVG_SIZE, color="white")
-                self.add_reward_button.on("click", self.add_reward_item)
+                self.add_reward_button.on(
+                    "click",
+                    lambda: invoke_w_session(
+                        self.add_reward_item, self.repository
+                    ),
+                )
 
-    def add_routine_item(self):  # TODO: DB update
+    def add_routine_item(self, session: Session):
         logger.debug("Adding routine item")
+        session.add(self.routine)
         # create routine item to routine object with order index of the last_reg_idx + 1
         routine_item = RoutineItem(order_index=self.last_reg_idx + 1)
         # increment postceding (reward) routine items' order indexes
-        for ri in self.routine.routine_items[self.last_reg_idx + 1 :]:
-            ri.order_index += 1
+        for ri in self.routine.routine_items:
+            if ri.order_index > self.last_reg_idx:
+                ri.order_index += 1
         # insert into list at new index
-        self.routine.routine_items.insert(self.last_reg_idx + 1, routine_item)
+        self.routine.routine_items.append(routine_item)
         # update self.last_reg_idx
         self.last_reg_idx += 1
         logger.debug(f"Last regular routine item idx now: {self.last_reg_idx}")
         if any(ri.is_reward for ri in self.routine.routine_items):
             # update the frame if an insertion is being made
-            self._update_routine_items_frame()
+            self._update_items_frame()
         else:
             # just add the row
-            with self.routine_items_frame:
+            with self.items_frame:
                 self._add_row(routine_item)
+        # update db
+        session.commit()
 
-    def add_reward_item(self):  # TODO: DB update
+    def add_reward_item(self, session: Session):
         logger.debug("Adding reward item")
-        # add reward item to routine object with order index of the last item + 1
+        session.add(self.routine)
+        # create routine object with order index of the last item + 1
         routine_item = RoutineItem(
             order_index=len(self.routine.routine_items), is_reward=True
         )
         self.routine.routine_items.append(routine_item)
-        with self.routine_items_frame:
+        with self.items_frame:
             self._add_row(routine_item)
+        # update db
+        session.commit()
 
-    def move_routine_item(  # TODO: DB update
-        self, row: RoutineItemRow, up: bool = False, down: bool = False
+    def move_item(  # TODO: DB update
+        self, routine_item: RoutineItem, up: bool = False, down: bool = False
     ):
         if up or down:
-            index = self.routine.routine_items.index(row.routine_item)
+            index = self.routine.routine_items.index(routine_item)
             if up and (index == 0 or index == self.last_reg_idx + 1):
                 logger.debug("Cannot move routine item upward")
                 return
@@ -328,13 +355,13 @@ class RoutineItemsExpansion(SidebarExpansion):  # TODO: name to ...Expansion?
             self.routine.routine_items[idx1].order_index = idx2
             self.routine.routine_items[idx2].order_index = idx1
             logger.debug(f"Swapped routine item order indexes {idx1} & {idx2}")
-            self._update_routine_items_frame()
+            self._update_items_frame()
 
-    # TODO: DB update
-    def delete_routine_item(self, row: RoutineItemRow):
-        logger.debug(f"Deleting routine item {row.routine_item.id}")
-        # remove routine item from routine object
-        idx = self.routine.routine_items.index(row.routine_item)
+    def delete_item(self, routine_item: RoutineItem, session: Session):
+        session.add(routine_item)
+        session.add(self.routine)
+        logger.debug(f"Deleting routine item {routine_item.id}")
+        idx = self.routine.routine_items.index(routine_item)
         self.routine.routine_items.pop(idx)
         # update the order indexes of the routine items that came after the deleted one
         for routine_item in self.routine.routine_items[idx:]:
@@ -343,34 +370,42 @@ class RoutineItemsExpansion(SidebarExpansion):  # TODO: name to ...Expansion?
         if idx <= self.last_reg_idx:
             self.last_reg_idx -= 1
         logger.debug(f"Last regular routine item idx now: {self.last_reg_idx}")
-        self._update_routine_items_frame()
+        self._update_items_frame()
+        session.commit()
 
-    def _update_routine_items_frame(self):
+    def _update_items_frame(self):
         """Clear and repopulates the 'div'/frame containing `RoutineItemRow`s
         in order to accomplish internal reording"""
         # sort routine items in routine object by order index
         self.routine.routine_items.sort(key=lambda x: x.order_index)
         # remove any rows currently in the frame
-        self.routine_items_frame.clear()
+        self.items_frame.clear()
         # instantiate new rows within the frame
-        with self.routine_items_frame:
+        with self.items_frame:
             for routine_item in self.routine.routine_items:
                 self._add_row(routine_item)
 
     def _add_row(self, routine_item: RoutineItem):
         row = RoutineItemRow(
             routine_item=routine_item,
-            user=self.user,
-            parent_element=self.routine_items_frame,
+            repository=self.repository,
+            parent_element=self.items_frame,
         )
         row.up_button.on(
-            "click", lambda e: self.move_routine_item(row, up=True)
+            "click",
+            lambda: self.move_item(row.routine_item, up=True),
         )
         row.down_button.on(
-            "click", lambda e: self.move_routine_item(row, down=True)
+            "click",
+            lambda: self.move_item(row.routine_item, down=True),
         )
         row.delete_button.on(
-            "click", lambda: self.delete_routine_item(row)
+            "click",
+            lambda: invoke_w_session(
+                self.delete_item,
+                repository=self.repository,
+                routine_item=row.routine_item,
+            ),
         )
 
 
@@ -414,7 +449,7 @@ class RoutineConfigurer(SidebarExpansion):
                 AlarmsExpansion(self.routine)
             # routine items expansion
             with ui.row().classes(DFLT_ROW_CLASSES):
-                RoutineItemsExpansion(self.routine, self.user, self.repository)
+                RoutineItemsExpansion(self.routine, self.repository)
             # row for target duration input
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE} no-wrap"):
                 ui.label("Target Duration:").style("width: 120px;")
@@ -501,13 +536,23 @@ class RoutinesSidebar(ui.left_drawer):
             # add routine button
             ui.separator()
             add_routine_button = ui.button().classes("w-1/2")
-            add_routine_button.props("icon=add").on("click", self.add_routine)
+            add_routine_button.props("icon=add").on(
+                "click",
+                lambda: invoke_w_session(
+                    self.add_routine, repository=self.repository
+                ),
+            )
 
-    def add_routine(self):  # TODO: DB update
-        logger.debug("Adding routine")
-        routine = Routine()
-        self.user.routines.append(routine)
+    def add_routine(self, session: Session):  # TODO: DB update
+        logger.debug("Adding routine for user: " + self.user.username)
+        routine = Routine(user=self.user)
+        # self.user.routines.append(routine)
+        session.add(routine)
+        session.commit()
         with self.routines_frame:
             RoutineConfigurer(
-                routine, self.user, parent_element=self.routines_frame
+                routine,
+                self.user,
+                parent_element=self.routines_frame,
+                repository=self.repository,
             )

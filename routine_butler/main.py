@@ -29,14 +29,18 @@ class RoutineButler:
     def __init__(self, repository: Repository, user: Optional[User] = None):
         self.repository = repository
         self.user = user
+        logger.debug(self.user)
         self.main_frame = ui.element("div")
 
         if user is None:
             with self.main_frame:
                 self.login()
         else:
+            # set repository current_username attribute
+            self.repository.current_username = user.username
+            # instantiate main gui without login
             with self.main_frame:
-                self.main_app()
+                self.main_gui()
 
     def login(self):
         set_colors()
@@ -51,7 +55,7 @@ class RoutineButler:
             "click", lambda: self.on_login_attempt(username_input.value)
         )
 
-    def main_app(self):
+    def main_gui(self):
         assert self.user is not None
 
         set_colors()
@@ -68,15 +72,17 @@ class RoutineButler:
         header.programs_button.on("click", programs_sidebar.toggle)
 
     def on_login_attempt(self, username):
-        user = self.repository.eagerly_get_user(username)
+        with self.repository.session() as session:
+            user = self.repository.eagerly_get_user(username, session=session)
 
         if user is None:
             ui.notify("Invalid username")
         else:
             self.user = user
+            self.repository.current_username = user.username
             self.main_frame.clear()
             with self.main_frame:
-                self.main_app()
+                self.main_gui()
             ui.notify("Welcome, " + user.username + "!")
 
 

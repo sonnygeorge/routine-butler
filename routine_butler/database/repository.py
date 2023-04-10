@@ -10,6 +10,8 @@ class Repository:
     """A singleton object that contains the database engine and provides any
     helpful "repository"-style methods to reduce code duplication."""
 
+    current_username: Optional[str] = None
+
     def __init__(self):
         self.engine = None
 
@@ -26,11 +28,8 @@ class Repository:
     ) -> Optional[User]:
         """Eagerly loads a user from the database (with all of their subsequent
         data) given a username. Returns None if no such username in DB."""
-        return (
-            session.query(User)
-            .filter_by(username=username)
-            .options(joinedload("*"))
-            .first()
+        return session.get(
+            User, username, options=[joinedload("*")], populate_existing=True
         )
 
 

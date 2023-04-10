@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from sqlmodel import SQLModel
 from nicegui import app
@@ -26,18 +27,21 @@ if __name__ in {"__main__", "__mp_main__"}:
     args = parser.parse_args()
 
     if args.testing:
+        # Delete the test database if it already exists
+        if os.path.exists(TEST_DB_URL.split(":///")[1]):
+            os.remove(TEST_DB_URL.split(":///")[1])
 
         # Create a test database
         repository = Repository()
         repository.create_db(TEST_DB_URL)
 
-        # Create a test user
-        test_user = User(username=TEST_USER_USERNAME)
+        test_user = None
 
-        if __name__ == "__main__":
+        if __name__ == "__mp_main__":
             logger.info("Running in testing mode")
-            # Add to db
+            # Create a test user
             with repository.session() as session:
+                test_user = User(username=TEST_USER_USERNAME)
                 session.add(test_user)
                 session.commit()
                 test_user = repository.eagerly_get_user(
