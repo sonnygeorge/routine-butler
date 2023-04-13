@@ -90,13 +90,16 @@ def login(request: Request) -> None:
             ui.notify("Welcome, " + user.username + "!")
             ui.open('/')
 
+    if 'id' not in request.session:
+        request.session['id'] = str(uuid.uuid4())
+
     # used with --testing for automatically login users
     if request.app.auto_login is not None:
         session_info[request.session['id']] = {'username': request.app.auto_login, 'authenticated': True}
 
     if is_authenticated(request):
         return RedirectResponse('/')
-    request.session['id'] = str(uuid.uuid4())
+
     with ui.card():
         ui.label("Login")
         ui.separator()

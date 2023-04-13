@@ -47,7 +47,8 @@ if __name__ in {"__main__", "__mp_main__"}:
         # Run the app
         main(engine, auto_login=TEST_USER_USERNAME)
     else:
-        logger.info("Running in production mode")
+        if __name__ == "__main__":
+            logger.info("Running in production mode")
         engine = create_engine(DB_URL)
         SQLModel.metadata.create_all(engine)
         main(engine)
