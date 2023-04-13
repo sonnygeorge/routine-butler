@@ -1,14 +1,12 @@
 import argparse
 import os
 
-from sqlmodel import SQLModel
-from nicegui import app
 from loguru import logger
-
-from sqlmodel import Session
+from sqlmodel import Session, SQLModel, create_engine
+from nicegui import app
 
 from routine_butler.main import main
-from routine_butler.database.repository import Repository
+from routine_butler.database import models  # required to create schema
 from routine_butler.database.models import User
 
 
@@ -32,30 +30,24 @@ if __name__ in {"__main__", "__mp_main__"}:
             os.remove(TEST_DB_URL.split(":///")[1])
 
         # Create a test database
-        repository = Repository()
-        repository.create_db(TEST_DB_URL)
-
-        test_user = None
+        engine = create_engine(TEST_DB_URL)
+        SQLModel.metadata.create_all(engine)
 
         if __name__ == "__mp_main__":
             logger.info("Running in testing mode")
             # Create a test user
-            with repository.session() as session:
+            with Session(engine) as session:
                 test_user = User(username=TEST_USER_USERNAME)
                 session.add(test_user)
                 session.commit()
-                test_user = repository.eagerly_get_user(
-                    username=TEST_USER_USERNAME, session=session
-                )
 
         # Add deletion of test database metadata to handlers of app shutdown
-        app.on_shutdown(lambda: SQLModel.metadata.drop_all(repository.engine))
+        app.on_shutdown(lambda: SQLModel.metadata.drop_all(engine))
 
         # Run the app
-        main(repository=repository, user=test_user)
+        main(engine, auto_login=TEST_USER_USERNAME)
     else:
-        if __name__ == "__main__":
-            logger.info("Running in production mode")
-        repository = Repository()
-        repository.create_db(DB_URL)
-        main(repository=repository)
+        logger.info("Running in production mode")
+        engine = create_engine(DB_URL)
+        SQLModel.metadata.create_all(engine)
+        main(engine)

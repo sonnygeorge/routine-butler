@@ -5,7 +5,9 @@ ORM models for the app/database
 from enum import Enum
 from typing import List, Optional
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlalchemy.orm import joinedload
+from sqlmodel import Field, Relationship, SQLModel, Session
+
 
 PARENT_CHILD_SA_RELATIONSHIP_KWARGS = {
     "cascade": "all, delete, delete-orphan, save-update"
@@ -27,6 +29,13 @@ class User(SQLModel, table=True):
         back_populates="user",
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
+
+    @classmethod
+    def eagerly_get_user(cls, session: Session, username: str) -> Optional['User']:
+        """Eagerly loads a user from the database (with all of their subsequent
+        data) given a username. Returns None if no such username in DB."""
+        return session.get(
+            cls, username, options=[joinedload("*")], populate_existing=True)
 
 
 class Program(SQLModel, table=True):

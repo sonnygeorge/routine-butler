@@ -1,16 +1,26 @@
-from functools import partial
+import uuid
 from typing import Optional
 
 from nicegui import ui, app
+from fastapi import Request
+from fastapi.responses import RedirectResponse
+from starlette.middleware.sessions import SessionMiddleware
 from loguru import logger
-from sqlmodel import SQLModel
+from sqlmodel import Session
 
-from routine_butler.elements.header import Header
+
+from .elements.header import Header
 from routine_butler.elements.routines_sidebar import RoutinesSidebar
-from routine_butler.elements.programs_sidebar import ProgramsSidebar
-from routine_butler.database.models import User
-from routine_butler.database.repository import Repository
-from routine_butler.utils.constants import clrs
+# from routine_butler.elements.programs_sidebar import ProgramsSidebar
+from .database.models import User
+from .utils.constants import clrs
+
+
+# session info keeps track of logged-in user
+session_info: dict[str, dict] = {}
+
+def is_authenticated(request: Request) -> bool:
+    return session_info.get(request.session.get('id'), {}).get('authenticated', False)
 
 
 def set_colors():
@@ -25,67 +35,77 @@ def set_colors():
     )
 
 
-class RoutineButler:
-    def __init__(self, repository: Repository, user: Optional[User] = None):
-        self.repository = repository
-        self.user = user
-        logger.debug(self.user)
-        self.main_frame = ui.element("div")
 
-        if user is None:
-            with self.main_frame:
-                self.login()
-        else:
-            # set repository current_username attribute
-            self.repository.current_username = user.username
-            # instantiate main gui without login
-            with self.main_frame:
-                self.main_gui()
+class DBMiddleware:
+    def __init__(self, app, engine):
+        self.app = app
+        self.engine = engine
 
-    def login(self):
-        set_colors()
+    async def __call__(self, scope, receive, send):
+        scope['db_engine'] = self.engine
+        await self.app(scope, receive, send)
 
-        with ui.card():
-            ui.label("Login")
-            ui.separator()
-            username_input = ui.input("Username")
-            login_button = ui.button("Login")
+def db_session(request: Request) -> Session:
+    """helper to get DB session from request"""
+    return Session(request.scope['db_engine'])
 
-        login_button.on(
-            "click", lambda: self.on_login_attempt(username_input.value)
-        )
 
-    def main_gui(self):
-        assert self.user is not None
+@ui.page('/')
+def main_gui(request: Request) -> None:
+    set_colors()
 
-        set_colors()
+    if not is_authenticated(request):
+        return RedirectResponse('/login')
+
+    with db_session(request) as session:
+        username = session_info[request.session['id']]['username']
+        user = User.eagerly_get_user(session, username)
+
+        if user is None:  # invalid session-id
+            del request.session['id']
+            ui.open('/login')
 
         header = Header()
-        routines_sidebar = RoutinesSidebar(
-            user=self.user, repository=self.repository
-        )
-        programs_sidebar = ProgramsSidebar(
-            user=self.user, repository=self.repository
-        )
-
+        routines_sidebar = RoutinesSidebar(session, user=user)
         header.routines_button.on("click", routines_sidebar.toggle)
-        header.programs_button.on("click", programs_sidebar.toggle)
 
-    def on_login_attempt(self, username):
-        with self.repository.session() as session:
-            user = self.repository.eagerly_get_user(username, session=session)
+        # programs_sidebar = ProgramsSidebar(
+        #     user=self.user, repository=self.repository
+        # )
+
+        # header.programs_button.on("click", programs_sidebar.toggle)
+
+
+@ui.page('/login')
+def login(request: Request) -> None:
+    set_colors()
+    def on_login_attempt():
+        with db_session(request) as session:
+            user = User.eagerly_get_user(session, username_input.value)
 
         if user is None:
             ui.notify("Invalid username")
         else:
-            self.user = user
-            self.repository.current_username = user.username
-            self.main_frame.clear()
-            with self.main_frame:
-                self.main_gui()
+            session_info[request.session['id']] = {'username': user.username, 'authenticated': True}
             ui.notify("Welcome, " + user.username + "!")
+            ui.open('/')
+
+    # used with --testing for automatically login users
+    if request.app.auto_login is not None:
+        session_info[request.session['id']] = {'username': request.app.auto_login, 'authenticated': True}
+
+    if is_authenticated(request):
+        return RedirectResponse('/')
+    request.session['id'] = str(uuid.uuid4())
+    with ui.card():
+        ui.label("Login")
+        ui.separator()
+        username_input = ui.input("Username")
+        ui.button("Login", on_click=on_login_attempt)
 
 
-def main(repository: Repository, user: Optional[User] = None):
-    RoutineButler(repository, user)
+def main(db_engine, auto_login=None):
+    app.add_middleware(DBMiddleware, engine=db_engine)
+    app.add_middleware(SessionMiddleware, secret_key='Ax5#%$3dgsfd.345dg^$fgd')
+    app.auto_login = auto_login
     ui.run()
