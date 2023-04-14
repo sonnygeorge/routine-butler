@@ -3,3 +3,4 @@ loguru
 sqlmodel
 pytest
 nicegui
+itsdangerous

@@ -1,38 +1,3 @@
-from typing import Any, Optional
-
-from sqlmodel import Session, SQLModel, create_engine
-from sqlalchemy.orm import joinedload
-
-from routine_butler.database.models import User
-
-
-class Repository:
-    """A singleton object that contains the database engine and provides any
-    helpful "repository"-style methods to reduce code duplication."""
-
-    current_username: Optional[str] = None
-
-    def __init__(self):
-        self.engine = None
-
-    def create_db(self, url: str):
-        self.engine = create_engine(url)
-        SQLModel.metadata.create_all(self.engine)
-
-    def session(self):
-        """Returns a new session given the engine"""
-        return Session(self.engine)
-
-    def eagerly_get_user(
-        self, username: str, session: Session
-    ) -> Optional[User]:
-        """Eagerly loads a user from the database (with all of their subsequent
-        data) given a username. Returns None if no such username in DB."""
-        return session.get(
-            User, username, options=[joinedload("*")], populate_existing=True
-        )
-
-
 ## OLD CODE
 
 # """database module
