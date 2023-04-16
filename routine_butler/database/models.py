@@ -78,7 +78,7 @@ class Routine(SQLModel, table=True):
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
     # Parent
-    user_username: Optional[int] = Field(default=None, foreign_key="user.username")
+    user_username: Optional[str] = Field(default=None, foreign_key="user.username")
     user: Optional[User] = Relationship(
         back_populates="routines",
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,

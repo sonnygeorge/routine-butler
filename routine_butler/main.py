@@ -10,10 +10,11 @@ from sqlmodel import Session
 
 
 from .elements.header import Header
-from routine_butler.elements.routines_sidebar import RoutinesSidebar
+from routine_butler.elements.routines_sidebar import routine_sidebar
 # from routine_butler.elements.programs_sidebar import ProgramsSidebar
 from .database.models import User
 from .utils.constants import clrs
+from .controller import RoutineCtl
 
 
 # session info keeps track of logged-in user
@@ -50,6 +51,8 @@ def db_session(request: Request) -> Session:
     return Session(request.scope['db_engine'])
 
 
+
+
 @ui.page('/')
 def main_gui(request: Request) -> None:
     set_colors()
@@ -66,7 +69,8 @@ def main_gui(request: Request) -> None:
             ui.open('/login')
 
         header = Header()
-        routines_sidebar = RoutinesSidebar(session, user=user)
+        routine_ctl = RoutineCtl(request.scope['db_engine'], user.username)
+        routines_sidebar = routine_sidebar(routine_ctl, user)
         header.routines_button.on("click", routines_sidebar.toggle)
 
         # programs_sidebar = ProgramsSidebar(
@@ -79,6 +83,8 @@ def main_gui(request: Request) -> None:
 @ui.page('/login')
 def login(request: Request) -> None:
     set_colors()
+
+    # process submited login form
     def on_login_attempt():
         with db_session(request) as session:
             user = User.eagerly_get_user(session, username_input.value)
@@ -90,6 +96,7 @@ def login(request: Request) -> None:
             ui.notify("Welcome, " + user.username + "!")
             ui.open('/')
 
+    # set cookie session ID
     if 'id' not in request.session:
         request.session['id'] = str(uuid.uuid4())
 
@@ -97,9 +104,11 @@ def login(request: Request) -> None:
     if request.app.auto_login is not None:
         session_info[request.session['id']] = {'username': request.app.auto_login, 'authenticated': True}
 
+    # if user already authenticated, redirect to main page before displaying login form
     if is_authenticated(request):
         return RedirectResponse('/')
 
+    # UI
     with ui.card():
         ui.label("Login")
         ui.separator()
