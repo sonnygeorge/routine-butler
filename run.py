@@ -7,8 +7,8 @@ from sqlmodel import Session, SQLModel, create_engine
 from nicegui import app
 
 from routine_butler.main import main
-from routine_butler.database import models  # required to create schema
-from routine_butler.database.models import User, Program
+from routine_butler.model import model  # required to create schema
+from routine_butler.model.model import User, Program
 
 
 TEST_DB_URL = "sqlite:///test_db.sqlite"

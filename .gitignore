@@ -162,6 +162,7 @@ cython_debug/
 # Dev database
 db.sqlite
 test_db.sqlite
+unit_test_db.sqlite
 
 # DS_Store
 .DS_Store

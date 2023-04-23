@@ -4,7 +4,7 @@ from datetime import datetime
 from nicegui import ui
 
 from routine_butler.elements.primitives.svg import SVG
-from routine_butler.utils.constants import clrs
+from routine_butler.utils.constants import clrs  # TODO: use
 
 BUTTON_STYLE = "height: 45px; width: 45px;"
 APP_NAME = "RoutineButler"
@@ -18,6 +18,9 @@ DATE_SIZE = ".7rem"
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROUTINE_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/routine-icon.svg")
 PROGRAM_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/program-icon.svg")
+
+
+# TODO: could be functions?
 
 
 class Clock(ui.column):

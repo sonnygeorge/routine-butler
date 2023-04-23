@@ -1,15 +1,15 @@
-from sqlmodel import Session
+# from sqlmodel import Session
 
-from routine_butler.database.repository import Repository
-from routine_butler.database.models import User
-
-
-TEST_USER_USERNAME = "test"
+# from routine_butler.database.repository import Repository
+# from routine_butler.database.models import User
 
 
-class TestRepository:
-    def test_engine_created(self, repository: Repository):
-        assert repository.engine is not None
+# TEST_USER_USERNAME = "test"
+
+
+# class TestRepository:
+#     def test_engine_created(self, repository: Repository):
+#         assert repository.engine is not None
 
 
 ## OLD CODE

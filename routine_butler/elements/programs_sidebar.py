@@ -1,16 +1,14 @@
 from nicegui import ui
 
-from routine_butler.database.models import User
-from routine_butler.database.repository import Repository
+from routine_butler.model.model import User
 
 DRAWER_WIDTH = "300"
 DRAWER_BREAKPOINT = "0"
 V_SPACE = 4
 
 class ProgramsSidebar(ui.right_drawer):
-    def __init__(self, user: User, repository: Repository):
+    def __init__(self, user: User):
         self.user = user
-        self.repository = repository
 
         super().__init__()
         self.classes(f"space-y-{V_SPACE} text-center py-0")

@@ -1,40 +1,29 @@
 import os
 
-from sqlmodel import Session, SQLModel
+from sqlmodel import create_engine, Session, SQLModel
 import pytest
 
-from routine_butler.database import models
-from routine_butler.database.repository import Repository
+from routine_butler.model import model
 
 
-TEST_DB_URL = "sqlite:///test_db.sqlite"
+TEST_DB_URL = "sqlite:///unit_test_db.sqlite"
 TEST_USER_USERNAME = "test"
 
 
 @pytest.fixture(scope="session")
-def repository():
-    repository = Repository()
-    # Delete the test database if it already exists
+def engine():
     if os.path.exists(TEST_DB_URL.split(":///")[1]):
         os.remove(TEST_DB_URL.split(":///")[1])
-    # Create the test database
-    repository.create_db(url=TEST_DB_URL)
-    # Create a test user
-    with repository.session() as session:
-        test_user = models.User(username=TEST_USER_USERNAME)
-        session.add(test_user)
-        session.commit()
-    # Set the repository current_username attribute
-    repository.current_username = TEST_USER_USERNAME
-
-    yield repository
-
-    SQLModel.metadata.drop_all(repository.engine)
+    
+    engine = create_engine(TEST_DB_URL, echo=False)
+    SQLModel.metadata.create_all(engine)
+    yield engine
+    SQLModel.metadata.drop_all(engine)
 
 
 @pytest.fixture(scope="function")
-def session(repository: Repository):
-    connection = repository.engine.connect()
+def session(engine):
+    connection = engine.connect()
     transaction = connection.begin()
     _session = Session(bind=connection)
     yield _session

@@ -5,8 +5,9 @@ ORM models for the app/database
 from enum import Enum
 from typing import List, Optional
 
-from sqlalchemy.orm import joinedload
 from sqlmodel import Field, Relationship, SQLModel, Session
+
+from routine_butler.model.crud_mixin import CRUDMixin
 
 
 PARENT_CHILD_SA_RELATIONSHIP_KWARGS = {
@@ -15,7 +16,7 @@ PARENT_CHILD_SA_RELATIONSHIP_KWARGS = {
 CHILD_PARENT_SA_RELATIONSHIP_KWARGS = {"cascade": "save-update, merge"}
 
 
-class User(SQLModel, table=True):
+class User(SQLModel, CRUDMixin, table=True):
     """SQLModel for "User" objects"""
 
     username: Optional[str] = Field(default="New User", primary_key=True)
@@ -30,15 +31,8 @@ class User(SQLModel, table=True):
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
 
-    @classmethod
-    def eagerly_get_user(cls, session: Session, username: str) -> Optional['User']:
-        """Eagerly loads a user from the database (with all of their subsequent
-        data) given a username. Returns None if no such username in DB."""
-        return session.get(
-            cls, username, options=[joinedload("*")], populate_existing=True)
 
-
-class Program(SQLModel, table=True):
+class Program(SQLModel, CRUDMixin, table=True):
     """SQLModel for "Program" objects"""
 
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
@@ -50,7 +44,9 @@ class Program(SQLModel, table=True):
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
     # Parent
-    user_username: Optional[int] = Field(default=None, foreign_key="user.username")
+    user_username: Optional[int] = Field(
+        default=None, foreign_key="user.username"
+    )
     user: Optional[User] = Relationship(
         back_populates="programs",
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
@@ -60,7 +56,7 @@ class Program(SQLModel, table=True):
         return self.title
 
 
-class Routine(SQLModel, table=True):
+class Routine(SQLModel, CRUDMixin, table=True):
     """SQLModel for "Routine" objects"""
 
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
@@ -78,11 +74,19 @@ class Routine(SQLModel, table=True):
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
     # Parent
-    user_username: Optional[str] = Field(default=None, foreign_key="user.username")
+    user_username: Optional[str] = Field(
+        default=None, foreign_key="user.username"
+    )
     user: Optional[User] = Relationship(
         back_populates="routines",
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
     )
+
+    @classmethod
+    def get_routine(cls, session: Session, id: int) -> Optional["Routine"]:
+        """Returns a routine from the database given an id. Returns None if no
+        such id in DB."""
+        return session.get(cls, id)
 
 
 class PriorityLevel(str, Enum):
@@ -98,7 +102,7 @@ class SoundFrequency(str, Enum):
     PERIODIC = "periodic"
 
 
-class RoutineItem(SQLModel, table=True):
+class RoutineItem(SQLModel, CRUDMixin, table=True):
     """SQLModel for "RoutineItem" objects"""
 
     __tablename__ = "routine_item"
@@ -121,7 +125,7 @@ class RoutineItem(SQLModel, table=True):
     )
 
 
-class Alarm(SQLModel, table=True):
+class Alarm(SQLModel, CRUDMixin, table=True):
     """SQLModel for "Alarm" objects"""
 
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)

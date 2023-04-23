@@ -6,7 +6,7 @@ from nicegui import ui
 from loguru import logger
 
 # import program_plugins
-from routine_butler.database.models import Routine
+from routine_butler.model.model import Routine
 
 
 # TODO: I have realized that the the nomenclature of program plugin is not needed here
