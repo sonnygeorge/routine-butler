@@ -3,7 +3,7 @@ import os
 from sqlmodel import create_engine, Session, SQLModel
 import pytest
 
-from routine_butler.model import model
+from routine_butler.model import models
 
 
 TEST_DB_URL = "sqlite:///unit_test_db.sqlite"

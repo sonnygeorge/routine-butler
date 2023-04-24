@@ -6,7 +6,7 @@ from nicegui import ui
 from loguru import logger
 
 # import program_plugins
-from routine_butler.model.model import Routine
+from routine_butler.model.models import Routine
 
 
 # TODO: I have realized that the the nomenclature of program plugin is not needed here
@@ -71,17 +71,17 @@ class Runner(ui.element):
         return len(self.initialized_plugins_queue) > 0
 
     def run_routine(self, routine: Routine):
-        # sort routine items by order index
-        routine.routine_items.sort(key=lambda x: x.order_index)
+        # sort routine elements by order index
+        routine.elements.sort(key=lambda x: x.order_index)
         # calculate program target times
         target_times = self.generate_program_target_times(routine)
         # get and initialize program plugins
         self.initialized_plugins_queue = []
-        for (routine_item, target_time) in zip(
-            routine.routine_items, target_times
+        for routine_element, target_time in zip(
+            routine.elements, target_times
         ):
             if target_time != OMIT_PROGRAM_FLAG:
-                program = routine_item.program
+                program = routine_element.program
                 plugin = self.get_plugin(program)
                 plugin.initialize(program, target_time)
                 self.initialized_plugins_queue.append(program)
@@ -124,7 +124,7 @@ class Runner(ui.element):
     def generate_program_target_times(
         self, routine: Routine
     ) -> List[Optional[int]]:
-        return [None for _ in routine.routine_items]
+        return [None for _ in routine.elements]
 
     def get_plugin(self, program) -> ProgramPlugin:
         pass

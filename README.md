@@ -1,9 +1,6 @@
 # RoutineButler
 
-
-## 🚀 **1.** Understand the App I am Trying to Build, Its Use-Case, and the Problem it Solves
-
-### 👾 **1.1** What is the App?
+## 👾 What is the App?
 
 `RoutineButler` is an app that:
 
@@ -15,7 +12,7 @@
 
 - 🏋️‍♀️ administers user-set routines with incentives (such as unlocking the box)
 
-### 👾 **1.2** Who would use it?
+## 👾 Who would use it?
 
 First and foremost, the app is for my own use (I have already built raspberry-pi+lockbox+touchscreen kiosk setup).
 
@@ -23,7 +20,7 @@ First and foremost, the app is for my own use (I have already built raspberry-pi
 
 Nevertheless, I am trying to take into consideration the possibility that other people might want to use this app someday as well.
 
-### 👾 **1.3** What does it do?
+## 👾 What does it do?
 
 The app allows users to:
 
@@ -32,14 +29,15 @@ The app allows users to:
 - 💪 have routines administered to them
 - 🔒 lock their phone away as an incentive to complete routines
 
-### 👾 TODO
+## 👾 TODO
 
-- [ ] change nomenclature of routine_items to elements
-- [ ] make elements a json field in routine (and not own table) where order is inferred from the order of the json list
+- [ ] NICEGUI QUESTION - single-use timer w/ progress bar?
+- [ ] NICEGUI QUESTION - latent throttle?
+- [ ] Evaluate strategy for alarm in ui/db anf hook up the two
+- [ ] Get crud mixin roasted?
+- [ ] Evaluate typed dict for dataclasses
 
-### Old ERD Diagram
-
-Here is my idea for the data model / domain model / ERD so far:
+## (OLD) ERD Diagram
 
 ```mermaid
 erDiagram

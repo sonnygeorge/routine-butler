@@ -2,12 +2,16 @@
 ORM models for the app/database
 """
 
-from enum import Enum
 from typing import List, Optional
 
-from sqlmodel import Field, Relationship, SQLModel, Session
+from sqlmodel import Field, Relationship, SQLModel, JSON, ARRAY, Column
 
 from routine_butler.model.crud_mixin import CRUDMixin
+from routine_butler.model.schema import (
+    SoundFrequency,
+    RoutineElement,
+    RoutineReward,
+)
 
 
 PARENT_CHILD_SA_RELATIONSHIP_KWARGS = {
@@ -38,11 +42,6 @@ class Program(SQLModel, CRUDMixin, table=True):
     id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
     title: Optional[str] = Field(default="New Program")
 
-    # Children
-    routine_items: List["RoutineItem"] = Relationship(
-        back_populates="program",
-        sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
-    )
     # Parent
     user_username: Optional[int] = Field(
         default=None, foreign_key="user.username"
@@ -52,9 +51,6 @@ class Program(SQLModel, CRUDMixin, table=True):
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
     )
 
-    def __str__(self):
-        return self.title
-
 
 class Routine(SQLModel, CRUDMixin, table=True):
     """SQLModel for "Routine" objects"""
@@ -63,13 +59,11 @@ class Routine(SQLModel, CRUDMixin, table=True):
     title: Optional[str] = Field(default="New Routine")
     target_duration: Optional[int] = Field(default=10)
     target_duration_enabled: bool = Field(default=False)
+    elements: List[RoutineElement] = Field(default=[], sa_column=Column(JSON))
+    rewards: List[RoutineReward] = Field(default=[], sa_column=Column(JSON))
 
     # Children
     alarms: List["Alarm"] = Relationship(
-        back_populates="routine",
-        sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
-    )
-    routine_items: List["RoutineItem"] = Relationship(
         back_populates="routine",
         sa_relationship_kwargs=PARENT_CHILD_SA_RELATIONSHIP_KWARGS,
     )
@@ -79,48 +73,6 @@ class Routine(SQLModel, CRUDMixin, table=True):
     )
     user: Optional[User] = Relationship(
         back_populates="routines",
-        sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
-    )
-
-    @classmethod
-    def get_routine(cls, session: Session, id: int) -> Optional["Routine"]:
-        """Returns a routine from the database given an id. Returns None if no
-        such id in DB."""
-        return session.get(cls, id)
-
-
-class PriorityLevel(str, Enum):
-    "Enum for a RoutineItem's priority level"
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-
-
-class SoundFrequency(str, Enum):
-    "Enum for a Alarm's sound frequency"
-    CONSTANT = "constant"
-    PERIODIC = "periodic"
-
-
-class RoutineItem(SQLModel, CRUDMixin, table=True):
-    """SQLModel for "RoutineItem" objects"""
-
-    __tablename__ = "routine_item"
-
-    id: Optional[int] = Field(default=None, primary_key=True, nullable=False)
-    order_index: int = Field(default=0)
-    priority_level: PriorityLevel = Field(default=PriorityLevel.MEDIUM)
-    is_reward: bool = Field(default=False)
-
-    # Parents
-    routine_id: Optional[int] = Field(default=None, foreign_key="routine.id")
-    routine: Optional[Routine] = Relationship(
-        back_populates="routine_items",
-        sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
-    )
-    program_id: Optional[int] = Field(default=None, foreign_key="program.id")
-    program: Optional[Program] = Relationship(
-        back_populates="routine_items",
         sa_relationship_kwargs=CHILD_PARENT_SA_RELATIONSHIP_KWARGS,
     )
 

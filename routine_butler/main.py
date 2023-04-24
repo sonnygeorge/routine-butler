@@ -1,5 +1,4 @@
 import uuid
-from typing import Optional
 
 from nicegui import ui, app
 from fastapi import Request
@@ -8,15 +7,11 @@ from starlette.middleware.sessions import SessionMiddleware
 from loguru import logger
 from sqlmodel import Session
 
-
-from .elements.header import Header
-from routine_butler.elements.routines_sidebar import routines_drawer
-
 # from routine_butler.elements.programs_sidebar import ProgramsSidebar
-from .model.model import User
+from routine_butler.elements.routines_sidebar import routines_drawer
+from .model.models import User
 from .utils.constants import clrs
-from .controller import RoutineCtl
-
+from .elements.header import Header
 
 # session info keeps track of logged-in user
 session_info: dict[str, dict] = {}

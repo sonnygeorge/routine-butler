@@ -9,13 +9,16 @@ from fastapi import Request
 from nicegui import ui
 from sqlmodel import Session
 
-from ..model.model import (
+from routine_butler.model.models import (
     Routine,
-    RoutineItem,
     Alarm,
+    User,
+)
+from routine_butler.model.schema import (
+    RoutineElement,
+    RoutineReward,
     SoundFrequency,
     PriorityLevel,
-    User,
 )
 from routine_butler.elements.primitives.svg import SVG
 from routine_butler.elements.primitives.sidebar_expansion import (
@@ -24,8 +27,7 @@ from routine_butler.elements.primitives.sidebar_expansion import (
 
 from routine_butler.utils.constants import clrs, icons  # TODO: use
 
-
-DRAWER_WIDTH = "500"
+DRAWER_WIDTH = "540"
 DRAWER_BREAKPOINT = "0"
 ROUTINE_SVG_SIZE: int = 28
 PROGRAM_SVG_SIZE: int = 21
@@ -39,16 +41,6 @@ REWARD_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/reward-icon.svg")
 V_SPACE = 4
 DFLT_ROW_CLASSES = "justify-evenly items-center w-full px-4 pt-4"
 DFLT_INPUT_PROPS = "standout dense"
-
-
-# TODO:
-# - fix on click listeners for input elements and select elements
-# - actually have program select element select from user's programs
-# - use icon constants
-# - connect everything to the database
-
-# NICEGUI QUESTIONS
-# - single-use timer w/ progress bar?
 
 
 class AlarmRow(ui.row):
@@ -72,59 +64,62 @@ class AlarmRow(ui.row):
                             time_setter.bind_value(time_input)
                             time_setter.on(
                                 "update:model-value",
-                                lambda: self.on_time_change(time_input.value),
+                                lambda: self.handle_time_change(
+                                    time_input.value
+                                ),
                             )
+            # volume knob
+            with ui.element("div").style("width: 10%;").classes("mx-1"):
+                vol_knob = ui.knob(self.alarm.volume, track_color="grey-2")
+                vol_knob.props("size=lg thickness=0.3")
+                with vol_knob:
+                    ui.icon("volume_up").props("size=xs")
+                vol_knob.on(
+                    "change",
+                    lambda: self.handle_change_volume(vol_knob.value),
+                )
+            # sound frequency select
+            with ui.element("div").style("width: 32%;"):
+                sound_frequency_select = ui.select(
+                    [e.value for e in SoundFrequency],
+                    value=self.alarm.sound_frequency,
+                    label="ring frequency",
+                ).props(DFLT_INPUT_PROPS)
+                sound_frequency_select.classes("w-full")
+                sound_frequency_select.on(
+                    "update:model-value",
+                    lambda: self.handle_select_sound_frequency(
+                        sound_frequency_select.value
+                    ),
+                )
+            # toggle switch
+            with ui.element("div").style("width: 34px;").classes("mx-1"):
+                switch = ui.switch().props("dense")
+                switch.on(
+                    "click",
+                    lambda: self.handle_toggle_enabled(switch.value),
+                )
+            # delete button
+            self.delete_button = ui.button()
+            self.delete_button.props("icon=cancel color=negative dense")
+            self.delete_button.on("click", self.handle_delete)
 
-    #             # volume knob
-    #             with ui.element("div").style("width: 10%;").classes("mx-1"):
-    #                 vol_knob = ui.knob(self.alarm.volume, track_color="grey-2")
-    #                 vol_knob.props("size=lg thickness=0.3")
-    #                 with vol_knob:
-    #                     ui.icon("volume_up").props("size=xs")
-    #                 vol_knob.on(
-    #                     "change", lambda: self.on_change_volume(vol_knob.value)
-    #                 )
-
-    #             # sound frequency select
-    #             with ui.element("div").style("width: 32%;"):
-    #                 sound_frequency_select = ui.select(
-    #                     [e.value for e in SoundFrequency],
-    #                     value=self.alarm.sound_frequency,
-    #                     label="ring frequency",
-    #                 ).props(DFLT_INPUT_PROPS)
-    #                 sound_frequency_select.classes("w-full")
-    #                 sound_frequency_select.on(
-    #                     "update:model-value",
-    #                     lambda: self.on_select_sound_frequency(
-    #                         sound_frequency_select.value
-    #                     ),
-    #                 )
-    #             # toggle switch
-    #             with ui.element("div").style("width: 34px;").classes("mx-1"):
-    #                 switch = ui.switch().props("dense")
-    #                 switch.on("click", lambda: self.on_toggle(switch.value))
-    #             # delete button
-    #             self.delete_button = ui.button()
-    #             self.delete_button.props("icon=cancel color=negative dense")
-    #             self.delete_button.on("click", self.on_delete)
-
-    def on_time_change(self, new_time):  # TODO: DB update
+    def handle_time_change(self, new_time):  # TODO: DB update
         self.alarm.set_time(new_time)
 
+    def handle_change_volume(self, new_volume):  # TODO: DB update
+        self.alarm.volume = new_volume
 
-#     def on_change_volume(self, new_volume):  # TODO: DB update
-#         self.alarm.volume = new_volume
+    def handle_select_sound_frequency(self, new_frequency):  # TODO: DB update
+        self.alarm.sound_frequency = new_frequency
 
-#     def on_select_sound_frequency(self, new_frequency):  # TODO: DB update
-#         self.alarm.sound_frequency = new_frequency
+    def handle_toggle_enabled(self, value: bool):  # TODO: DB update
+        self.alarm.enabled = value
 
-#     def on_toggle(self, value: bool):  # TODO: DB update
-#         self.alarm.enabled = value
-
-#     def on_delete(self):  # TODO: DB update
-#         self.parent_element.remove(self)
-#         self.parent_element.update()
-#         del self
+    def handle_delete(self):  # TODO: DB update
+        self.parent_element.remove(self)
+        self.parent_element.update()
+        del self
 
 
 class AlarmsExpansion(SidebarExpansion):
@@ -141,115 +136,22 @@ class AlarmsExpansion(SidebarExpansion):
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
                 self.add_alarm_button = ui.button().props("icon=add")
                 self.add_alarm_button.classes("w-full")
-                self.add_alarm_button.on("click", self.on_add_alarm)
+                self.add_alarm_button.on("click", self.handle_add_alarm)
 
-    def on_add_alarm(self):  # TODO: DB update
+    def handle_add_alarm(self):  # TODO: DB update
         alarm = Alarm()
         self.routine.alarms.append(alarm)
         with self.alarms_frame:
             AlarmRow(alarm, parent_element=self.alarms_frame)
 
 
-class RoutineItemRow(ui.row):
-    def __init__(
-        self,
-        engine,
-        username: str,
-        routine_item: RoutineItem,
-        parent_element: ui.element,
-    ):
-        self.engine = engine
-        self.item_id = routine_item.id
-        self.parent_element = parent_element
-
-        super().__init__()
-        self.classes(DFLT_ROW_CLASSES + " gap-x-0")
-
-        btn_clr = "secondary" if routine_item.is_reward else "primary"
-
-        with self:
-            # number
-            number = ui.element("div").style("width: 5%;")
-            number.classes("mx-0 self-start w-full")
-            number.classes(f"rounded bg-{btn_clr} w-full drop-shadow")
-            with number:
-                lbl = ui.label(f"{routine_item.order_index + 1}.")
-                lbl.style("height: 1.125rem;")
-                lbl.classes("text-white text-center text-xs text-bold")
-                lbl.classes("flex items-center justify-center")
-            # program select
-            with Session(engine) as session:
-                user = User()  # FIXME
-            with ui.element("div").style("width: 32%;"):
-                program_select = ui.select(
-                    {p.id: p.title for p in user.programs},
-                    value=routine_item.program_id,
-                    label="program",
-                ).props(DFLT_INPUT_PROPS)
-                program_select.classes("w-full")
-                program_select.on(
-                    "update:model-value",
-                    lambda: self.on_select_program(program_select.value),
-                )
-            #             # priority level select
-            #             with ui.element("div").style("width: 27%;"):
-            #                 if self.routine_item.is_reward:
-            #                     q_item = ui.element("q-item").props("dense")
-            #                     q_item.style("height: 2.5rem;")
-            #                     cls = "items-center justify-center border-secondary"
-            #                     cls += " rounded w-full border-dotted border-2"
-            #                     q_item.classes(cls)
-            #                     with q_item:
-            #                         SVG(
-            #                             REWARD_SVG_FPATH,
-            #                             size=REWARD_SVG_SIZE,
-            #                             color="#e5e5e5",
-            #                         )
-            #                 else:
-            #                     priority_level_select = ui.select(
-            #                         [e.value for e in PriorityLevel],
-            #                         value=self.routine_item.priority_level,
-            #                         label="priority",
-            #                     ).props(DFLT_INPUT_PROPS)
-            #                     priority_level_select.classes("w-full")
-            #                     priority_level_select.on(
-            #                         "update:model-value",
-            #                         lambda: self.on_select_priority_level(
-            #                             priority_level_select.value
-            #                         ),
-            #                     )
-            # order buttons
-            order_buttons_frame = ui.row().classes("gap-x-1 justify-center")
-            with order_buttons_frame.style("width: 18%;"):
-                self.up_button = ui.button().classes(f"bg-{btn_clr}")
-                self.up_button.props(f"icon=arrow_upward dense")
-                self.down_button = ui.button().classes(f"bg-{btn_clr}")
-                self.down_button.props(f"icon=arrow_downward dense")
-            # delete button
-            with ui.element("div").style("width: 7%;"):
-                self.delete_button = ui.button()
-                self.delete_button.props("icon=cancel color=negative dense")
-
-    def on_select_program(self, new_program: int):
-        with Session(self.engine) as session:
-            routine_item = session.get(RoutineItem, self.item_id)
-            routine_item.program_id = new_program
-            session.add(routine_item)
-            session.commit()
-
-
-#     def on_select_priority_level(self, new_priority_level):  # TODO: DB update
-#         self.routine_item.priority_level = new_priority_level
-
-
-class RoutineItemsExpansion(SidebarExpansion):
+class RoutineElementsExpansion(SidebarExpansion):
     def __init__(self, engine, username: str, routine: Routine):
         self.engine = engine
         self.username = username
         self.routine = routine
-
-        regular_items = [x for x in routine.routine_items if not x.is_reward]
-        self.last_reg_idx = len(regular_items) - 1
+        self.elements = routine.elements
+        self.rewards = routine.rewards
 
         svg_kwargs = {
             "fpath": PROGRAM_SVG_FPATH,
@@ -261,159 +163,205 @@ class RoutineItemsExpansion(SidebarExpansion):
         self.classes("justify-between items-center")
 
         with self:
-            self.items_frame = ui.element("div")
-            self._update_items_frame()
+            self.rows_frame = ui.element("div")
+            self._update_rows_frame()
 
             # bottom buttons
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
-                # add routine item button
-                self.add_routine_item_button = ui.button().props("icon=add")
-                self.add_routine_item_button.classes("w-3/4")
-                self.add_routine_item_button.on("click", self.add_routine_item)
+                # add routine element button
+                self.add_routine_element_button = ui.button().props("icon=add")
+                self.add_routine_element_button.classes("w-3/4")
+                self.add_routine_element_button.on(
+                    "click", self.handle_add_element
+                )
                 # add reward buttom
-                self.add_reward_button = ui.button().classes(
+                self.add_reward_element_button = ui.button().classes(
                     "items-center w-1/5 bg-secondary"
                 )
-                with self.add_reward_button:
+                with self.add_reward_element_button:
                     SVG(REWARD_SVG_FPATH, size=REWARD_SVG_SIZE, color="white")
-                self.add_reward_button.on(
+                self.add_reward_element_button.on(
                     "click",
-                    self.add_reward_item,
+                    self.handle_add_reward,
                 )
 
-    def add_routine_item(self):
-        with Session(self.engine) as session:
-            # increment postceding (reward) routine items' order
-            # indexes to make room for the new routine item
-            # TODO: my temporary expunge fix makes this break so I really just need to rethink it
-            for ri in self.routine.routine_items:
-                if ri.order_index > self.last_reg_idx:
-                    ri.update_in_db(session, order_index=ri.order_index + 1)
-            # create routine item w/ order index of the last_reg_idx + 1
-            if self.routine in session:  # TODO: move into the CRUD methods?
-                session.expunge(self.routine)
-            routine_item = RoutineItem(
-                order_index=self.last_reg_idx + 1, routine=self.routine
-            )
-            # add to db
-            routine_item.add_to_db(session)
-            # update self.last_reg_idx
-            self.last_reg_idx += 1
-            logger.debug(
-                f"Last regular routine item idx now: {self.last_reg_idx}"
-            )
-            if any(ri.is_reward for ri in self.routine.routine_items):
-                # update the frame if an insertion is being made
-                self._update_items_frame()
-            else:
-                # just add the row
-                with self.items_frame:
-                    self._add_row(routine_item)
-
-    def add_reward_item(self):
-        with Session(self.engine) as session:
-            # create reward item with order index of the last item + 1
-            routine_item = RoutineItem(
-                order_index=len(self.routine.routine_items),
-                is_reward=True,
-                routine=self.routine,
-            )
-            # add to db
-            routine_item.add_to_db(session)
-            # update the frame with a new RoutineItemRow
-            with self.items_frame:
-                self._add_row(routine_item)
-
-    def handle_move_item(  # TODO: DB update
-        self, routine_item: RoutineItem, up: bool = False, down: bool = False
-    ):
-        if up or down:
-            index = self.routine.routine_items.index(routine_item)
-            if up and (index == 0 or index == self.last_reg_idx + 1):
-                logger.debug("Cannot move routine item upward")
-                return
-            if down and (
-                index >= len(self.routine.routine_items) - 1
-                or index == self.last_reg_idx
-            ):
-                logger.debug("Cannot move routine item downward")
-                return
-            if up:
-                idx1, idx2 = index - 1, index
-            elif down:
-                idx1, idx2 = index, index + 1
-            with Session(self.engine) as session:
-                self.routine.routine_items[idx1].update_in_db(
-                    session, order_index=idx2
-                )
-                if (
-                    self.routine in session
-                ):  # TODO: move into the CRUD methods?
-                    session.expunge(self.routine)
-                self.routine.routine_items[idx2].update_in_db(
-                    session, order_index=idx1
-                )
-                logger.debug(
-                    f"Swapped routine item order indexes {idx1} & {idx2}"
-                )
-                self._update_items_frame()
-
-    def handle_delete_routine_item(self, routine_item: RoutineItem):
-        with Session(self.engine) as session:
-            # update self.last_reg_idx
-            if not routine_item.is_reward:
-                self.last_reg_idx -= 1
-            # get the order_index of the routine item to be deleted
-            idx = routine_item.order_index
-            # delete the routine item from the db
-            routine_item.delete_from_db(session)
-            self.routine.routine_items.remove(routine_item)
-            # decrement the order idxs of the items postceding the deleted one
-            for routine_item in self.routine.routine_items:
-                if routine_item.order_index > idx:
-                    if (
-                        self.routine in session
-                    ):  # TODO: move into the CRUD methods?
-                        session.expunge(self.routine)
-                    routine_item.update_in_db(
-                        session, order_index=routine_item.order_index - 1
-                    )
-            logger.debug(
-                f"Last regular routine item idx now: {self.last_reg_idx}"
-            )
-            # update ui
-            self._update_items_frame()
-
-    def _update_items_frame(self):
-        """Clear and repopulates the 'div'/frame containing `RoutineItemRow`s
+    def _update_rows_frame(self):
+        """Clear and repopulates the 'div'/frame containing `RoutineElementRow`s
         in order to accomplish internal reording"""
-        # sort routine items in routine object by order index
-        self.routine.routine_items.sort(key=lambda x: x.order_index)
         # remove any rows currently in the frame
-        self.items_frame.clear()
+        self.rows_frame.clear()
         # instantiate new rows within the frame
-        with self.items_frame:
-            for routine_item in self.routine.routine_items:
-                self._add_row(routine_item)
+        with self.rows_frame:
+            for idx, element in enumerate(self.elements):
+                self._add_row(row_idx=idx, row_data=element)
+            for idx, reward in enumerate(self.rewards):
+                self._add_row(
+                    row_idx=len(self.elements) + idx, row_data=reward
+                )
 
-    def _add_row(self, routine_item: RoutineItem):
-        row = RoutineItemRow(
-            engine=self.engine,
-            username=self.username,
-            routine_item=routine_item,
-            parent_element=self.items_frame,
+    def _add_row(
+        self, row_idx: int, row_data: Union[RoutineElement, RoutineReward]
+    ):
+        accent_color = (
+            "primary" if "priority_level" in row_data.keys() else "secondary"
         )
-        row.up_button.on(
-            "click",
-            lambda: self.handle_move_item(routine_item, up=True),
-        )
-        row.down_button.on(
-            "click",
-            lambda: self.handle_move_item(routine_item, down=True),
-        )
-        row.delete_button.on(
-            "click", lambda: self.handle_delete_routine_item(routine_item)
-        )
+
+        with ui.row().classes(DFLT_ROW_CLASSES + " gap-x-0"):
+            # number
+            number = ui.element("div").style("width: 5%;")
+            number.classes("mx-0 self-start w-full")
+            number.classes(f"rounded bg-{accent_color} w-full drop-shadow")
+            with number:
+                lbl = ui.label(f"{row_idx + 1}.")
+                lbl.style("height: 1.125rem;")
+                lbl.classes("text-white text-center text-xs text-bold")
+                lbl.classes("flex items-center justify-center")
+            # program select
+            with Session(self.engine) as session:
+                user = User()  # FIXME
+            with ui.element("div").style("width: 32%;"):
+                program_select = ui.select(
+                    {p.id: p.title for p in user.programs},
+                    value="",
+                    label="program",
+                ).props(DFLT_INPUT_PROPS)
+                program_select.classes("w-full")
+                program_select.on(
+                    "update:model-value",
+                    lambda: self.handle_select_program(
+                        row_idx=row_idx, new_program=program_select.value
+                    ),
+                )
+            # priority level select
+            with ui.element("div").style("width: 27%;"):
+                if "priority_level" in row_data.keys():
+                    priority_level_select = ui.select(
+                        [e.value for e in PriorityLevel],
+                        value=row_data["priority_level"],
+                        label="priority",
+                    ).props(DFLT_INPUT_PROPS)
+                    priority_level_select.classes("w-full")
+                    priority_level_select.on(
+                        "update:model-value",
+                        lambda: self.handle_select_priority(
+                            row_idx=row_idx,
+                            new_priority=priority_level_select.value,
+                        ),
+                    )
+                else:
+                    q_item = ui.element("q-item").props("dense")
+                    q_item.style("height: 2.5rem;")
+                    cls = "items-center justify-center border-secondary"
+                    cls += " rounded w-full border-dotted border-2"
+                    q_item.classes(cls)
+                    with q_item:
+                        SVG(
+                            REWARD_SVG_FPATH,
+                            size=REWARD_SVG_SIZE,
+                            color="#e5e5e5",
+                        )
+            # order movement buttons
+            order_buttons_frame = ui.row().classes("gap-x-1 justify-center")
+            with order_buttons_frame.style("width: 18%;"):
+                up_button = ui.button().classes(f"bg-{accent_color}")
+                up_button.props(f"icon=arrow_upward dense")
+                up_button.on(
+                    "click",
+                    lambda: self.handle_move_row_up(row_idx=row_idx),
+                )
+                down_button = ui.button().classes(f"bg-{accent_color}")
+                down_button.props(f"icon=arrow_downward dense")
+                down_button.on(
+                    "click",
+                    lambda: self.handle_move_row_down(row_idx=row_idx),
+                )
+            # delete button
+            with ui.element("div").style("width: 7%;"):
+                delete_button = ui.button()
+                delete_button.props("icon=cancel color=negative dense")
+                delete_button.on(
+                    "click",
+                    lambda: self.handle_delete_row(row_idx=row_idx),
+                )
+
+    def handle_add_element(self):
+        element = {"priority_level": PriorityLevel.MEDIUM, "program": ""}
+        self.elements.append(element)
+        with Session(self.engine) as session:
+            self.routine.update_in_db(session, elements=self.elements)
+        if len(self.rewards) == 0:
+            with self.rows_frame:
+                self._add_row(row_idx=len(self.elements) - 1, row_data=element)
+        else:
+            self._update_rows_frame()
+
+    def handle_add_reward(self):
+        reward = {"program": ""}
+        self.rewards.append(reward)
+        with Session(self.engine) as session:
+            self.routine.update_in_db(session, rewards=self.rewards)
+        with self.rows_frame:
+            new_row_idx = len(self.elements + self.rewards) - 1
+            self._add_row(row_idx=new_row_idx, row_data=reward)
+
+    def handle_move_row_up(self, row_idx: int):
+        if row_idx == len(self.elements) or row_idx == 0:
+            logger.debug("Cannot move upward")
+            return
+        elif row_idx > len(self.elements):  # reward
+            self.rewards.insert(row_idx - 1, self.rewards.pop(row_idx))
+            with Session(self.engine) as session:
+                self.routine.update_in_db(session, elements=self.elements)
+        else:  # element
+            self.elements.insert(row_idx - 1, self.elements.pop(row_idx))
+            with Session(self.engine) as session:
+                self.routine.update_in_db(session, elements=self.elements)
+        self._update_rows_frame()
+
+    def handle_move_row_down(self, row_idx: int):
+        if (
+            row_idx == len(self.elements) - 1
+            or row_idx == len(self.elements + self.rewards) - 1
+        ):
+            logger.debug("Cannot move downward")
+            return
+        elif row_idx >= len(self.elements):  # reward
+            self.rewards.insert(row_idx + 1, self.rewards.pop(row_idx))
+            with Session(self.engine) as session:
+                self.routine.update_in_db(session, elements=self.elements)
+        else:  # element
+            self.elements.insert(row_idx + 1, self.elements.pop(row_idx))
+            with Session(self.engine) as session:
+                self.routine.update_in_db(session, elements=self.elements)
+        self._update_rows_frame()
+
+    def handle_delete_row(self, row_idx: int):
+        if row_idx >= len(self.elements):  # reward
+            self.rewards.pop(row_idx - len(self.elements))
+            with Session(self.engine) as session:
+                self.routine.update_in_db(session, rewards=self.rewards)
+        else:  # element
+            self.elements.pop(row_idx)
+            with Session(self.engine) as session:
+                self.routine.update_in_db(session, elements=self.elements)
+        self._update_rows_frame()
+
+    def handle_select_program(self, row_idx: int, new_program: int):
+        if row_idx >= len(self.elements):  # reward
+            self.rewards[row_idx - len(self.elements)]["program"] = new_program
+            with Session(self.engine) as session:
+                self.routine.update_in_db(session, rewards=self.rewards)
+        else:  # element
+            self.elements[row_idx]["program"] = new_program
+            with Session(self.engine) as session:
+                self.routine.update_in_db(session, elements=self.elements)
+        self._update_rows_frame()
+
+    def handle_select_priority(self, row_idx: int, new_priority: int):
+        self.elements[row_idx]["priority_level"] = new_priority
+        with Session(self.engine) as session:
+            self.routine.update_in_db(session, elements=self.elements)
+        self._update_rows_frame()
 
 
 class RoutineConfigurer(SidebarExpansion):
@@ -454,9 +402,9 @@ class RoutineConfigurer(SidebarExpansion):
             # alarms expansion
             with ui.row().classes(DFLT_ROW_CLASSES):
                 AlarmsExpansion(routine)
-            # routine items expansion
+            # routine elements expansion
             with ui.row().classes(DFLT_ROW_CLASSES):
-                RoutineItemsExpansion(engine, username, routine)
+                RoutineElementsExpansion(engine, username, routine)
 
             # row for target duration input
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE} no-wrap"):
