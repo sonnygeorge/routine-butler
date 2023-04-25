@@ -36,6 +36,7 @@ The app allows users to:
 - [ ] Get crud mixin roasted?
 - [ ] Evaluate typed dict for dataclasses... [pydantic alternative](https://roman.pt/posts/pydantic-in-sqlalchemy-fields/)
 - [ ] Implement [trailing](https://nicegui.io/documentation/slider#throttle_events_with_leading_and_trailing_options) throttling where appropriate
+- [ ] Add [emoji favicon](https://nicegui.io/documentation#ui_run)
 
 ## (OLD) ERD Diagram
 
