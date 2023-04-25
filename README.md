@@ -35,7 +35,7 @@ The app allows users to:
 - [ ] NICEGUI QUESTION - latent throttle?
 - [ ] Evaluate strategy for alarm in ui/db anf hook up the two
 - [ ] Get crud mixin roasted?
-- [ ] Evaluate typed dict for dataclasses
+- [ ] Evaluate typed dict for dataclasses... [pydantic alternative](https://roman.pt/posts/pydantic-in-sqlalchemy-fields/)
 
 ## (OLD) ERD Diagram
 
