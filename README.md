@@ -36,6 +36,7 @@ The app allows users to:
 - [ ] Evaluate strategy for alarm in ui/db anf hook up the two
 - [ ] Get crud mixin roasted?
 - [ ] Evaluate typed dict for dataclasses... [pydantic alternative](https://roman.pt/posts/pydantic-in-sqlalchemy-fields/)
+- [ ] Implement [trailing](https://nicegui.io/documentation/slider#throttle_events_with_leading_and_trailing_options) throttling where appropriate 
 
 ## (OLD) ERD Diagram
 
