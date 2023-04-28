@@ -1,32 +1,18 @@
 import os
 
-from sqlmodel import create_engine, Session, SQLModel
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.engine.base import Engine
 
-from routine_butler.model import models
+from routine_butler.models.base import SQLAlchemyBase
 
 
-TEST_DB_URL = "sqlite:///unit_test_db.sqlite"
-TEST_USER_USERNAME = "test"
+INTEGRATION_TEST_DB_FPATH = "unit_test_db.sqlite"
 
 
 @pytest.fixture(scope="session")
-def engine():
-    if os.path.exists(TEST_DB_URL.split(":///")[1]):
-        os.remove(TEST_DB_URL.split(":///")[1])
-    
-    engine = create_engine(TEST_DB_URL, echo=False)
-    SQLModel.metadata.create_all(engine)
+def engine() -> Engine:
+    engine = create_engine(f"sqlite:///{INTEGRATION_TEST_DB_FPATH}")
+    SQLAlchemyBase.metadata.create_all(engine)
     yield engine
-    SQLModel.metadata.drop_all(engine)
-
-
-@pytest.fixture(scope="function")
-def session(engine):
-    connection = engine.connect()
-    transaction = connection.begin()
-    _session = Session(bind=connection)
-    yield _session
-    _session.close()
-    transaction.rollback()
-    connection.close()
+    os.remove(INTEGRATION_TEST_DB_FPATH)

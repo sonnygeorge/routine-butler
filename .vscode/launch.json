@@ -15,7 +15,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "justMyCode": true
+            "justMyCode": false
         }
     ]
 }
