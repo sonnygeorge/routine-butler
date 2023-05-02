@@ -34,8 +34,7 @@ The app allows users to:
 - [ ] NICEGUI QUESTION - single-use timer w/ progress bar?
 - [ ] Evaluate typed dict for dataclasses... [pydantic alternative](https://roman.pt/posts/pydantic-in-sqlalchemy-fields/)
 - [ ] Implement [trailing](https://nicegui.io/documentation/slider#throttle_events_with_leading_and_trailing_options) throttling where appropriate
-- [ ] Evaluate/get feedback on UI handlers / object strategy / naming
-- [ ] Add [emoji favicon](https://nicegui.io/documentation#ui_run)
+- [ ] Evaluate/get feedback on UI handlers / object strategy / naming / ui constant centralization strategy
 
 ## (OLD) ERD Diagram
 
