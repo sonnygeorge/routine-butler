@@ -20,7 +20,7 @@ class UserORM(BaseDBORMModel):
 
     USERNAME_LENGTH_LIMIT = 60
 
-    username = Column(String(USERNAME_LENGTH_LIMIT))
+    username = Column(String(USERNAME_LENGTH_LIMIT), unique=True)
 
 
 class User(BaseDBPydanticModel):
@@ -43,14 +43,6 @@ class User(BaseDBPydanticModel):
         except InstanceAlreadyExistsError:
             child.update_self_in_db(engine)
 
-    def add_routine(self, engine: Engine, routine: Routine) -> None:
-        """Adds the given routine to the database"""
-        self._add_child(engine, routine)
-
-    def add_program(self, engine: Engine, program: Program) -> None:
-        """Adds the given program to the database"""
-        self._add_child(engine, program)
-
     def _get_children(
         self,
         engine: Engine,
@@ -59,6 +51,14 @@ class User(BaseDBPydanticModel):
         """Queries the database for all children of the given type"""
         is_child_filter_expr = child_type.Config.orm_model.user_uid == self.uid
         return child_type.query_many(engine, filter_=is_child_filter_expr)
+
+    def add_routine(self, engine: Engine, routine: Routine) -> None:
+        """Adds the given routine to the database"""
+        self._add_child(engine, routine)
+
+    def add_program(self, engine: Engine, program: Program) -> None:
+        """Adds the given program to the database"""
+        self._add_child(engine, program)
 
     def get_routines(self, engine: Engine) -> List[Routine]:
         """Queries the database for all routines belonging to this user"""

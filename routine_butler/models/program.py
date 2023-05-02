@@ -1,12 +1,9 @@
 from typing import Optional
 
 from pydantic import constr
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, String
 
-from routine_butler.models.base import (
-    BaseDBORMModel,
-    BaseDBPydanticModel,
-)
+from routine_butler.models.base import BaseDBORMModel, BaseDBPydanticModel
 
 
 class ProgramORM(BaseDBORMModel):

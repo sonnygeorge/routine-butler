@@ -3,17 +3,15 @@ from datetime import datetime
 
 from nicegui import ui
 
-from routine_butler.elements.primitives.svg import SVG
-from routine_butler.utils.constants import clrs  # TODO: use
+from routine_butler.ui.primitives.svg import SVG
+from routine_butler.ui.constants import HDR_APP_NAME as APP_NAME
+from routine_butler.ui.constants import HDR_APP_NAME_SIZE as APP_NAME_SIZE
+from routine_butler.ui.constants import HDR_BUTTON_STYLE as BUTTON_STYLE
+from routine_butler.ui.constants import HDR_DATE_SIZE as DATE_SIZE
+from routine_butler.ui.constants import HDR_PRGRM_SVG_SIZE as PROGRAMS_SVG_SIZE
+from routine_butler.ui.constants import HDR_RTN_SVG_SIZE as ROUTINES_SVG_SIZE
+from routine_butler.ui.constants import HDR_TIME_SIZE as TIME_SIZE
 
-BUTTON_STYLE = "height: 45px; width: 45px;"
-APP_NAME = "RoutineButler"
-APP_NAME_SIZE = "1.9rem"
-ROUTINES_SVG_SIZE: int = 30
-PROGRAMS_SVG_SIZE: int = 25
-LOGO_SIZE = "2.6rem"
-TIME_SIZE = "1.1rem"
-DATE_SIZE = ".7rem"
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROUTINE_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/routine-icon.svg")

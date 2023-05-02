@@ -14,7 +14,7 @@
 
 ## 👾 Who would use it?
 
-First and foremost, the app is for my own use (I have already built raspberry-pi+lockbox+touchscreen kiosk setup).
+First and foremost, the app is for my own use (I have already built the raspberry-pi+lockbox+touchscreen kiosk setup).
 
 ![picture of the lockbox and kiosk](https://i.imgur.com/64x0Byw.jpeg)
 
@@ -27,15 +27,14 @@ The app allows users to:
 - 📝 configure routines
 - 📝 configure programs
 - 💪 have routines administered to them
-- 🔒 lock their phone away as an incentive to complete routines
+- 🔒 lock something (e.g. the user's phone) away as an incentive to complete routines
 
 ## 👾 TODO
 
 - [ ] NICEGUI QUESTION - single-use timer w/ progress bar?
-- [ ] Evaluate strategy for alarm in ui/db anf hook up the two
-- [ ] Get crud mixin roasted?
 - [ ] Evaluate typed dict for dataclasses... [pydantic alternative](https://roman.pt/posts/pydantic-in-sqlalchemy-fields/)
 - [ ] Implement [trailing](https://nicegui.io/documentation/slider#throttle_events_with_leading_and_trailing_options) throttling where appropriate
+- [ ] Evaluate/get feedback on UI handlers / object strategy / naming
 - [ ] Add [emoji favicon](https://nicegui.io/documentation#ui_run)
 
 ## (OLD) ERD Diagram

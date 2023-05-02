@@ -1,6 +1,4 @@
 rich
 loguru
-sqlmodel
 pytest
 nicegui
-itsdangerous

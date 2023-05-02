@@ -159,13 +159,11 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-# Dev database
-db.sqlite
-test_db.sqlite
-unit_test_db.sqlite
+# databases
+*.sqlite
 
 # DS_Store
 .DS_Store
 
-# my scratch file
-scratch.py
+# scratch files
+*scratch*.py

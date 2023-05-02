@@ -6,7 +6,6 @@ from sqlalchemy.engine.base import Engine
 
 from routine_butler.models.base import SQLAlchemyBase
 
-
 INTEGRATION_TEST_DB_FPATH = "unit_test_db.sqlite"
 
 

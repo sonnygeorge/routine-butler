@@ -1,5 +1,5 @@
 """This module is an implementation of a strategy to interact with a database using
-SQLAlchemy ORM models and Pydantic models. 
+SQLAlchemy ORM models and Pydantic models.
 
 The basic idea of the strategy is to bake the methods for a model's interactions with the
 database into the Pydantic model itself, making them database-"batteries-included".

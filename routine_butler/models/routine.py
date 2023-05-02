@@ -6,7 +6,6 @@ from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String
 
 from routine_butler.models.base import BaseDBORMModel, BaseDBPydanticModel
 
-
 # TODO: change target_duration to target_duration_minutes
 
 
@@ -16,7 +15,10 @@ class SoundFrequency(str, Enum):
     PERIODIC = "periodic"
 
 
-class Alarm(TypedDict):  # FIXME
+class Alarm(TypedDict):
+    time: str
+    enabled: bool
+    volume: float
     sound_frequency: SoundFrequency
 
 
@@ -44,7 +46,7 @@ class RoutineORM(BaseDBORMModel):
     TITLE_LENGTH_LIMIT = 60
 
     title = Column(String(TITLE_LENGTH_LIMIT))
-    target_duration = Column(Integer)
+    target_duration_minutes = Column(Integer)
     target_duration_enabled = Column(Boolean)
     elements = Column(JSON)
     rewards = Column(JSON)
@@ -56,7 +58,7 @@ class Routine(BaseDBPydanticModel):
     """BaseDBPydanticModel model for a Routine"""
 
     title: constr(max_length=RoutineORM.TITLE_LENGTH_LIMIT) = "New Routine"
-    target_duration: int = 10
+    target_duration_minutes: int = 30
     target_duration_enabled: bool = False
     elements: List[RoutineElement] = []
     rewards: List[RoutineReward] = []

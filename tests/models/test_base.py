@@ -6,12 +6,12 @@ from sqlalchemy import Column, String
 from sqlalchemy.engine.base import Engine
 
 from routine_butler.models.base import (
+    AttemptedSetOnReadOnlyFieldError,
     BaseDBORMModel,
     BaseDBPydanticModel,
     DatabaseDeletionFailedError,
     DatabaseUpdateFailedError,
     InstanceAlreadyExistsError,
-    AttemptedSetOnReadOnlyFieldError,
 )
 
 INTEGRATION_TEST_DB_FPATH = "test_database.db"
