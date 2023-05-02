@@ -69,4 +69,4 @@ class MainApp:
 
 def main(engine: Engine, auto_login: Optional[str] = None):
     MainApp(engine, auto_login)
-    ui.run()
+    ui.run(favicon="🚀")
