@@ -1,4 +1,5 @@
-rich
 loguru
-pytest
 nicegui
+pre-commit
+pytest
+rich
