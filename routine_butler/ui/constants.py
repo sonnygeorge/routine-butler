@@ -1,4 +1,5 @@
 """A central location for stylistic UI constants for quick iteration/experimentation"""
+
 import os
 
 _CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
