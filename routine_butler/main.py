@@ -9,25 +9,22 @@ from routine_butler.ui.header import Header
 from routine_butler.ui.routines_sidebar import routines_sidebar
 
 
-def set_colors():
-    ui.colors(
-        primary=CLR_CODES.primary,
-        secondary=CLR_CODES.secondary,
-        accent=CLR_CODES.accent,
-        positive=CLR_CODES.positive,
-        negative=CLR_CODES.negative,
-        info=CLR_CODES.info,
-        warning=CLR_CODES.warning,
-    )
-
-
 class MainApp:
     def __init__(self, engine: Engine, auto_login: Optional[str] = None):
         self.engine = engine
+
+        ui.colors(
+            primary=CLR_CODES.primary,
+            secondary=CLR_CODES.secondary,
+            accent=CLR_CODES.accent,
+            positive=CLR_CODES.positive,
+            negative=CLR_CODES.negative,
+            info=CLR_CODES.info,
+            warning=CLR_CODES.warning,
+        )
+
         self.header = Header()
         self.main_frame = ui.element("div")
-
-        set_colors()
 
         if auto_login is not None:
             self.handle_login_attempt(username=auto_login)
@@ -39,7 +36,7 @@ class MainApp:
             with ui.card():
                 ui.label("Login")
                 ui.separator()
-                username_input = ui.input("Username")
+                username_input = ui.input("User:")
                 ui.button(
                     "Login",
                     on_click=lambda: self.handle_login_attempt(
