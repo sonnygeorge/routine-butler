@@ -3,7 +3,7 @@ from typing import Callable, Optional, Union
 from nicegui import ui
 
 
-class SidebarExpansion(ui.expansion):
+class IconExpansion(ui.expansion):
     def __init__(
         self,
         title: str,
