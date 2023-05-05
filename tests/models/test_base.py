@@ -157,21 +157,21 @@ def test_basic_query_many(engine: Engine):
     hero2 = Hero()
     hero2.add_self_to_db(engine)
     same_ids_filter_exp = Hero.Config.orm_model.uid.in_([hero1.uid, hero2.uid])
-    qry_result = Hero.query_many(engine, filter_=same_ids_filter_exp)
+    qry_result = Hero.query(engine, filter_=same_ids_filter_exp)
     assert qry_result == [hero1, hero2]
 
 
 def test_basic_query_many_no_filter(engine: Engine):
     hero1 = Hero()
     hero1.add_self_to_db(engine)  # make sure something in db table
-    qry_result = Hero.query_many(engine, limit=3)
+    qry_result = Hero.query(engine, limit=3)
     assert len(qry_result) > 0  # make sure something (anything) is returned
 
 
 def test_query_many_no_matches(engine: Engine):
     impossible_uid = -1
     impossible_uid_filter_exp = Hero.Config.orm_model.uid == impossible_uid
-    assert Hero.query_many(engine, filter_=impossible_uid_filter_exp) == []
+    assert Hero.query(engine, filter_=impossible_uid_filter_exp) == []
 
 
 def test_query_many_order_by(engine: Engine):
@@ -183,7 +183,7 @@ def test_query_many_order_by(engine: Engine):
         uids.append(hero.uid)
     same_ids_filter_exp = Hero.Config.orm_model.uid.in_(uids)
     name_asc_order_by_exp = Hero.Config.orm_model.name.asc()
-    qry_result = Hero.query_many(
+    qry_result = Hero.query(
         engine, filter_=same_ids_filter_exp, order_by=name_asc_order_by_exp
     )
     assert [hero.name for hero in qry_result] == sorted(names)

@@ -9,6 +9,15 @@ from routine_butler.ui.constants import SDBR_V_SPACE as V_SPACE
 from routine_butler.ui.primitives.icon_expansion import IconExpansion
 
 
+DEFAULT_ALARM = {  # since TypedDicts dont's support default values
+    "time": "12:00",
+    "volume": 0.5,
+    "sound_frequency": SoundFrequency.CONSTANT,
+    "enabled": True,
+}
+THROTTLE = 0.5
+
+
 class AlarmsExpansion(IconExpansion):
     def __init__(self, engine: Engine, routine: Routine):
         self.engine = engine
@@ -26,7 +35,9 @@ class AlarmsExpansion(IconExpansion):
                     f"icon={ICON_STRS.add}"
                 )
                 self.add_alarm_button.classes("w-full")
-                self.add_alarm_button.on("click", self.handle_add_alarm)
+
+            # connect handler
+            self.add_alarm_button.on("click", self.handle_add_alarm)
 
     @property
     def num_alarms(self) -> int:
@@ -51,22 +62,12 @@ class AlarmsExpansion(IconExpansion):
                         with ui.menu() as menu:
                             time_setter = ui.time()
                             time_setter.bind_value(time_input)
-                            time_setter.on(
-                                "update:model-value",
-                                lambda: self.handle_time_change(
-                                    row_idx, time_input.value
-                                ),
-                            )  # FIXME: add throttle
             # volume knob
             with ui.element("div").style("width: 10%;").classes("mx-1"):
                 vol_knob = ui.knob(value=alarm["volume"], track_color="grey-2")
                 vol_knob.props("size=lg thickness=0.3")
                 with vol_knob:
                     ui.icon("volume_up").props("size=xs")
-                vol_knob.on(
-                    "change",
-                    lambda: self.handle_change_volume(row_idx, vol_knob.value),
-                )
             # sound frequency select
             with ui.element("div").style("width: 32%;"):
                 sound_frequency_select = ui.select(
@@ -75,40 +76,45 @@ class AlarmsExpansion(IconExpansion):
                     label="ring frequency",
                 ).props(DFLT_INPUT_PRPS)
                 sound_frequency_select.classes("w-full")
-                sound_frequency_select.on(
-                    "update:model-value",
-                    lambda: self.handle_select_sound_frequency(
-                        row_idx, sound_frequency_select.value
-                    ),
-                )
             # toggle switch
             with ui.element("div").style("width: 34px;").classes("mx-1"):
                 switch = ui.switch().props("dense")
                 switch.value = alarm["enabled"]
-                switch.on(
-                    "click",
-                    lambda: self.handle_toggle_enabled(row_idx, switch.value),
-                )
             # delete button
-            self.delete_button = ui.button()
-            self.delete_button.props(
+            delete_button = ui.button()
+            delete_button.props(
                 f"icon={ICON_STRS.delete} color=negative dense"
             )
-            self.delete_button.on(
-                "click", lambda: self.handle_delete_alarm(row_idx)
-            )
+
+        # connect handlers to elements
+        time_setter.on(
+            "update:model-value",
+            lambda: self.handle_time_change(row_idx, time_input.value),
+            throttle=THROTTLE,
+        )
+        vol_knob.on(
+            "change",
+            lambda: self.handle_change_volume(row_idx, vol_knob.value),
+            throttle=THROTTLE,
+        )
+        sound_frequency_select.on(
+            "update:model-value",
+            lambda: self.handle_select_sound_frequency(
+                row_idx, sound_frequency_select.value
+            ),
+        )
+        switch.on(
+            "click",
+            lambda: self.handle_toggle_enabled(row_idx, switch.value),
+        )
+        delete_button.on("click", lambda: self.handle_delete_alarm(row_idx))
 
     def handle_add_alarm(self):
-        alarm = {
-            "time": "12:00",
-            "volume": 0.5,
-            "sound_frequency": SoundFrequency.CONSTANT,
-            "enabled": True,
-        }
-        self.routine.alarms.append(alarm)
+        new_alarm = DEFAULT_ALARM.copy()
+        self.routine.alarms.append(new_alarm)
         self.routine.update_self_in_db(self.engine)
         with self.alarms_frame:
-            self._add_ui_row(row_idx=self.num_alarms - 1, alarm=alarm)
+            self._add_ui_row(row_idx=self.num_alarms - 1, alarm=new_alarm)
 
     def handle_time_change(self, row_idx: int, new_time: str):
         self.routine.alarms[row_idx]["time"] = new_time

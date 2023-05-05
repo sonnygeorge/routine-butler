@@ -13,8 +13,8 @@ TEST_USER_USERNAME = "test"
 
 if __name__ in {"__main__", "__mp_main__"}:
     # Define the "--testing" cli argument
-    parser = argparse.ArgumentParser(description="Runs RoutineButler")  # FIXME
-    help = "If used, the app will be run with a test database w/ a single fake test user"
+    parser = argparse.ArgumentParser(description="Runs RoutineButler")
+    help = "If used, the app will run with a test database and auto-login w/ a test user"
     parser.add_argument("--testing", action="store_true", help=help)
 
     # Parse the arguments
@@ -24,9 +24,6 @@ if __name__ in {"__main__", "__mp_main__"}:
         # Create a test database
         engine = create_engine(TEST_DB_URL)
         SQLAlchemyBase.metadata.create_all(engine)
-
-        # # Add deletion of test database metadata to handlers of app shutdown
-        # app.on_shutdown(lambda: SQLAlchemyBase.metadata.drop_all(engine))
 
         # Run the app
         main(engine, auto_login=TEST_USER_USERNAME)

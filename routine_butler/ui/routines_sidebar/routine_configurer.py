@@ -49,10 +49,6 @@ class RoutineConfigurer(IconExpansion):
                 # save button
                 title_save_button = ui.button().props(f"icon={ICON_STRS.save}")
                 title_save_button.classes("w-1/5")
-                title_save_button.on(
-                    "click",
-                    lambda: self.handle_title_update(self.title_input.value),
-                )
 
             # alarms expansion
             with ui.row().classes(DFLT_ROW_CLASSES):
@@ -69,12 +65,6 @@ class RoutineConfigurer(IconExpansion):
                 target_duration_slider = ui.slider(
                     min=0, max=120, value=routine.target_duration_minutes
                 ).classes("w-1/3")
-                target_duration_slider.on(
-                    "change",
-                    lambda: self.handle_target_duration_update(
-                        target_duration_slider.value
-                    ),
-                )
                 # target duration label
                 target_duration_label = ui.label().style("width: 35px;")
                 target_duration_label.bind_text_from(
@@ -89,26 +79,37 @@ class RoutineConfigurer(IconExpansion):
                 target_duration_enabled_switch.value = (
                     routine.target_duration_enabled
                 )
-                target_duration_enabled_switch.on(
-                    "click",
-                    lambda: self.handle_target_duration_enabled_update(
-                        target_duration_enabled_switch.value
-                    ),
-                )
             # bottom buttons
             ui.separator()
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
-                # start routine
+                # start routine button
                 self.start_button = ui.button().classes("w-3/4")
                 self.start_button.props(
                     f"icon={ICON_STRS.play} color=positive"
                 )
-                # delete routine
+                # delete routine button
                 self.delete_button = ui.button().classes("w-1/5")
                 self.delete_button.props(
                     f"icon={ICON_STRS.delete} color=negative"
                 )
-                self.delete_button.on("click", self.handle_delete)
+
+        # connect handlers to elements
+        title_save_button.on(
+            "click", lambda: self.handle_title_update(self.title_input.value)
+        )
+        target_duration_slider.on(
+            "change",
+            lambda: self.handle_target_duration_update(
+                target_duration_slider.value
+            ),
+        )
+        target_duration_enabled_switch.on(
+            "click",
+            lambda: self.handle_target_duration_enabled_update(
+                target_duration_enabled_switch.value
+            ),
+        )
+        self.delete_button.on("click", self.handle_delete)
 
     def handle_title_update(self, new_title):
         # update the title column in the db

@@ -6,7 +6,12 @@ from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String
 
 from routine_butler.models.base import BaseDBORMModel, BaseDBPydanticModel
 
-# TODO: change target_duration to target_duration_minutes
+
+# NOTE: the reason why Alarm and RoutineElement are not their own tables in the
+# db is simply *PERSONAL PREFERENCE* based loosely on the following:
+
+# - RoutineElement: removes need manage bi-parental foreign keys to Routine & Program
+# - Alarm: consistency w/ RoutineElement
 
 
 class SoundFrequency(str, Enum):

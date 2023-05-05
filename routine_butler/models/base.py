@@ -33,8 +33,9 @@ Usage:
 import datetime
 import sys
 import warnings
-from typing import List, Optional, Protocol, Self
+from typing import List, Optional, Protocol, Self, Union
 
+from loguru import logger
 from pydantic import BaseModel
 from sqlalchemy import Column, DateTime, Integer
 from sqlalchemy.engine.base import Engine
@@ -42,6 +43,31 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.elements import BinaryExpression, UnaryExpression
+
+# define and add custom log level for database events
+DB_EVENT_LOG_LVL = "DB EVENT"
+logger.level(DB_EVENT_LOG_LVL, no=33, color="<magenta>")
+
+
+def log_db_event(
+    class_name: str,
+    method_name: str,
+    uid: Optional[Union[str, int]] = None,
+) -> None:
+    """Logs a database event.
+
+    Args:
+        class_name (str): The name of the BaseDBPydanticModel class that the event is
+            associated with.
+        method_name (str): The name of the method that the event is associated with.
+        uid (Optional[Union[str, int]], optional): The uid (if applicable) of the
+            instance that the event is associated with. Defaults to None.
+    """
+    if uid is not None:
+        str_to_be_logged = f"{class_name}(uid:{uid}) - {method_name}()"
+    else:
+        str_to_be_logged = f"{class_name} - {method_name}()"
+    logger.log(DB_EVENT_LOG_LVL, str_to_be_logged)
 
 
 class AttemptedSetOnReadOnlyFieldError(Exception):
@@ -185,7 +211,7 @@ class BaseDBPydanticModel(BaseModel):
             Optional[Self]: The first result of the query, or None if no results.
         """
         cls._validate_orm_model()
-        results = cls.query_many(engine, filter_=filter_, limit=2)
+        results = cls.query(engine, filter_=filter_, limit=2)
         if len(results) > 1:
             warnings.warn(
                 "query_one() called with a `filter_` argument that returned multiple "
@@ -194,7 +220,7 @@ class BaseDBPydanticModel(BaseModel):
         return results[0] if results else None
 
     @classmethod
-    def query_many(
+    def query(
         cls,
         engine: Engine,
         filter_: Optional[BinaryExpression] = None,
@@ -213,6 +239,7 @@ class BaseDBPydanticModel(BaseModel):
         Returns:
             List[Self]: The results of the query, or an empty list if no results.
         """
+        log_db_event(cls.__name__, "query")
         cls._validate_orm_model()
         if order_by is None:
             order_by = cls.Config.orm_model.created_at.asc()
@@ -231,6 +258,7 @@ class BaseDBPydanticModel(BaseModel):
         Returns:
             None
         """
+        log_db_event(self.__class__.__name__, "add_self_to_db", self.uid)
         self._validate_orm_model()
         with Session(engine) as session:
             orm_model_instance = self._to_orm()
@@ -253,6 +281,7 @@ class BaseDBPydanticModel(BaseModel):
         Returns:
             None
         """
+        log_db_event(self.__class__.__name__, "update_self_in_db", self.uid)
         self._validate_orm_model()
         updates_to_make = self.dict()
         updates_to_make["updated_at"] = now()
@@ -283,6 +312,7 @@ class BaseDBPydanticModel(BaseModel):
         Returns:
             None
         """
+        log_db_event(self.__class__.__name__, "delete_self_from_db", self.uid)
         self._validate_orm_model()
         with Session(engine) as session:
             rows_affected = (
