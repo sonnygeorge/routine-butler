@@ -12,8 +12,16 @@ STROKE_PATTERN = re.compile(r"(?<=stroke:)\s*(.*?)(?=;|\")")
 
 def update_svg_attributes(
     svg: str, size: Optional[int] = None, color: Optional[str] = None
-):
-    """Updates the height, width, fill, and stroke attributes of an svg string"""
+) -> str:
+    """Updates the height, width, fill, and stroke attributes of an svg string
+
+    Args:
+        svg (str): svg string
+        size (Optional[int], optional): size in pixels. Defaults to None.
+        color (Optional[str], optional): color in hex or rgb. Defaults to None.
+    Returns:
+        str: updated svg string
+    """
     if size is not None:
         if re.search(HEIGHT_PATTERN, svg):
             svg = HEIGHT_PATTERN.sub(f'height="{size}"', svg)
@@ -42,12 +50,17 @@ def update_svg_attributes(
 
 
 class SVG(ui.html):
-    """Wraps nicegui.ui.html for reading an svg from a file and setting its
-    height and width to the size parameter"""
-
     def __init__(
         self, fpath: Union[str, os.PathLike], size: int, color: str = "white"
     ):
+        """Custom element that renders an svg file with the given size and color
+
+        Args:
+            fpath (Union[str, os.PathLike]): path to svg file
+            size (int): size of svg
+            color (str, optional): color of svg. Defaults to "white".
+        """
+
         with open(fpath) as f:
             svg = f.read()
 

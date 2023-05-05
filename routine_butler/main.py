@@ -6,11 +6,18 @@ from sqlalchemy.engine import Engine
 from routine_butler.models.user import User
 from routine_butler.ui.constants import CLR_CODES
 from routine_butler.ui.header import Header
-from routine_butler.ui.routines_sidebar import routines_sidebar
+from routine_butler.ui.routines_sidebar.routines_sidebar import routines_sidebar
 
 
 class MainApp:
     def __init__(self, engine: Engine, auto_login: Optional[str] = None):
+        """Main app class
+
+        Args:
+            engine (Engine): sqlalchemy engine for db connection
+            auto_login (Optional[str]): username to auto login. Defaults to None.
+        """
+
         self.engine = engine
 
         ui.colors(
@@ -38,11 +45,10 @@ class MainApp:
                 ui.label("Login")
                 ui.separator()
                 username_input = ui.input("User:")
-                ui.button(
-                    "Login",
-                    on_click=lambda: self.handle_login_attempt(
-                        username_input.value
-                    ),
+                btn = ui.button("Login")
+                btn.on(
+                    "click",
+                    lambda: self.handle_login_attempt(username_input.value),
                 )
 
     def main_gui(self, user):
