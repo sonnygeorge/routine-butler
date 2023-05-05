@@ -1,4 +1,10 @@
 """A central location for stylistic UI constants for quick iteration/experimentation"""
+import os
+
+_CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
+ABS_ROUTINE_SVG_PATH = os.path.join(_CURRENT_DIR, "../assets/routine-icon.svg")
+ABS_PROGRAM_SVG_PATH = os.path.join(_CURRENT_DIR, "../assets/program-icon.svg")
+ABS_REWARD_SVG_PATH = os.path.join(_CURRENT_DIR, "../assets/reward-icon.svg")
 
 
 class ICON_STRS:  # Quasar material icons
@@ -63,7 +69,6 @@ SDBR_DFLT_INPUT_PRPS: str = "standout dense"
 
 # routines sidebar
 RTNS_SDBR_WIDTH: str = "540"
-
 
 # a quick script to display ICON_STRS and CLR_CODES in a nicegui app
 if __name__ in {"__main__", "__mp_main__"}:
