@@ -1,9 +1,12 @@
-import os
 from datetime import datetime
 
 from nicegui import ui
 
 from routine_butler.ui.primitives.svg import SVG
+from routine_butler.ui.constants import (
+    ABS_PROGRAM_SVG_PATH,
+    ABS_ROUTINE_SVG_PATH,
+)
 from routine_butler.ui.constants import HDR_APP_NAME as APP_NAME
 from routine_butler.ui.constants import HDR_APP_NAME_SIZE as APP_NAME_SIZE
 from routine_butler.ui.constants import HDR_BUTTON_STYLE as BUTTON_STYLE
@@ -11,14 +14,6 @@ from routine_butler.ui.constants import HDR_DATE_SIZE as DATE_SIZE
 from routine_butler.ui.constants import HDR_PRGRM_SVG_SIZE as PROGRAMS_SVG_SIZE
 from routine_butler.ui.constants import HDR_RTN_SVG_SIZE as ROUTINES_SVG_SIZE
 from routine_butler.ui.constants import HDR_TIME_SIZE as TIME_SIZE
-
-
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-ROUTINE_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/routine-icon.svg")
-PROGRAM_SVG_FPATH = os.path.join(CURRENT_DIR, "../assets/program-icon.svg")
-
-
-# TODO: could be functions?
 
 
 class Clock(ui.column):
@@ -59,7 +54,7 @@ class Header(ui.header):
                 self.routines_button = ui.button()
                 self.routines_button.style(BUTTON_STYLE)
                 with self.routines_button:
-                    SVG(ROUTINE_SVG_FPATH, ROUTINES_SVG_SIZE, color="white")
+                    SVG(ABS_ROUTINE_SVG_PATH, ROUTINES_SVG_SIZE, color="white")
                 # app name
                 ui.label(APP_NAME).style(f"font-size: {APP_NAME_SIZE}")
             with right_content:
@@ -69,4 +64,4 @@ class Header(ui.header):
                 self.programs_button = ui.button()
                 self.programs_button.style(BUTTON_STYLE)
                 with self.programs_button:
-                    SVG(PROGRAM_SVG_FPATH, PROGRAMS_SVG_SIZE, color="white")
+                    SVG(ABS_PROGRAM_SVG_PATH, PROGRAMS_SVG_SIZE, color="white")

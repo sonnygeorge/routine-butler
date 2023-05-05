@@ -6,7 +6,9 @@ from sqlalchemy.engine import Engine
 from routine_butler.models.user import User
 from routine_butler.ui.constants import CLR_CODES
 from routine_butler.ui.header import Header
-from routine_butler.ui.routines_sidebar.routines_sidebar import routines_sidebar
+from routine_butler.ui.routines_sidebar.routines_sidebar import (
+    routines_sidebar,
+)
 
 
 class MainApp:
