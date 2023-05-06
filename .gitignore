@@ -167,3 +167,4 @@ cython_debug/
 
 # scratch files
 *scratch*.py
+*scratch*.md
