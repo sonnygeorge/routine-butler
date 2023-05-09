@@ -3,3 +3,4 @@ nicegui
 pre-commit
 pytest
 rich
+sqlalchemy
