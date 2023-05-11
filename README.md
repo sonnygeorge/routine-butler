@@ -31,6 +31,14 @@ The app allows users to:
 
 ## 👾 TODO
 
+- [ ] Add **views folder** and add views: configure_routines, configure_programs, administer_routines, login, home
+- [ ] **components folder** with components
+- [ ] **components/primitives** folder with primitives
+- [ ] **components/micro** folder with microcomponents
+- [ ] **state object** w/ header, engine, and user ... (clean up main)
+
+...
+
 - [ ] Evaluate typed dict for dataclasses... [pydantic alternative](https://roman.pt/posts/pydantic-in-sqlalchemy-fields/)
 - [ ] Evaluate/get feedback on UI handlers / object strategy / naming / ui constant centralization strategy
 - [ ] UI tests using: [screen.py](https://github.com/zauberzeug/nicegui/blob/main/tests/screen.py#L85)

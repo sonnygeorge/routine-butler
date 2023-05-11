@@ -4,6 +4,16 @@ from loguru import logger
 from nicegui import ui
 from sqlalchemy.engine import Engine
 
+from routine_butler.constants import (
+    ABS_PROGRAM_SVG_PATH,
+    ABS_REWARD_SVG_PATH,
+    ICON_STRS,
+    PROGRAM_SVG_SIZE,
+    REWARD_SVG_SIZE,
+)
+from routine_butler.constants import SDBR_DFLT_INPUT_PRPS as DFLT_INPUT_PRPS
+from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
+from routine_butler.constants import SDBR_V_SPACE as V_SPACE
 from routine_butler.models.routine import (
     PriorityLevel,
     Routine,
@@ -11,19 +21,8 @@ from routine_butler.models.routine import (
     RoutineReward,
 )
 from routine_butler.models.user import User
-from routine_butler.ui.constants import (
-    ABS_PROGRAM_SVG_PATH,
-    ABS_REWARD_SVG_PATH,
-    ICON_STRS,
-    PROGRAM_SVG_SIZE,
-    REWARD_SVG_SIZE,
-)
-from routine_butler.ui.constants import SDBR_DFLT_INPUT_PRPS as DFLT_INPUT_PRPS
-from routine_butler.ui.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
-from routine_butler.ui.constants import SDBR_V_SPACE as V_SPACE
 from routine_butler.ui.primitives.icon_expansion import IconExpansion
 from routine_butler.ui.primitives.svg import SVG
-
 
 # since TypedDicts dont's support default values
 DEFAULT_REWARD = {"program": ""}

@@ -1,13 +1,12 @@
 from nicegui import ui
 from sqlalchemy.engine import Engine
 
+from routine_butler.constants import ICON_STRS
+from routine_butler.constants import SDBR_DFLT_INPUT_PRPS as DFLT_INPUT_PRPS
+from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
+from routine_butler.constants import SDBR_V_SPACE as V_SPACE
 from routine_butler.models.routine import Alarm, Routine, SoundFrequency
-from routine_butler.ui.constants import ICON_STRS
-from routine_butler.ui.constants import SDBR_DFLT_INPUT_PRPS as DFLT_INPUT_PRPS
-from routine_butler.ui.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
-from routine_butler.ui.constants import SDBR_V_SPACE as V_SPACE
 from routine_butler.ui.primitives.icon_expansion import IconExpansion
-
 
 DEFAULT_ALARM = {  # since TypedDicts dont's support default values
     "time": "12:00",
@@ -16,6 +15,14 @@ DEFAULT_ALARM = {  # since TypedDicts dont's support default values
     "enabled": True,
 }
 THROTTLE = 0.5
+
+
+def volume_knob(value: float):
+    vol_knob = ui.knob(value=value, track_color="grey-2")
+    vol_knob.props("size=lg thickness=0.3")
+    with vol_knob:
+        ui.icon("volume_up").props("size=xs")
+    return vol_knob
 
 
 class AlarmsExpansion(IconExpansion):
@@ -64,10 +71,7 @@ class AlarmsExpansion(IconExpansion):
                             time_setter.bind_value(time_input)
             # volume knob
             with ui.element("div").style("width: 10%;").classes("mx-1"):
-                vol_knob = ui.knob(value=alarm["volume"], track_color="grey-2")
-                vol_knob.props("size=lg thickness=0.3")
-                with vol_knob:
-                    ui.icon("volume_up").props("size=xs")
+                vol_knob = volume_knob(alarm["volume"])
             # sound frequency select
             with ui.element("div").style("width: 32%;"):
                 sound_frequency_select = ui.select(

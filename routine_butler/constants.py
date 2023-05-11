@@ -3,9 +3,9 @@
 import os
 
 _CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
-ABS_ROUTINE_SVG_PATH = os.path.join(_CURRENT_DIR, "../assets/routine-icon.svg")
-ABS_PROGRAM_SVG_PATH = os.path.join(_CURRENT_DIR, "../assets/program-icon.svg")
-ABS_REWARD_SVG_PATH = os.path.join(_CURRENT_DIR, "../assets/reward-icon.svg")
+ABS_ROUTINE_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/routine-icon.svg")
+ABS_PROGRAM_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/program-icon.svg")
+ABS_REWARD_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/reward-icon.svg")
 
 
 class ICON_STRS:  # Quasar material icons
