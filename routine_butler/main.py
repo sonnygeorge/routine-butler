@@ -5,6 +5,9 @@ from routine_butler.models.base import SQLAlchemyBase
 from routine_butler.models.user import User
 from routine_butler.state import state
 
+# import views
+from routine_butler.views import *  # noqa: F401, F403
+
 TEST_DB_URL = "sqlite:///test_db.sqlite"
 DB_URL = "sqlite:///db.sqlite"
 TEST_USER_USERNAME = "test"
@@ -15,7 +18,7 @@ def main(testing: bool):
     state.engine = create_engine(db_url)
     SQLAlchemyBase.metadata.create_all(state.engine)
 
-    if testing:
+    if testing:  # automatically log in test user
         # create test user if it doesn't exist
         is_test_user_filter_expr = (
             User.Config.orm_model.username == TEST_USER_USERNAME

@@ -1,8 +1,8 @@
 from nicegui import ui
 
+from routine_butler.components.header import Header
 from routine_butler.models.user import User
 from routine_butler.state import state
-from routine_butler.ui.header import Header
 from routine_butler.utils import apply_color_theme
 
 

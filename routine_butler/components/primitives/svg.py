@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Union, Optional
+from typing import Optional, Union
 
 from nicegui import ui
 
@@ -34,7 +34,7 @@ def update_svg_attributes(
 
     if color is not None:
         if "style=" not in svg:
-            svg = svg.replace("<path", f'<path style=""')
+            svg = svg.replace("<path", '<path style=""')
 
         if re.search(FILL_PATTERN, svg):
             svg = FILL_PATTERN.sub(color, svg)

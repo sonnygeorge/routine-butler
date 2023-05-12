@@ -23,3 +23,11 @@ def redirect_if_not_logged_in():
             ui.open("/login")
 
     ui.timer(0.1, _redirect_if_not_logged_in, once=True)
+
+
+def move_up_in_list(list_: list, idx_to_move: int):
+    list_.insert(idx_to_move - 1, list_.pop(idx_to_move))
+
+
+def move_down_in_list(list_: list, idx_to_move: int):
+    list_.insert(idx_to_move + 1, list_.pop(idx_to_move))

@@ -6,7 +6,6 @@ from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String
 
 from routine_butler.models.base import BaseDBORMModel, BaseDBPydanticModel
 
-
 # NOTE: the reason why Alarm and RoutineElement are not their own tables in the
 # db is simply *PERSONAL PREFERENCE* based loosely on the following:
 
@@ -14,7 +13,7 @@ from routine_butler.models.base import BaseDBORMModel, BaseDBPydanticModel
 # - Alarm: consistency w/ RoutineElement
 
 
-class SoundFrequency(str, Enum):
+class RingFrequency(str, Enum):
     "Enum for a Alarm's sound frequency"
     CONSTANT = "constant"
     PERIODIC = "periodic"
@@ -22,9 +21,9 @@ class SoundFrequency(str, Enum):
 
 class Alarm(TypedDict):
     time: str
-    enabled: bool
+    is_enabled: bool
     volume: float
-    sound_frequency: SoundFrequency
+    ring_frequency: RingFrequency
 
 
 class PriorityLevel(str, Enum):

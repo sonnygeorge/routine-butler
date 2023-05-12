@@ -8,4 +8,4 @@ class State:
     engine: Engine = None
 
 
-state = State()
+state = State()  # instantiate state singleton for the app to import

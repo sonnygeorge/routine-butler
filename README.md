@@ -31,11 +31,11 @@ The app allows users to:
 
 ## 👾 TODO
 
-- [ ] Add **views folder** and add views: configure_routines, configure_programs, administer_routines, login, home
-- [ ] **components folder** with components
-- [ ] **components/primitives** folder with primitives
-- [ ] **components/micro** folder with microcomponents
-- [ ] **state object** w/ header, engine, and user ... (clean up main)
+- [x] Add **views folder** and add views: configure_routines, configure_programs, administer_routines, login, home
+- [x] **components folder** with components
+- [x] **components/primitives** folder with primitives
+- [x] **components/micro** folder with microcomponents
+- [x] **state object** w/ header, engine, and user ... (clean up main)
 
 ...
 
@@ -43,3 +43,5 @@ The app allows users to:
 - [ ] Evaluate/get feedback on UI handlers / object strategy / naming / ui constant centralization strategy
 - [ ] UI tests using: [screen.py](https://github.com/zauberzeug/nicegui/blob/main/tests/screen.py#L85)
 - [x] Implement [trailing](https://nicegui.io/documentation/slider#throttle_events_with_leading_and_trailing_options) throttling where appropriate
+- [ ] Enum for Quasar event names?
+- [ ] Enum for Quasar color aliases?

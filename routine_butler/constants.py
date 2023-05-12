@@ -49,6 +49,9 @@ class CLR_CODES:
     warning = "#d6dd54"
 
 
+# for throttling events that would otherwise fire too often
+THROTTLE_SECONDS = 0.5
+
 # header
 HDR_BUTTON_STYLE = "height: 45px; width: 45px;"
 HDR_APP_NAME = "RoutineButler"
