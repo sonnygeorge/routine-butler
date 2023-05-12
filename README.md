@@ -45,3 +45,4 @@ The app allows users to:
 - [x] Implement [trailing](https://nicegui.io/documentation/slider#throttle_events_with_leading_and_trailing_options) throttling where appropriate
 - [ ] Enum for Quasar event names?
 - [ ] Enum for Quasar color aliases?
+- [ ] Should micro buttons be same file?
