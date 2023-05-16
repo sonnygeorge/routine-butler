@@ -3,11 +3,7 @@ from sqlalchemy.engine import Engine
 
 from routine_butler.components.alarms_expansion import AlarmsExpansion
 from routine_butler.components.elements_expansion import ElementsExpansion
-from routine_butler.components.micro import (
-    delete_button,
-    play_button,
-    target_duration_slider,
-)
+from routine_butler.components import micro
 from routine_butler.components.primitives.icon_expansion import IconExpansion
 from routine_butler.components.primitives.svg import SVG
 from routine_butler.constants import (
@@ -54,7 +50,7 @@ class RoutineConfigurer(IconExpansion):
             with ui.row().classes(DFLT_ROW_CLASSES):
                 ElementsExpansion(engine, user, routine)
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE} no-wrap"):
-                target_duration_slider_ = target_duration_slider(
+                target_duration_slider = micro.target_duration_slider(
                     routine.target_duration_minutes
                 )
                 target_duration_enabled_switch = ui.switch(
@@ -62,16 +58,16 @@ class RoutineConfigurer(IconExpansion):
                 ).props("dense")
             ui.separator()
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
-                self.start_button = play_button().classes("w-3/4")
-                delete_button_ = delete_button().classes("w-1/5")
+                self.start_button = micro.play_button().classes("w-3/4")
+                delete_button = micro.delete_button().classes("w-1/5")
 
         title_save_button.on(
             "click", lambda: self.hdl_title_update(self.title_input.value)
         )
-        target_duration_slider_.on(
+        target_duration_slider.on(
             "change",
             lambda: self.hdl_target_duration_update(
-                target_duration_slider_.value
+                target_duration_slider.value
             ),
         )
         target_duration_enabled_switch.on(
@@ -80,7 +76,7 @@ class RoutineConfigurer(IconExpansion):
                 target_duration_enabled_switch.value
             ),
         )
-        delete_button_.on("click", self.hdl_delete)
+        delete_button.on("click", self.hdl_delete)
 
     def hdl_title_update(self, new_title):
         self.routine.title = new_title

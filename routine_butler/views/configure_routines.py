@@ -1,7 +1,7 @@
 from nicegui import ui
 
 from routine_butler.components.header import Header
-from routine_butler.components.micro.add_button import add_button
+from routine_butler.components import micro
 from routine_butler.components.routine_configurer import RoutineConfigurer
 from routine_butler.constants import RTNS_SDBR_WIDTH as DRAWER_WIDTH
 from routine_butler.constants import SDBR_BREAKPOINT as BREAKPOINT
@@ -44,5 +44,5 @@ def configure_routines():
                     parent_element=routines_frame,
                 )
         ui.separator()
-        add_routine_button = add_button().classes("w-1/2")
+        add_routine_button = micro.add_button().classes("w-1/2")
         add_routine_button.on("click", handle_add_routine)

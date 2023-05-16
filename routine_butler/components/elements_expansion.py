@@ -3,16 +3,7 @@ from typing import Union
 from nicegui import ui
 from sqlalchemy.engine import Engine
 
-from routine_butler.components.micro import (
-    add_button,
-    delete_button,
-    order_buttons,
-    priority_level_select,
-    program_select,
-    reward_button,
-    reward_icon_placeholder,
-    row_superscript,
-)
+from routine_butler.components import micro
 from routine_butler.components.primitives.icon_expansion import IconExpansion
 from routine_butler.components.primitives.svg import SVG
 from routine_butler.constants import ABS_PROGRAM_SVG_PATH, PROGRAM_SVG_SIZE
@@ -52,8 +43,10 @@ class ElementsExpansion(IconExpansion):
             self._update_rows_frame()
 
             with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
-                add_routine_element_button = add_button().classes("w-3/4")
-                add_reward_element_button = reward_button().classes("w-1/5")
+                add_routine_element_button = micro.add_button()
+                add_routine_element_button.classes("w-3/4")
+                add_reward_element_button = micro.reward_button()
+                add_reward_element_button.classes("w-1/5")
             add_routine_element_button.on("click", self.hdl_add_element)
             add_reward_element_button.on("click", self.hdl_add_reward)
 
@@ -69,11 +62,11 @@ class ElementsExpansion(IconExpansion):
         with self.rows_frame:
             for idx, element in enumerate(self.routine.elements):
                 self._add_ui_row(
-                    row_superscript_=idx + 1, routine_element=element
+                    row_superscript=idx + 1, routine_element=element
                 )
             for idx, reward in enumerate(self.routine.rewards):
                 self._add_ui_row(
-                    row_superscript_=self.num_elements + idx + 1,
+                    row_superscript=self.num_elements + idx + 1,
                     routine_element=reward,
                 )
 
@@ -97,7 +90,7 @@ class ElementsExpansion(IconExpansion):
 
     def _add_ui_row(
         self,
-        row_superscript_: int,
+        row_superscript: int,
         routine_element: Union[RoutineElement, RoutineReward],
     ):
         accent_color = (
@@ -105,42 +98,42 @@ class ElementsExpansion(IconExpansion):
         )
 
         with ui.row().classes(DFLT_ROW_CLASSES + " gap-x-0"):
-            row_superscript(row_superscript_, accent_color)
+            micro.row_superscript(row_superscript, accent_color)
             with ui.element("div").style("width: 32%;"):
-                program_select_ = program_select(self.choosable_programs)
+                program_select = micro.program_select(self.choosable_programs)
             with ui.element("div").style("width: 27%;"):
                 if self._is_reward(routine_element):
-                    reward_icon_placeholder()
+                    micro.reward_icon_placeholder()
                 else:
-                    priority_level_select_ = priority_level_select(
+                    priority_level_select = micro.priority_level_select(
                         routine_element["priority_level"]
                     )
-            up_button, down_button = order_buttons(accent_color)
+            up_button, down_button = micro.order_buttons(accent_color)
             with ui.element("div").style("width: 7%;"):
-                delete_button_ = delete_button().props("dense")
+                delete_button = micro.delete_button().props("dense")
 
-            program_select_.on(
+            program_select.on(
                 "update:model-value",
                 lambda: self.hdl_select_program(
-                    row_superscript_, program_select_.value
+                    row_superscript, program_select.value
                 ),
             )
             if not self._is_reward(routine_element):
-                priority_level_select_.on(
+                priority_level_select.on(
                     "update:model-value",
                     lambda: self.hdl_select_priority(
-                        row_superscript_,
-                        priority_level_select_.value,
+                        row_superscript,
+                        priority_level_select.value,
                     ),
                 )
             down_button.on(
-                "click", lambda: self.hdl_move_row_down(row_superscript_)
+                "click", lambda: self.hdl_move_row_down(row_superscript)
             )
             up_button.on(
-                "click", lambda: self.hdl_move_row_up(row_superscript_)
+                "click", lambda: self.hdl_move_row_up(row_superscript)
             )
-            delete_button_.on(
-                "click", lambda: self.hdl_delete_row(row_superscript_)
+            delete_button.on(
+                "click", lambda: self.hdl_delete_row(row_superscript)
             )
 
     def hdl_add_element(self):
