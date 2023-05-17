@@ -11,6 +11,7 @@ from routine_butler.constants import HDR_DATE_SIZE as DATE_SIZE
 from routine_butler.constants import HDR_PRGRM_SVG_SIZE as PROGRAMS_SVG_SIZE
 from routine_butler.constants import HDR_RTN_SVG_SIZE as ROUTINES_SVG_SIZE
 from routine_butler.constants import HDR_TIME_SIZE as TIME_SIZE
+from routine_butler.constants import PagePath
 
 
 class HeaderClock(ui.column):
@@ -50,4 +51,5 @@ class Header(ui.header):
                 with programs_button:
                     SVG(ABS_PROGRAM_SVG_PATH, PROGRAMS_SVG_SIZE, color="white")
 
-        routines_button.on("click", lambda: ui.open("/configure_routines"))
+        routines_button.on("click", lambda: ui.open(PagePath.SET_ROUTINES))
+        programs_button.on("click", lambda: ui.open(PagePath.SET_PROGRAMS))

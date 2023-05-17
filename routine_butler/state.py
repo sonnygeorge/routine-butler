@@ -1,11 +1,30 @@
+from typing import TYPE_CHECKING, Dict, List, Optional, Type
+
 from sqlalchemy.engine import Engine
 
-from routine_butler.models.user import User
+from routine_butler.models.routine import Routine
+from routine_butler.utils import ProgramPlugin, dynamically_get_plugins
+
+if TYPE_CHECKING:
+    from routine_butler.models.program import Program
+    from routine_butler.models.user import User
 
 
 class State:
-    user: User = None
     engine: Engine = None
+    user: "User" = None
+    programs: List["Program"] = []
+    program_titles: List[str] = []
+    plugins: Dict[str, Type[ProgramPlugin]] = dynamically_get_plugins()
+    pending_routine_to_run: Optional[Routine] = None
+
+    def set_user(self, user: "User"):
+        self.user = user
+        self.update_programs()
+
+    def update_programs(self):
+        self.programs = [p for p in self.user.get_programs(self.engine)]
+        self.program_titles = [p.title for p in self.programs]
 
 
-state = State()  # instantiate state singleton for the app to import
+state = State()  # instantiate singleton for the app to import

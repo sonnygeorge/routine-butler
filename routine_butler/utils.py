@@ -1,8 +1,13 @@
+import importlib
+import os
+from typing import TYPE_CHECKING, Dict, Protocol, Type
+
 from nicegui import ui
 
-from routine_butler.constants import CLR_CODES
-from routine_butler.models.user import User
-from routine_butler.state import state
+from routine_butler.constants import ABS_PROGRAMS_DIR_PATH, CLR_CODES, PagePath
+
+if TYPE_CHECKING:
+    from routine_butler.models.user import User
 
 
 def apply_color_theme():
@@ -17,12 +22,18 @@ def apply_color_theme():
     )
 
 
-def redirect_if_not_logged_in():
-    def _redirect_if_not_logged_in():
-        if not isinstance(state.user, User):
-            ui.open("/login")
+def redirect_to_page(
+    page_path: PagePath, n_seconds_before_redirect: float = 0.1
+):
+    def _redirect_to_page():
+        ui.open(page_path)
 
-    ui.timer(0.1, _redirect_if_not_logged_in, once=True)
+    ui.timer(n_seconds_before_redirect, _redirect_to_page, once=True)
+
+
+def redirect_if_user_is_none(user: "User"):
+    if user is None:
+        redirect_to_page(PagePath.LOGIN)
 
 
 def move_up_in_list(list_: list, idx_to_move: int):
@@ -31,3 +42,31 @@ def move_up_in_list(list_: list, idx_to_move: int):
 
 def move_down_in_list(list_: list, idx_to_move: int):
     list_.insert(idx_to_move + 1, list_.pop(idx_to_move))
+
+
+def snake_to_upper_camel(snake_case_str: str) -> str:
+    return "".join(word.capitalize() for word in snake_case_str.split("_"))
+
+
+class ProgramPlugin(Protocol):
+    """Protocol for program types to implement"""
+
+    def administer(self, on_complete: callable):
+        ...
+
+    def dict(self) -> dict:
+        ...
+
+
+def dynamically_get_plugins() -> Dict[str, Type[ProgramPlugin]]:
+    """Dynamically loads all program types from the programs directory"""
+    program_types = {}
+    for file_name in os.listdir(ABS_PROGRAMS_DIR_PATH):
+        if file_name.endswith(".py") and not file_name.startswith("__"):
+            module_name = file_name[:-3]
+            module = importlib.import_module(
+                f"routine_butler.plugins.{module_name}"
+            )
+            class_name = snake_to_upper_camel(module_name)
+            program_types[class_name] = getattr(module, class_name)
+    return program_types

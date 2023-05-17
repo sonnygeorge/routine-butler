@@ -1,5 +1,4 @@
 from nicegui import ui
-from sqlalchemy.engine import Engine
 
 from routine_butler.components import micro
 from routine_butler.components.primitives.icon_expansion import IconExpansion
@@ -8,6 +7,7 @@ from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
 from routine_butler.constants import SDBR_V_SPACE as V_SPACE
 from routine_butler.constants import THROTTLE_SECONDS
 from routine_butler.models.routine import Alarm, RingFrequency, Routine
+from routine_butler.state import state
 
 DEFAULT_ALARM = {  # since TypedDicts dont's support default values
     "time": "12:00",
@@ -18,8 +18,7 @@ DEFAULT_ALARM = {  # since TypedDicts dont's support default values
 
 
 class AlarmsExpansion(IconExpansion):
-    def __init__(self, engine: Engine, routine: Routine):
-        self.engine = engine
+    def __init__(self, routine: Routine):
         self.routine = routine
         super().__init__("Alarms", icon=ICON_STRS.alarm)
 
@@ -80,29 +79,29 @@ class AlarmsExpansion(IconExpansion):
     def hdl_add_alarm(self):
         new_alarm = DEFAULT_ALARM.copy()
         self.routine.alarms.append(new_alarm)
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
         with self.alarms_frame:
             self._add_ui_row(row_idx=self.num_alarms - 1, alarm=new_alarm)
 
     def hdl_time_change(self, row_idx: int, new_time: str):
         self.routine.alarms[row_idx]["time"] = new_time
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
 
     def hdl_change_volume(self, row_idx: int, new_volume: float):
         self.routine.alarms[row_idx]["volume"] = new_volume
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
 
     def hdl_select_ring_frequency(
         self, row_idx: int, new_frequency: RingFrequency
     ):
         self.routine.alarms[row_idx]["ring_frequency"] = new_frequency
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
 
     def hdl_toggle_enabled(self, row_idx: int, value: bool):
         self.routine.alarms[row_idx]["is_enabled"] = value
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
 
     def hdl_delete_alarm(self, row_idx: int):
         self.routine.alarms.pop(row_idx)
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
         self._update_alarms_frame()

@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import List, Optional, TypedDict
 
 from pydantic import constr
@@ -13,7 +13,7 @@ from routine_butler.models.base import BaseDBORMModel, BaseDBPydanticModel
 # - Alarm: consistency w/ RoutineElement
 
 
-class RingFrequency(str, Enum):
+class RingFrequency(StrEnum):
     "Enum for a Alarm's sound frequency"
     CONSTANT = "constant"
     PERIODIC = "periodic"
@@ -26,7 +26,7 @@ class Alarm(TypedDict):
     ring_frequency: RingFrequency
 
 
-class PriorityLevel(str, Enum):
+class PriorityLevel(StrEnum):
     "Enum for a RoutineElement's priority level"
     LOW = "low"
     MEDIUM = "medium"

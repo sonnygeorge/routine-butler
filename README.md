@@ -31,11 +31,15 @@ The app allows users to:
 
 ## 👾 TODO
 
-- [x] Add **views folder** and add views: configure_routines, configure_programs, administer_routines, login, home
-- [x] **components folder** with components
-- [x] **components/primitives** folder with primitives
-- [x] **components/micro** folder with microcomponents
-- [x] **state object** w/ header, engine, and user ... (clean up main)
+- [ ] Use Pydantic instead of Typed Dict!!!!
+- [ ] Change example plugin to prompt continue!!!!
+- [ ] Delete program button!!!!
+
+...
+
+- [ ] Implement crude plugin_config setting
+- [ ] If user is supposed to be doing a routine when app fires up, redirect to where they were in the routine
+- [ ] Implement system that queues routines? (e.g. routine_x is triggered by and alarm at 4:00pm and routine_y is triggered right after at 4:01, it should be activated right after routine_x is completed)
 
 ...
 

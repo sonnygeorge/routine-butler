@@ -28,6 +28,6 @@ def main(testing: bool):
             test_user = User(username=TEST_USER_USERNAME)
             test_user.add_self_to_db(state.engine)
         # set current user to test user
-        state.user = test_user
+        state.set_user(test_user)
 
     ui.run(favicon="🚀")

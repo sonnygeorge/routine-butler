@@ -1,7 +1,6 @@
 from typing import Union
 
 from nicegui import ui
-from sqlalchemy.engine import Engine
 
 from routine_butler.components import micro
 from routine_butler.components.primitives.icon_expansion import IconExpansion
@@ -15,20 +14,17 @@ from routine_butler.models.routine import (
     RoutineElement,
     RoutineReward,
 )
-from routine_butler.models.user import User
+from routine_butler.state import state
 from routine_butler.utils import move_down_in_list, move_up_in_list
 
 # since TypedDicts dont's support default values
 DEFAULT_REWARD = {"program": ""}
-DEFAULT_ELEMENT = {"priority_level": PriorityLevel.MEDIUM, "reward": ""}
+DEFAULT_ELEMENT = {"priority_level": PriorityLevel.MEDIUM, "program": ""}
 
 
 class ElementsExpansion(IconExpansion):
-    def __init__(self, engine: Engine, user: User, routine: Routine):
-        self.engine = engine
-        self.user = user
+    def __init__(self, routine: Routine):
         self.routine = routine
-        self.update_choosable_programs()
 
         svg_kwargs = {
             "fpath": ABS_PROGRAM_SVG_PATH,
@@ -70,9 +66,6 @@ class ElementsExpansion(IconExpansion):
                     routine_element=reward,
                 )
 
-    def update_choosable_programs(self):
-        self.choosable_programs = self.user.get_programs(self.engine)
-
     def _is_reward(
         self, routine_element: Union[RoutineElement, RoutineReward]
     ) -> bool:
@@ -100,7 +93,9 @@ class ElementsExpansion(IconExpansion):
         with ui.row().classes(DFLT_ROW_CLASSES + " gap-x-0"):
             micro.row_superscript(row_superscript, accent_color)
             with ui.element("div").style("width: 32%;"):
-                program_select = micro.program_select(self.choosable_programs)
+                program_select = micro.program_select(
+                    state.program_titles, value=routine_element["program"]
+                )
             with ui.element("div").style("width: 27%;"):
                 if self._is_reward(routine_element):
                     micro.reward_icon_placeholder()
@@ -139,7 +134,7 @@ class ElementsExpansion(IconExpansion):
     def hdl_add_element(self):
         new_element = DEFAULT_ELEMENT.copy()
         self.routine.elements.append(new_element)
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
 
         if len(self.routine.rewards) == 0:
             row_superscript = len(self.routine.elements + self.routine.rewards)
@@ -151,7 +146,7 @@ class ElementsExpansion(IconExpansion):
     def hdl_add_reward(self):
         new_reward = DEFAULT_REWARD.copy()
         self.routine.rewards.append(new_reward)
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
 
         row_superscript = len(self.routine.elements + self.routine.rewards)
         with self.rows_frame:
@@ -175,7 +170,7 @@ class ElementsExpansion(IconExpansion):
             else:
                 idx = self._elements_idx_from_row_superscript(row_superscript)
                 move_up_in_list(self.routine.elements, idx)
-            self.routine.update_self_in_db(self.engine)
+            self.routine.update_self_in_db(state.engine)
             self._update_rows_frame()
 
     def _is_superscript_of_last_reward(self, row_superscript: int) -> bool:
@@ -198,7 +193,7 @@ class ElementsExpansion(IconExpansion):
             else:
                 idx = self._elements_idx_from_row_superscript(row_superscript)
                 move_down_in_list(self.routine.elements, idx)
-            self.routine.update_self_in_db(self.engine)
+            self.routine.update_self_in_db(state.engine)
             self._update_rows_frame()
 
     def hdl_delete_row(self, row_superscript: int):
@@ -208,7 +203,7 @@ class ElementsExpansion(IconExpansion):
         else:
             idx = self._elements_idx_from_row_superscript(row_superscript)
             self.routine.elements.pop(idx)
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
         self._update_rows_frame()
 
     def hdl_select_program(self, row_superscript: int, new_program: str):
@@ -218,11 +213,11 @@ class ElementsExpansion(IconExpansion):
         else:
             idx = self._elements_idx_from_row_superscript(row_superscript)
             self.routine.elements[idx]["program"] = new_program
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
         self._update_rows_frame()
 
     def hdl_select_priority(self, row_superscript: int, new_priority: int):
         idx = self._elements_idx_from_row_superscript(row_superscript)
         self.routine.elements[idx]["priority_level"] = new_priority
-        self.routine.update_self_in_db(self.engine)
+        self.routine.update_self_in_db(state.engine)
         self._update_rows_frame()

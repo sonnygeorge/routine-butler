@@ -11,11 +11,13 @@
             "args": ["--testing"]
         },
         {
-            "name": "Python: Current File",
+            "name": "Python: Current File from root",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "justMyCode": false
+            "program": "${workspaceFolder}{file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

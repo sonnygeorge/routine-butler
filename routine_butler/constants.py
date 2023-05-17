@@ -1,11 +1,22 @@
 """A central location for stylistic UI constants for quick iteration/experimentation"""
 
 import os
+from enum import StrEnum
 
 _CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 ABS_ROUTINE_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/routine-icon.svg")
 ABS_PROGRAM_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/program-icon.svg")
 ABS_REWARD_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/reward-icon.svg")
+
+ABS_PROGRAMS_DIR_PATH = os.path.join(_CURRENT_DIR, "plugins")
+
+
+class PagePath(StrEnum):
+    HOME = "/"
+    DO_ROUTINE = "/do-routine"
+    SET_ROUTINES = "/set-routines"
+    SET_PROGRAMS = "/set-programs"
+    LOGIN = "/login"
 
 
 class ICON_STRS:  # Quasar material icons

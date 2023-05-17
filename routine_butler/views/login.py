@@ -1,12 +1,13 @@
 from nicegui import ui
 
 from routine_butler.components.header import Header
+from routine_butler.constants import PagePath
 from routine_butler.models.user import User
 from routine_butler.state import state
 from routine_butler.utils import apply_color_theme
 
 
-@ui.page(path="/login")
+@ui.page(path=PagePath.LOGIN)
 def login():
     def handle_login_attempt(username: str):
         # query db for user
@@ -18,8 +19,8 @@ def login():
             user = User(username=username)
             user.add_self_to_db(state.engine)
 
-        state.user = user
-        ui.open("/")
+        state.set_user(user)
+        ui.open(PagePath.HOME)
 
     apply_color_theme()
     Header()
