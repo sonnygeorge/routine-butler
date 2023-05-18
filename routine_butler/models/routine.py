@@ -1,7 +1,7 @@
 from enum import StrEnum
-from typing import List, Optional, TypedDict
+from typing import List, Optional
 
-from pydantic import constr
+from pydantic import BaseModel, constr
 from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String
 
 from routine_butler.models.base import BaseDBORMModel, BaseDBPydanticModel
@@ -19,11 +19,11 @@ class RingFrequency(StrEnum):
     PERIODIC = "periodic"
 
 
-class Alarm(TypedDict):
-    time: str
-    is_enabled: bool
-    volume: float
-    ring_frequency: RingFrequency
+class Alarm(BaseModel):
+    time: str = "12:00"
+    is_enabled: bool = True
+    volume: float = 0.5
+    ring_frequency: RingFrequency = RingFrequency.CONSTANT
 
 
 class PriorityLevel(StrEnum):
@@ -33,13 +33,13 @@ class PriorityLevel(StrEnum):
     HIGH = "high"
 
 
-class RoutineElement(TypedDict):
-    priority_level: PriorityLevel
-    program: str
+class RoutineElement(BaseModel):
+    priority_level: PriorityLevel = PriorityLevel.MEDIUM
+    program: str = ""
 
 
-class RoutineReward(TypedDict):
-    program: str
+class RoutineReward(BaseModel):
+    program: str = ""
 
 
 class RoutineORM(BaseDBORMModel):

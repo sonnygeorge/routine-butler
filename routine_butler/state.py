@@ -15,11 +15,12 @@ class State:
     user: "User" = None
     programs: List["Program"] = []
     program_titles: List[str] = []
-    plugins: Dict[str, Type[ProgramPlugin]] = dynamically_get_plugins()
+    plugin_types: Dict[str, Type[ProgramPlugin]] = {}
     pending_routine_to_run: Optional[Routine] = None
 
     def set_user(self, user: "User"):
         self.user = user
+        self.plugin_types = dynamically_get_plugins()
         self.update_programs()
 
     def update_programs(self):

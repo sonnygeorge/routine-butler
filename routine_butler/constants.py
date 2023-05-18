@@ -14,8 +14,8 @@ ABS_PROGRAMS_DIR_PATH = os.path.join(_CURRENT_DIR, "plugins")
 class PagePath(StrEnum):
     HOME = "/"
     DO_ROUTINE = "/do-routine"
-    SET_ROUTINES = "/set-routines"
-    SET_PROGRAMS = "/set-programs"
+    SET_ROUTINES = "/configure-routines"
+    SET_PROGRAMS = "/configure-programs"
     LOGIN = "/login"
 
 

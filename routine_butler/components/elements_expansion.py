@@ -9,17 +9,12 @@ from routine_butler.constants import ABS_PROGRAM_SVG_PATH, PROGRAM_SVG_SIZE
 from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
 from routine_butler.constants import SDBR_V_SPACE as V_SPACE
 from routine_butler.models.routine import (
-    PriorityLevel,
     Routine,
     RoutineElement,
     RoutineReward,
 )
 from routine_butler.state import state
 from routine_butler.utils import move_down_in_list, move_up_in_list
-
-# since TypedDicts dont's support default values
-DEFAULT_REWARD = {"program": ""}
-DEFAULT_ELEMENT = {"priority_level": PriorityLevel.MEDIUM, "program": ""}
 
 
 class ElementsExpansion(IconExpansion):
@@ -66,12 +61,6 @@ class ElementsExpansion(IconExpansion):
                     routine_element=reward,
                 )
 
-    def _is_reward(
-        self, routine_element: Union[RoutineElement, RoutineReward]
-    ) -> bool:
-        # TODO: a bit hacky since isinstance() doesn't work with TypedDicts
-        return "priority_level" not in routine_element.keys()
-
     def _is_superscript_of_reward(self, row_superscript: int) -> bool:
         return row_superscript > self.num_elements
 
@@ -86,22 +75,23 @@ class ElementsExpansion(IconExpansion):
         row_superscript: int,
         routine_element: Union[RoutineElement, RoutineReward],
     ):
-        accent_color = (
-            "secondary" if self._is_reward(routine_element) else "primary"
-        )
+        if isinstance(routine_element, RoutineReward):
+            accent_color = "secondary"
+        else:
+            accent_color = "primary"
 
         with ui.row().classes(DFLT_ROW_CLASSES + " gap-x-0"):
             micro.row_superscript(row_superscript, accent_color)
             with ui.element("div").style("width: 32%;"):
                 program_select = micro.program_select(
-                    state.program_titles, value=routine_element["program"]
+                    state.program_titles, value=routine_element.program
                 )
             with ui.element("div").style("width: 27%;"):
-                if self._is_reward(routine_element):
+                if isinstance(routine_element, RoutineReward):
                     micro.reward_icon_placeholder()
                 else:
                     priority_level_select = micro.priority_level_select(
-                        routine_element["priority_level"]
+                        routine_element.priority_level
                     )
             up_button, down_button = micro.order_buttons(accent_color)
             with ui.element("div").style("width: 7%;"):
@@ -113,7 +103,7 @@ class ElementsExpansion(IconExpansion):
                     row_superscript, program_select.value
                 ),
             )
-            if not self._is_reward(routine_element):
+            if not isinstance(routine_element, RoutineReward):
                 priority_level_select.on(
                     "update:model-value",
                     lambda: self.hdl_select_priority(
@@ -132,7 +122,7 @@ class ElementsExpansion(IconExpansion):
             )
 
     def hdl_add_element(self):
-        new_element = DEFAULT_ELEMENT.copy()
+        new_element = RoutineElement()
         self.routine.elements.append(new_element)
         self.routine.update_self_in_db(state.engine)
 
@@ -144,7 +134,7 @@ class ElementsExpansion(IconExpansion):
             self._update_rows_frame()
 
     def hdl_add_reward(self):
-        new_reward = DEFAULT_REWARD.copy()
+        new_reward = RoutineReward()
         self.routine.rewards.append(new_reward)
         self.routine.update_self_in_db(state.engine)
 
@@ -209,15 +199,15 @@ class ElementsExpansion(IconExpansion):
     def hdl_select_program(self, row_superscript: int, new_program: str):
         if self._is_superscript_of_reward(row_superscript):
             idx = self._rewards_idx_from_row_superscript(row_superscript)
-            self.routine.rewards[idx]["program"] = new_program
+            self.routine.rewards[idx].program = new_program
         else:
             idx = self._elements_idx_from_row_superscript(row_superscript)
-            self.routine.elements[idx]["program"] = new_program
+            self.routine.elements[idx].program = new_program
         self.routine.update_self_in_db(state.engine)
         self._update_rows_frame()
 
     def hdl_select_priority(self, row_superscript: int, new_priority: int):
         idx = self._elements_idx_from_row_superscript(row_superscript)
-        self.routine.elements[idx]["priority_level"] = new_priority
+        self.routine.elements[idx].priority_level = new_priority
         self.routine.update_self_in_db(state.engine)
         self._update_rows_frame()

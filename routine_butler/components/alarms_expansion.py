@@ -9,13 +9,6 @@ from routine_butler.constants import THROTTLE_SECONDS
 from routine_butler.models.routine import Alarm, RingFrequency, Routine
 from routine_butler.state import state
 
-DEFAULT_ALARM = {  # since TypedDicts dont's support default values
-    "time": "12:00",
-    "volume": 0.5,
-    "ring_frequency": RingFrequency.CONSTANT,
-    "is_enabled": True,
-}
-
 
 class AlarmsExpansion(IconExpansion):
     def __init__(self, routine: Routine):
@@ -44,15 +37,15 @@ class AlarmsExpansion(IconExpansion):
     def _add_ui_row(self, row_idx: int, alarm: Alarm):
         with ui.row().classes(DFLT_ROW_CLASSES + " gap-x-0"):
             with ui.element("div").style("width: 23%;"):
-                time_setter = micro.time_input(value=alarm["time"])
+                time_setter = micro.time_input(value=alarm.time)
             with ui.element("div").style("width: 10%;").classes("mx-1"):
-                vol_knob = micro.volume_knob(alarm["volume"])
+                vol_knob = micro.volume_knob(alarm.volume)
             with ui.element("div").style("width: 32%;"):
                 ring_frequency_select = micro.ring_frequency_select(
-                    value=alarm["ring_frequency"]
+                    value=alarm.ring_frequency
                 )
             with ui.element("div").style("width: 34px;").classes("mx-1"):
-                switch = ui.switch(value=alarm["is_enabled"]).props("dense")
+                switch = ui.switch(value=alarm.is_enabled).props("dense")
             delete_alarm_button = micro.delete_button().props("dense")
 
         time_setter.on(
@@ -77,28 +70,28 @@ class AlarmsExpansion(IconExpansion):
         delete_alarm_button.on("click", lambda: self.hdl_delete_alarm(row_idx))
 
     def hdl_add_alarm(self):
-        new_alarm = DEFAULT_ALARM.copy()
+        new_alarm = Alarm()
         self.routine.alarms.append(new_alarm)
         self.routine.update_self_in_db(state.engine)
         with self.alarms_frame:
             self._add_ui_row(row_idx=self.num_alarms - 1, alarm=new_alarm)
 
     def hdl_time_change(self, row_idx: int, new_time: str):
-        self.routine.alarms[row_idx]["time"] = new_time
+        self.routine.alarms[row_idx].time = new_time
         self.routine.update_self_in_db(state.engine)
 
     def hdl_change_volume(self, row_idx: int, new_volume: float):
-        self.routine.alarms[row_idx]["volume"] = new_volume
+        self.routine.alarms[row_idx].volume = new_volume
         self.routine.update_self_in_db(state.engine)
 
     def hdl_select_ring_frequency(
         self, row_idx: int, new_frequency: RingFrequency
     ):
-        self.routine.alarms[row_idx]["ring_frequency"] = new_frequency
+        self.routine.alarms[row_idx].ring_frequency = new_frequency
         self.routine.update_self_in_db(state.engine)
 
     def hdl_toggle_enabled(self, row_idx: int, value: bool):
-        self.routine.alarms[row_idx]["is_enabled"] = value
+        self.routine.alarms[row_idx].is_enabled = value
         self.routine.update_self_in_db(state.engine)
 
     def hdl_delete_alarm(self, row_idx: int):

@@ -2,7 +2,9 @@ from routine_butler.components.micro.add_button import add_button
 from routine_butler.components.micro.delete_button import delete_button
 from routine_butler.components.micro.order_buttons import order_buttons
 from routine_butler.components.micro.play_button import play_button
-from routine_butler.components.micro.plugin_select import plugin_select
+from routine_butler.components.micro.plugin_type_select import (
+    plugin_type_select,
+)
 from routine_butler.components.micro.priority_level_select import (
     priority_level_select,
 )

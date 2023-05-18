@@ -1,5 +1,3 @@
-from typing import Optional
-
 from nicegui import ui
 
 from routine_butler.components import micro
@@ -10,16 +8,17 @@ from routine_butler.models.program import Program
 from routine_butler.state import state
 from routine_butler.utils import apply_color_theme, redirect_if_user_is_none
 
-ADD_NEW_PROGRAM_STR = "Add new program"
+ADD_NEW_PROGRAM_STR = "Add New..."
 
 
 @ui.page(path=PagePath.SET_PROGRAMS)
-def set_programs():
-    def update_program_select_options():
+def configure_programs():
+    def _update_program_select_options():
         program_select.options = state.program_titles + [ADD_NEW_PROGRAM_STR]
+        program_select.value = ""
         program_select.update()
 
-    def hdl_select_program(program_title: Optional[Program] = None):
+    def hdl_select_program_to_configure(program_title: Program):
         program_configurer_frame.clear()
         if program_title == ADD_NEW_PROGRAM_STR:
             program = Program()
@@ -30,8 +29,16 @@ def set_programs():
         with program_configurer_frame:
             p_conf = ProgramConfigurer(program)
 
-        p_conf.save_button.on("click", update_program_select_options)
+        p_conf.save_button.on("click", _update_program_select_options)
         p_conf.save_button.on("click", program_configurer_frame.clear)
+
+    def hdl_delete_program(program_title: Program):
+        idx = state.program_titles.index(program_title)
+        program = state.programs[idx]
+        program.delete_self_from_db(state.engine)  # remove from db
+        state.programs.pop(idx)  # remove from state
+        state.program_titles.pop(idx)
+        _update_program_select_options()
 
     redirect_if_user_is_none(state.user)
     apply_color_theme()
@@ -39,11 +46,19 @@ def set_programs():
 
     with ui.row():
         with ui.card():
-            program_select = micro.program_select(state.program_titles)
-            configure_button = ui.button("Configure")
+            program_select = micro.program_select(
+                state.program_titles + [ADD_NEW_PROGRAM_STR]
+            )
+            with ui.row():
+                configure_button = ui.button("Configure")
+                delete_button = micro.delete_button()
         program_configurer_frame = ui.element("div")
 
     configure_button.on(
         "click",
-        lambda: hdl_select_program(program_select.value),
+        lambda: hdl_select_program_to_configure(program_select.value),
+    )
+    delete_button.on(
+        "click",
+        lambda: hdl_delete_program(program_select.value),
     )

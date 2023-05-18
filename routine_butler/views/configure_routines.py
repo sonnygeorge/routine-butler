@@ -13,7 +13,7 @@ from routine_butler.utils import apply_color_theme, redirect_if_user_is_none
 
 
 @ui.page(path=PagePath.SET_ROUTINES)
-def set_routines():
+def configure_routines():
     def handle_add_routine():
         new_routine = Routine()
         new_routine.add_self_to_db(state.engine)
