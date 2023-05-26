@@ -6,7 +6,7 @@ from routine_butler.components.elements_expansion import ElementsExpansion
 from routine_butler.components.primitives import SVG, IconExpansion
 from routine_butler.constants import (
     ABS_ROUTINE_SVG_PATH,
-    ROUTINE_SVG_SIZE,
+    SVG_SIZE,
     PagePath,
 )
 from routine_butler.constants import SDBR_DFLT_INPUT_PRPS as DFLT_INPUT_PRPS
@@ -27,7 +27,7 @@ class RoutineConfigurer(IconExpansion):
         self.parent_element = parent_element
         svg_kwargs = {
             "fpath": ABS_ROUTINE_SVG_PATH,
-            "size": ROUTINE_SVG_SIZE,
+            "size": SVG_SIZE.ROUTINE,
             "color": "black",
         }
         super().__init__(routine.title, icon=SVG, icon_kwargs=svg_kwargs)
