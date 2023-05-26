@@ -63,14 +63,16 @@ class CLR_CODES:
 # for throttling events that would otherwise fire too often
 THROTTLE_SECONDS = 0.5
 
+
 # header
-HDR_BUTTON_STYLE = "height: 45px; width: 45px;"
-HDR_APP_NAME = "RoutineButler"
-HDR_APP_NAME_SIZE = "1.9rem"
-HDR_RTN_SVG_SIZE: int = 30
-HDR_PRGRM_SVG_SIZE: int = 25
-HDR_TIME_SIZE = "1.1rem"
-HDR_DATE_SIZE = ".7rem"
+class HDR:
+    BUTTON_STYLE = "height: 45px; width: 45px;"
+    APP_NAME = "RoutineButler"
+    APP_NAME_SIZE = "1.9rem"
+    RTN_SVG_SIZE: int = 30
+    PRGRM_SVG_SIZE: int = 25
+    TIME_SIZE = "1.1rem"
+    DATE_SIZE = ".7rem"
 
 
 # sidebars
