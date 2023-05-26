@@ -7,7 +7,6 @@ _CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 ABS_ROUTINE_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/routine-icon.svg")
 ABS_PROGRAM_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/program-icon.svg")
 ABS_REWARD_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/reward-icon.svg")
-
 ABS_PROGRAMS_DIR_PATH = os.path.join(_CURRENT_DIR, "plugins")
 
 
@@ -64,7 +63,6 @@ class CLR_CODES:
 THROTTLE_SECONDS = 0.5
 
 
-# header
 class HDR:
     BUTTON_STYLE = "height: 45px; width: 45px;"
     APP_NAME = "RoutineButler"
@@ -75,17 +73,18 @@ class HDR:
     DATE_SIZE = ".7rem"
 
 
-# sidebars
 class SVG_SIZE(IntEnum):
     PROGRAM: int = 21
     ROUTINE: int = 28
     REWARD: int = 17
 
 
-SDBR_V_SPACE: int = 4
-SDBR_BREAKPOINT: str = "0"
-SDBR_DFLT_ROW_CLS: str = "justify-evenly items-center w-full px-4 pt-4"
-SDBR_DFLT_INPUT_PRPS: str = "standout dense"
+class SDBR:
+    V_SPACE: int = 4
+    BREAKPOINT: str = "0"
+    DFLT_ROW_CLS: str = "justify-evenly items-center w-full px-4 pt-4"
+    DFLT_INPUT_PRPS: str = "standout dense"
+
 
 # routines sidebar
 RTNS_SDBR_WIDTH: str = "540"

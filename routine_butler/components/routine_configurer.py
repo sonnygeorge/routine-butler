@@ -6,12 +6,10 @@ from routine_butler.components.elements_expansion import ElementsExpansion
 from routine_butler.components.primitives import SVG, IconExpansion
 from routine_butler.constants import (
     ABS_ROUTINE_SVG_PATH,
+    SDBR,
     SVG_SIZE,
     PagePath,
 )
-from routine_butler.constants import SDBR_DFLT_INPUT_PRPS as DFLT_INPUT_PRPS
-from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
-from routine_butler.constants import SDBR_V_SPACE as V_SPACE
 from routine_butler.models.routine import Routine
 from routine_butler.state import state
 from routine_butler.utils import redirect_to_page
@@ -31,20 +29,22 @@ class RoutineConfigurer(IconExpansion):
             "color": "black",
         }
         super().__init__(routine.title, icon=SVG, icon_kwargs=svg_kwargs)
-        self.expansion_frame.classes(f"mt-{V_SPACE}")
+        self.expansion_frame.classes(f"mt-{SDBR.V_SPACE}")
 
         with self:
-            with ui.row().classes(DFLT_ROW_CLASSES):
+            with ui.row().classes(SDBR.DFLT_ROW_CLS):
                 ui.label("Title:")
                 self.title_input = ui.input(
                     value=routine.title,
-                ).props(DFLT_INPUT_PRPS)
+                ).props(SDBR.DFLT_INPUT_PRPS)
                 title_save_button = micro.save_button().classes("w-1/5")
-            with ui.row().classes(DFLT_ROW_CLASSES):
+            with ui.row().classes(SDBR.DFLT_ROW_CLS):
                 AlarmsExpansion(routine)
-            with ui.row().classes(DFLT_ROW_CLASSES):
+            with ui.row().classes(SDBR.DFLT_ROW_CLS):
                 ElementsExpansion(routine)
-            with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE} no-wrap"):
+            with ui.row().classes(
+                SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE} no-wrap"
+            ):
                 target_duration_slider = micro.target_duration_slider(
                     routine.target_duration_minutes
                 )
@@ -52,7 +52,7 @@ class RoutineConfigurer(IconExpansion):
                     value=routine.target_duration_enabled
                 ).props("dense")
             ui.separator()
-            with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
+            with ui.row().classes(SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE}"):
                 start_button = micro.play_button().classes("w-3/4")
                 delete_button = micro.delete_button().classes("w-1/5")
 

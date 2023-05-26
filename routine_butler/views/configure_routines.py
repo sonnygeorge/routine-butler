@@ -4,9 +4,7 @@ from routine_butler.components import micro
 from routine_butler.components.header import Header
 from routine_butler.components.routine_configurer import RoutineConfigurer
 from routine_butler.constants import RTNS_SDBR_WIDTH as DRAWER_WIDTH
-from routine_butler.constants import SDBR_BREAKPOINT as BREAKPOINT
-from routine_butler.constants import SDBR_V_SPACE as V_SPACE
-from routine_butler.constants import PagePath
+from routine_butler.constants import SDBR, PagePath
 from routine_butler.models.routine import Routine
 from routine_butler.state import state
 from routine_butler.utils import apply_color_theme, redirect_if_user_is_none
@@ -29,8 +27,8 @@ def configure_routines():
     Header()
 
     drawer = ui.left_drawer(value=True)
-    drawer.classes(f"space-y-{V_SPACE} text-center py-0")
-    drawer.props(f"breakpoint={BREAKPOINT} width={DRAWER_WIDTH} bordered")
+    drawer.classes(f"space-y-{SDBR.V_SPACE} text-center py-0")
+    drawer.props(f"breakpoint={SDBR.BREAKPOINT} width={DRAWER_WIDTH} bordered")
 
     with drawer:
         routines_frame = ui.element("div")

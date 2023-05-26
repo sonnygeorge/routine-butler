@@ -5,7 +5,7 @@ from nicegui import ui
 from pydantic import BaseModel, ValidationError
 
 from routine_butler.components import micro
-from routine_butler.constants import SDBR_DFLT_INPUT_PRPS as DFLT_INPUT_PRPS
+from routine_butler.constants import SDBR
 from routine_butler.models.program import Program
 from routine_butler.state import state
 from routine_butler.utils import ProgramPlugin
@@ -53,7 +53,7 @@ class ProgramConfigurer(ui.card):
                 validation={
                     TAKEN_NAME_MSG: lambda v: v not in state.program_titles
                 },
-            ).props(DFLT_INPUT_PRPS)
+            ).props(SDBR.DFLT_INPUT_PRPS)
             with ui.row():
                 self.plugin_select = micro.plugin_type_select(
                     value=program.plugin_type

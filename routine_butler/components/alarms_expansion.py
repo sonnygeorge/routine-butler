@@ -2,9 +2,7 @@ from nicegui import ui
 
 from routine_butler.components import micro
 from routine_butler.components.primitives import IconExpansion
-from routine_butler.constants import ICON_STRS, THROTTLE_SECONDS
-from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
-from routine_butler.constants import SDBR_V_SPACE as V_SPACE
+from routine_butler.constants import ICON_STRS, SDBR, THROTTLE_SECONDS
 from routine_butler.models.routine import Alarm, RingFrequency, Routine
 from routine_butler.state import state
 
@@ -18,7 +16,7 @@ class AlarmsExpansion(IconExpansion):
             self.alarms_frame = ui.element("div")
             self._update_alarms_frame()
 
-            with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
+            with ui.row().classes(SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE}"):
                 add_alarm_button = micro.add_button().classes("w-full")
 
             add_alarm_button.on("click", self.hdl_add_alarm)
@@ -34,7 +32,7 @@ class AlarmsExpansion(IconExpansion):
                 self._add_ui_row(row_idx=idx, alarm=alarm)
 
     def _add_ui_row(self, row_idx: int, alarm: Alarm):
-        with ui.row().classes(DFLT_ROW_CLASSES + " gap-x-0"):
+        with ui.row().classes(SDBR.DFLT_ROW_CLS + " gap-x-0"):
             with ui.element("div").style("width: 23%;"):
                 time_setter = micro.time_input(value=alarm.time)
             with ui.element("div").style("width: 10%;").classes("mx-1"):

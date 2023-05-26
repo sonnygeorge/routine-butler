@@ -4,9 +4,7 @@ from nicegui import ui
 
 from routine_butler.components import micro
 from routine_butler.components.primitives import SVG, IconExpansion
-from routine_butler.constants import ABS_PROGRAM_SVG_PATH, SVG_SIZE
-from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
-from routine_butler.constants import SDBR_V_SPACE as V_SPACE
+from routine_butler.constants import ABS_PROGRAM_SVG_PATH, SDBR, SVG_SIZE
 from routine_butler.models.routine import (
     Routine,
     RoutineElement,
@@ -32,7 +30,7 @@ class ElementsExpansion(IconExpansion):
             self.rows_frame = ui.element("div")
             self._update_rows_frame()
 
-            with ui.row().classes(DFLT_ROW_CLASSES + f" pb-{V_SPACE}"):
+            with ui.row().classes(SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE}"):
                 add_routine_element_button = micro.add_button()
                 add_routine_element_button.classes("w-3/4")
                 add_reward_element_button = micro.reward_button()
@@ -79,7 +77,7 @@ class ElementsExpansion(IconExpansion):
         else:
             accent_color = "primary"
 
-        with ui.row().classes(DFLT_ROW_CLASSES + " gap-x-0"):
+        with ui.row().classes(SDBR.DFLT_ROW_CLS + " gap-x-0"):
             micro.row_superscript(row_superscript, accent_color)
             with ui.element("div").style("width: 32%;"):
                 program_select = micro.program_select(
