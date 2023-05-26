@@ -2,8 +2,12 @@ from datetime import datetime
 
 from nicegui import ui
 
-from routine_butler.components.primitives.svg import SVG
-from routine_butler.constants import ABS_PROGRAM_SVG_PATH, ABS_ROUTINE_SVG_PATH
+from routine_butler.components.primitives import SVG
+from routine_butler.constants import (
+    ABS_PROGRAM_SVG_PATH,
+    ABS_ROUTINE_SVG_PATH,
+    PagePath,
+)
 from routine_butler.constants import HDR_APP_NAME as APP_NAME
 from routine_butler.constants import HDR_APP_NAME_SIZE as APP_NAME_SIZE
 from routine_butler.constants import HDR_BUTTON_STYLE as BUTTON_STYLE
@@ -11,7 +15,6 @@ from routine_butler.constants import HDR_DATE_SIZE as DATE_SIZE
 from routine_butler.constants import HDR_PRGRM_SVG_SIZE as PROGRAMS_SVG_SIZE
 from routine_butler.constants import HDR_RTN_SVG_SIZE as ROUTINES_SVG_SIZE
 from routine_butler.constants import HDR_TIME_SIZE as TIME_SIZE
-from routine_butler.constants import PagePath
 
 
 class HeaderClock(ui.column):

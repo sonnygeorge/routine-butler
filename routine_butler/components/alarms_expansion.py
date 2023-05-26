@@ -1,11 +1,10 @@
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.components.primitives.icon_expansion import IconExpansion
-from routine_butler.constants import ICON_STRS
+from routine_butler.components.primitives import IconExpansion
+from routine_butler.constants import ICON_STRS, THROTTLE_SECONDS
 from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
 from routine_butler.constants import SDBR_V_SPACE as V_SPACE
-from routine_butler.constants import THROTTLE_SECONDS
 from routine_butler.models.routine import Alarm, RingFrequency, Routine
 from routine_butler.state import state
 

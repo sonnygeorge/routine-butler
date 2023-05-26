@@ -3,13 +3,15 @@ from nicegui import ui
 from routine_butler.components import micro
 from routine_butler.components.alarms_expansion import AlarmsExpansion
 from routine_butler.components.elements_expansion import ElementsExpansion
-from routine_butler.components.primitives.icon_expansion import IconExpansion
-from routine_butler.components.primitives.svg import SVG
-from routine_butler.constants import ABS_ROUTINE_SVG_PATH, ROUTINE_SVG_SIZE
+from routine_butler.components.primitives import SVG, IconExpansion
+from routine_butler.constants import (
+    ABS_ROUTINE_SVG_PATH,
+    ROUTINE_SVG_SIZE,
+    PagePath,
+)
 from routine_butler.constants import SDBR_DFLT_INPUT_PRPS as DFLT_INPUT_PRPS
 from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
 from routine_butler.constants import SDBR_V_SPACE as V_SPACE
-from routine_butler.constants import PagePath
 from routine_butler.models.routine import Routine
 from routine_butler.state import state
 from routine_butler.utils import redirect_to_page

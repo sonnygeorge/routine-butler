@@ -3,8 +3,7 @@ from typing import Union
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.components.primitives.icon_expansion import IconExpansion
-from routine_butler.components.primitives.svg import SVG
+from routine_butler.components.primitives import SVG, IconExpansion
 from routine_butler.constants import ABS_PROGRAM_SVG_PATH, PROGRAM_SVG_SIZE
 from routine_butler.constants import SDBR_DFLT_ROW_CLS as DFLT_ROW_CLASSES
 from routine_butler.constants import SDBR_V_SPACE as V_SPACE

@@ -1,6 +1,6 @@
 from nicegui import ui
 
-from routine_butler.components.primitives.svg import SVG
+from routine_butler.components.primitives import SVG
 from routine_butler.constants import ABS_REWARD_SVG_PATH, REWARD_SVG_SIZE
 
 
