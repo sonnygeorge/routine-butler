@@ -32,9 +32,9 @@ class ElementsExpansion(IconExpansion):
 
             with ui.row().classes(SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE}"):
                 add_routine_element_button = micro.add_button()
-                add_routine_element_button.classes("w-3/4")
+                add_routine_element_button.classes("w-64")
                 add_reward_element_button = micro.reward_button()
-                add_reward_element_button.classes("w-1/5")
+                add_reward_element_button.classes("w-64")
             add_routine_element_button.on("click", self.hdl_add_element)
             add_reward_element_button.on("click", self.hdl_add_reward)
 

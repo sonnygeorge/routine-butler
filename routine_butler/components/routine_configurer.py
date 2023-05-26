@@ -33,15 +33,18 @@ class RoutineConfigurer(IconExpansion):
 
         with self:
             with ui.row().classes(SDBR.DFLT_ROW_CLS):
-                ui.label("Title:")
+                ui.label("Title")
                 self.title_input = ui.input(
                     value=routine.title,
                 ).props(SDBR.DFLT_INPUT_PRPS)
-                title_save_button = micro.save_button().classes("w-1/5")
+                title_save_button = micro.save_button().classes("w-64")
+
             with ui.row().classes(SDBR.DFLT_ROW_CLS):
                 AlarmsExpansion(routine)
+
             with ui.row().classes(SDBR.DFLT_ROW_CLS):
                 ElementsExpansion(routine)
+
             with ui.row().classes(
                 SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE} no-wrap"
             ):
@@ -51,10 +54,12 @@ class RoutineConfigurer(IconExpansion):
                 target_duration_enabled_switch = ui.switch(
                     value=routine.target_duration_enabled
                 ).props("dense")
+
             ui.separator()
-            with ui.row().classes(SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE}"):
-                start_button = micro.play_button().classes("w-3/4")
-                delete_button = micro.delete_button().classes("w-1/5")
+
+            with ui.row().classes(f"{SDBR.DFLT_ROW_CLS} pb-{SDBR.V_SPACE}"):
+                start_button = micro.play_button().classes("w-64")
+                delete_button = micro.delete_button().classes("w-64")
 
         title_save_button.on(
             "click", lambda: self.hdl_title_update(self.title_input.value)

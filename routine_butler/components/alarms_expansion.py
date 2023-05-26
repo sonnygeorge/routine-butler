@@ -17,7 +17,7 @@ class AlarmsExpansion(IconExpansion):
             self._update_alarms_frame()
 
             with ui.row().classes(SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE}"):
-                add_alarm_button = micro.add_button().classes("w-full")
+                add_alarm_button = micro.add_button().classes("w-64")
 
             add_alarm_button.on("click", self.hdl_add_alarm)
 

@@ -26,11 +26,9 @@ def configure_routines():
     apply_color_theme()
     Header()
 
-    drawer = ui.left_drawer(value=True)
-    drawer.classes(f"space-y-{SDBR.V_SPACE} text-center py-0")
-    drawer.props(f"breakpoint={SDBR.BREAKPOINT} width={DRAWER_WIDTH} bordered")
+    with ui.card() as base:
+        base.classes("container flex items-stretch")
 
-    with drawer:
         routines_frame = ui.element("div")
         with routines_frame:
             for routine in state.user.get_routines(state.engine):
@@ -39,5 +37,5 @@ def configure_routines():
                     parent_element=routines_frame,
                 )
         ui.separator()
-        add_routine_button = micro.add_button().classes("w-1/2")
+        add_routine_button = micro.add_button().classes("w-1/2 self-center")
         add_routine_button.on("click", handle_add_routine)
