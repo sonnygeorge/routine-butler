@@ -23,7 +23,7 @@ def login():
         ui.open(PagePath.HOME)
 
     apply_color_theme()
-    Header()
+    Header(hide_buttons=True)
 
     with ui.card() as base:
         base.classes("max-w-xl absolute-center container flex items-stretch")
