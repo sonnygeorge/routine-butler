@@ -3,7 +3,6 @@ from nicegui import ui
 from routine_butler.components import micro
 from routine_butler.components.header import Header
 from routine_butler.components.routine_configurer import RoutineConfigurer
-from routine_butler.constants import RTNS_SDBR_WIDTH as DRAWER_WIDTH
 from routine_butler.constants import SDBR, PagePath
 from routine_butler.models.routine import Routine
 from routine_butler.state import state
@@ -28,7 +27,7 @@ def configure_routines():
 
     drawer = ui.left_drawer(value=True)
     drawer.classes(f"space-y-{SDBR.V_SPACE} text-center py-0")
-    drawer.props(f"breakpoint={SDBR.BREAKPOINT} width={DRAWER_WIDTH} bordered")
+    drawer.props(f"breakpoint={SDBR.BREAKPOINT} width={SDBR.WIDTH} bordered")
 
     with drawer:
         routines_frame = ui.element("div")
