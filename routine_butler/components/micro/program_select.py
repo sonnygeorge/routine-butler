@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 
 from nicegui import ui
 
-from routine_butler.constants import SDBR_DFLT_INPUT_PRPS as DFLT_INPUT_PRPS
+from routine_butler.constants import SDBR
 from routine_butler.models.program import Program
 
 
@@ -17,5 +17,5 @@ def program_select(
         options=options,
         value=value,
         label="program",
-    ).props(DFLT_INPUT_PRPS)
+    ).props(SDBR.DFLT_INPUT_PRPS)
     return program_select.classes("w-full")

@@ -1,7 +1,0 @@
-from nicegui import ui
-
-from routine_butler.constants import ICON_STRS
-
-
-def save_button() -> ui.button:
-    return ui.button().props(f"icon={ICON_STRS.save}")
