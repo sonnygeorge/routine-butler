@@ -33,10 +33,12 @@ class RoutineConfigurer(IconExpansion):
 
         with self:
             with ui.row().classes(SDBR.DFLT_ROW_CLS):
-                ui.label("Title")
-                self.title_input = ui.input(
-                    value=routine.title,
-                ).props(SDBR.DFLT_INPUT_PRPS)
+                with ui.row().classes("items-center"):
+                    ui.label("Title")
+                    self.title_input = ui.input(
+                        value=routine.title,
+                    ).props(SDBR.DFLT_INPUT_PRPS)
+
                 title_save_button = micro.save_button().classes("w-64")
 
             with ui.row().classes(SDBR.DFLT_ROW_CLS):
@@ -48,12 +50,13 @@ class RoutineConfigurer(IconExpansion):
             with ui.row().classes(
                 SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE} no-wrap"
             ):
-                target_duration_slider = micro.target_duration_slider(
-                    routine.target_duration_minutes
+                (
+                    target_duration_slider,
+                    target_duration_enabled_switch,
+                ) = micro.target_duration_slider(
+                    routine.target_duration_minutes,
+                    routine.target_duration_enabled,
                 )
-                target_duration_enabled_switch = ui.switch(
-                    value=routine.target_duration_enabled
-                ).props("dense")
 
             ui.separator()
 

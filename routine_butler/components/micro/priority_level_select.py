@@ -5,9 +5,13 @@ from routine_butler.models.routine import PriorityLevel
 
 
 def priority_level_select(value: float) -> ui.select:
-    priority_level_select = ui.select(
-        [e.value for e in PriorityLevel],
-        value=value,
-        label="priority",
-    ).props(SDBR.DFLT_INPUT_PRPS)
-    return priority_level_select.classes("w-full")
+    priority_level_select = (
+        ui.select(
+            [e.value for e in PriorityLevel],
+            value=value,
+            label="priority",
+        )
+        .props(SDBR.DFLT_INPUT_PRPS)
+        .classes("w-64")
+    )
+    return priority_level_select
