@@ -5,7 +5,6 @@ from nicegui import ui
 from pydantic import BaseModel, ValidationError
 
 from routine_butler.components import micro
-from routine_butler.constants import SDBR
 from routine_butler.models.program import Program
 from routine_butler.state import state
 from routine_butler.utils import ProgramPlugin
@@ -50,7 +49,7 @@ class ProgramConfigurer(ui.card):
         self.style("width: 853px")
 
         with self:
-            with ui.row().classes("items-center justify-start"):
+            with ui.row().classes("items-center justify-start w-full"):
                 micro.program_svg(size=20, color="lightgray").classes("mx-1")
                 self.title_input = (
                     ui.input(
@@ -61,13 +60,13 @@ class ProgramConfigurer(ui.card):
                             not in state.program_titles
                         },
                     )
-                    .props(SDBR.DFLT_INPUT_PRPS)
+                    .props("standout dense")
                     .classes("w-64")
                 )
                 ui.separator().props("vertical").classes("mx-3")
                 self.plugin_select = micro.plugin_type_select(
                     value=program.plugin_type
-                ).classes("w-64")
+                ).classes("grow")
                 choose_plugin_button = ui.button("choose").classes("w-40")
 
             ui.separator()
@@ -75,8 +74,7 @@ class ProgramConfigurer(ui.card):
             self.temp_filler = ui.label("choose a type...")
             self.temp_filler.classes("text-gray-300 italic")
 
-            self.plugin_grid = ui.grid(columns=2).classes("mt-3 mb-6")
-            self.plugin_grid.classes("items-center justify-center w-3/5")
+            self.plugin_grid = ui.grid(columns=2).classes("mt-3 mb-6 w-1/2")
             self.plugin_grid.set_visibility(False)
             self.plugin_input_elements: Dict[str, ui.input] = {}
 
@@ -104,11 +102,19 @@ class ProgramConfigurer(ui.card):
                 passes_pydantic_validation, plugin.__class__, key
             )  # partial seems to be necessary here, lambdas don't quite work
             with self.plugin_grid:
-                ui.markdown(f"`{key}`")
+                # label
+                key_label = ui.element("q-item").props("dense")
+                cls = "items-center justify-center border-secondary"
+                cls += " rounded w-full border-dotted border-2"
+                key_label.classes(cls).style("height: 2.5rem;")
+                with key_label:
+                    text = ui.label(f"{key}:").classes("self-center")
+                    text.classes("text-gray-800 text-xl")
+                # input
                 self.plugin_input_elements[key] = ui.input(
                     value=value,
                     validation={f"{INVALID_MSG}": is_pydantic_valid},
-                )
+                ).props("standout dense")
 
     def _update_plugin_with_plugin_grid_values(self):
         kwargs = {

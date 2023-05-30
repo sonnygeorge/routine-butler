@@ -2,7 +2,7 @@ from nicegui import ui
 
 from routine_butler.components import micro
 from routine_butler.components.primitives import IconExpansion
-from routine_butler.constants import ICON_STRS, SDBR, THROTTLE_SECONDS
+from routine_butler.constants import ICON_STRS, THROTTLE_SECONDS
 from routine_butler.models.routine import Alarm, RingFrequency, Routine
 from routine_butler.state import state
 
@@ -10,16 +10,12 @@ from routine_butler.state import state
 class AlarmsExpansion(IconExpansion):
     def __init__(self, routine: Routine):
         self.routine = routine
-        super().__init__("Alarms", icon=ICON_STRS.alarm)
+        super().__init__("Alarms", icon=ICON_STRS.alarm, width="850px")
 
         with self:
-            self.alarms_frame = ui.element("div")
+            self.alarms_frame = ui.column()
+            self.alarms_frame.classes("items-center justify-center pt-4")
             self._update_alarms_frame()
-
-            with ui.row().classes(SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE}"):
-                add_alarm_button = micro.add_button().classes("w-64")
-
-            add_alarm_button.on("click", self.hdl_add_alarm)
 
     @property
     def num_alarms(self) -> int:
@@ -31,19 +27,22 @@ class AlarmsExpansion(IconExpansion):
             for idx, alarm in enumerate(self.routine.alarms):
                 self._add_ui_row(row_idx=idx, alarm=alarm)
 
+            add_alarm_button = micro.add_button()
+            add_alarm_button.classes("w-40 mb-4")
+            add_alarm_button.on("click", self.hdl_add_alarm)
+
     def _add_ui_row(self, row_idx: int, alarm: Alarm):
-        with ui.row().classes(SDBR.DFLT_ROW_CLS + " gap-x-0"):
-            with ui.element("div").style("width: 23%;"):
-                time_setter = micro.time_input(value=alarm.time)
-            with ui.element("div").style("width: 10%;").classes("mx-1"):
-                vol_knob = micro.volume_knob(alarm.volume)
-            with ui.element("div").style("width: 32%;"):
-                ring_frequency_select = micro.ring_frequency_select(
-                    value=alarm.ring_frequency
-                )
-            with ui.element("div").style("width: 34px;").classes("mx-1"):
-                switch = ui.switch(value=alarm.is_enabled).props("dense")
+        row = ui.row().classes("items-center w-full px-4 gap-x-2")
+        with row.classes("justify-between").style("width: 725px;"):
+            time_setter = micro.time_input(value=alarm.time).classes("w-40")
+            vol_knob = micro.volume_knob(alarm.volume)
+            ring_frequency_select = micro.ring_frequency_select(
+                value=alarm.ring_frequency
+            ).classes("w-40")
+            switch = ui.switch(value=alarm.is_enabled).props("dense")
             delete_alarm_button = micro.delete_button().props("dense")
+
+        ui.separator().classes("bg-gray-100 w-full")
 
         time_setter.on(
             "update:model-value",
@@ -70,8 +69,7 @@ class AlarmsExpansion(IconExpansion):
         new_alarm = Alarm()
         self.routine.alarms.append(new_alarm)
         self.routine.update_self_in_db(state.engine)
-        with self.alarms_frame:
-            self._add_ui_row(row_idx=self.num_alarms - 1, alarm=new_alarm)
+        self._update_alarms_frame()
 
     def hdl_time_change(self, row_idx: int, new_time: str):
         self.routine.alarms[row_idx].time = new_time

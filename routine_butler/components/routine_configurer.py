@@ -2,14 +2,9 @@ from nicegui import ui
 
 from routine_butler.components import micro
 from routine_butler.components.alarms_expansion import AlarmsExpansion
-from routine_butler.components.elements_expansion import ElementsExpansion
+from routine_butler.components.chronology_expansion import ChronologyExpansion
 from routine_butler.components.primitives import SVG, IconExpansion
-from routine_butler.constants import (
-    ABS_ROUTINE_SVG_PATH,
-    SDBR,
-    SVG_SIZE,
-    PagePath,
-)
+from routine_butler.constants import ABS_ROUTINE_SVG_PATH, PagePath
 from routine_butler.models.routine import Routine
 from routine_butler.state import state
 from routine_butler.utils import redirect_to_page
@@ -25,44 +20,40 @@ class RoutineConfigurer(IconExpansion):
         self.parent_element = parent_element
         svg_kwargs = {
             "fpath": ABS_ROUTINE_SVG_PATH,
-            "size": SVG_SIZE.ROUTINE,
+            "size": 28,
             "color": "black",
         }
-        super().__init__(routine.title, icon=SVG, icon_kwargs=svg_kwargs)
-        self.expansion_frame.classes(f"mt-{SDBR.V_SPACE}")
+        super().__init__(
+            routine.title, icon=SVG, icon_kwargs=svg_kwargs, width="1100px"
+        )
 
         with self:
-            with ui.row().classes(SDBR.DFLT_ROW_CLS):
+            top_row = ui.row().classes("items-center justify-center")
+            with top_row.classes("pt-4 gap-x-7 w-full"):
                 with ui.row().classes("items-center"):
-                    ui.label("Title")
+                    ui.label("Title:")
                     self.title_input = ui.input(
                         value=routine.title,
-                    ).props(SDBR.DFLT_INPUT_PRPS)
+                    ).props("standout dense")
+                    title_save_button = micro.save_button().classes("w-20")
 
-                title_save_button = micro.save_button().classes("w-64")
+                ui.separator().props("vertical")
 
-            with ui.row().classes(SDBR.DFLT_ROW_CLS):
-                AlarmsExpansion(routine)
-
-            with ui.row().classes(SDBR.DFLT_ROW_CLS):
-                ElementsExpansion(routine)
-
-            with ui.row().classes(
-                SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE} no-wrap"
-            ):
-                (
-                    target_duration_slider,
-                    target_duration_enabled_switch,
-                ) = micro.target_duration_slider(
+                objs = micro.target_duration_slider(
                     routine.target_duration_minutes,
                     routine.target_duration_enabled,
                 )
+                target_duration_slider, target_duration_enabled_switch = objs
 
-            ui.separator()
+                AlarmsExpansion(routine)
+                ChronologyExpansion(routine)
 
-            with ui.row().classes(f"{SDBR.DFLT_ROW_CLS} pb-{SDBR.V_SPACE}"):
-                start_button = micro.play_button().classes("w-64")
-                delete_button = micro.delete_button().classes("w-64")
+                ui.separator().classes("bg-gray-100")
+                bottom_row = ui.row().style("width: 850px")
+                with bottom_row.classes("items-center justify-end mb-5"):
+                    start_button = micro.play_button().classes("grow")
+                    ui.separator().props("vertical").classes("mx-3")
+                    delete_button = micro.delete_button().style("width: 155px")
 
         title_save_button.on(
             "click", lambda: self.hdl_title_update(self.title_input.value)
@@ -100,7 +91,7 @@ class RoutineConfigurer(IconExpansion):
         redirect_to_page(PagePath.DO_ROUTINE)
 
     def hdl_delete(self):
-        self.parent_element.remove(self.expansion_frame)
+        self.parent_element.remove(self.bordered_frame)
         self.parent_element.update()
         self.routine.delete_self_from_db(state.engine)
         del self

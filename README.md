@@ -38,7 +38,7 @@ The app allows users to:
 
 - [ ] Evaluate/get feedback on UI handlers / object strategy / naming / ui constant centralization strategy
 - [ ] UI tests using: [screen.py](https://github.com/zauberzeug/nicegui/blob/main/tests/screen.py#L85)
-- [x] Implement [trailing](https://nicegui.io/documentation/slider#throttle_events_with_leading_and_trailing_options) throttling where appropriate
+appropriate
 - [ ] Enum for Quasar event names?
 - [ ] Enum for Quasar color aliases?
 - [ ] Should micro buttons be same file?

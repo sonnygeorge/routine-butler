@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Dict, Protocol, Type
 
 from nicegui import ui
 
-from routine_butler.constants import ABS_PROGRAMS_DIR_PATH, CLR_CODES, PagePath
+from routine_butler.constants import ABS_PLUGINS_DIR_PATH, CLR_CODES, PagePath
 
 if TYPE_CHECKING:
     from routine_butler.models.user import User
@@ -61,7 +61,7 @@ class ProgramPlugin(Protocol):
 def dynamically_get_plugins() -> Dict[str, Type[ProgramPlugin]]:
     """Dynamically loads all program types from the programs directory"""
     program_types = {}
-    for file_name in os.listdir(ABS_PROGRAMS_DIR_PATH):
+    for file_name in os.listdir(ABS_PLUGINS_DIR_PATH):
         if not file_name.startswith("_") and file_name.endswith(".py"):
             module_name = file_name[:-3]
             module = importlib.import_module(

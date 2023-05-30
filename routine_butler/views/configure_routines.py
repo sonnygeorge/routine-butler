@@ -3,9 +3,7 @@ from nicegui import ui
 from routine_butler.components import micro
 from routine_butler.components.header import Header
 from routine_butler.components.routine_configurer import RoutineConfigurer
-
 from routine_butler.constants import PagePath
-
 from routine_butler.models.routine import Routine
 from routine_butler.state import state
 from routine_butler.utils import apply_color_theme, redirect_if_user_is_none
@@ -27,18 +25,14 @@ def configure_routines():
     apply_color_theme()
     Header()
 
-
-    with ui.card().classes(
-        "absolute-center container flex items-stretch"
-    ).style("top: 1rem").style("transform: translate(-50%,0%)"):
-
-        routines_frame = ui.element("div")
-        with routines_frame:
+    content = ui.column().classes("justify-center items-center self-center")
+    with content.classes("w-4/5 gap-y-4"):
+        routines_frame = ui.column().classes("w-full")
+        with routines_frame.classes("justify-center items-center gap-y-4"):
             for routine in state.user.get_routines(state.engine):
                 RoutineConfigurer(
-                    routine=routine,
-                    parent_element=routines_frame,
+                    routine=routine, parent_element=routines_frame
                 )
-        ui.separator()
-        add_routine_button = micro.add_button().classes("w-1/2 self-center")
+
+        add_routine_button = micro.add_button().classes("w-40 self-center")
         add_routine_button.on("click", handle_add_routine)
