@@ -29,8 +29,8 @@ class HeaderClock(ui.column):
 
 
 class Header(ui.header):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, hide_buttons=False):
+        super().__init__()
         self.classes("justify-between items-center bg-secondary")
         self.props("elevated")
 
@@ -38,17 +38,30 @@ class Header(ui.header):
             left_content = ui.row().style("align-items: center")
             right_content = ui.row().style("align-items: center")
             with left_content:
-                routines_button = ui.button().style(HDR.BUTTON_STYLE)
-                with routines_button:
-                    SVG(ABS_ROUTINE_SVG_PATH, HDR.RTN_SVG_SIZE, color="white")
+                if hide_buttons:
+                    ui.element("div").style(HDR.BUTTON_STYLE)
+                else:
+                    routines_button = ui.button().style(HDR.BUTTON_STYLE)
+                    with routines_button:
+                        SVG(
+                            ABS_ROUTINE_SVG_PATH,
+                            HDR.RTN_SVG_SIZE,
+                            color="white",
+                        )
                 ui.label(HDR.APP_NAME).style(f"font-size: {HDR.APP_NAME_SIZE}")
             with right_content:
                 HeaderClock()
-                programs_button = ui.button().style(HDR.BUTTON_STYLE)
-                with programs_button:
-                    SVG(
-                        ABS_PROGRAM_SVG_PATH, HDR.PRGRM_SVG_SIZE, color="white"
-                    )
+                if hide_buttons:
+                    ui.element("div").style(HDR.BUTTON_STYLE)
+                else:
+                    programs_button = ui.button().style(HDR.BUTTON_STYLE)
+                    with programs_button:
+                        SVG(
+                            ABS_PROGRAM_SVG_PATH,
+                            HDR.PRGRM_SVG_SIZE,
+                            color="white",
+                        )
 
-        routines_button.on("click", lambda: ui.open(PagePath.SET_ROUTINES))
-        programs_button.on("click", lambda: ui.open(PagePath.SET_PROGRAMS))
+        if not hide_buttons:
+            routines_button.on("click", lambda: ui.open(PagePath.SET_ROUTINES))
+            programs_button.on("click", lambda: ui.open(PagePath.SET_PROGRAMS))
