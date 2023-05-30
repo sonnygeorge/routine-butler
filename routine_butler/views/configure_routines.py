@@ -3,7 +3,9 @@ from nicegui import ui
 from routine_butler.components import micro
 from routine_butler.components.header import Header
 from routine_butler.components.routine_configurer import RoutineConfigurer
+
 from routine_butler.constants import PagePath
+
 from routine_butler.models.routine import Routine
 from routine_butler.state import state
 from routine_butler.utils import apply_color_theme, redirect_if_user_is_none
@@ -25,9 +27,11 @@ def configure_routines():
     apply_color_theme()
     Header()
 
+
     with ui.card().classes(
         "absolute-center container flex items-stretch"
     ).style("top: 1rem").style("transform: translate(-50%,0%)"):
+
         routines_frame = ui.element("div")
         with routines_frame:
             for routine in state.user.get_routines(state.engine):

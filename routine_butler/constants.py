@@ -84,10 +84,8 @@ class SDBR:
     BREAKPOINT: str = "0"
     DFLT_ROW_CLS: str = "justify-evenly items-center w-full px-4 pt-4"
     DFLT_INPUT_PRPS: str = "standout dense"
+    WIDTH: str = "540"
 
-
-# routines sidebar
-RTNS_SDBR_WIDTH: str = "540"
 
 # a quick script to display ICON_STRS and CLR_CODES in a nicegui app
 if __name__ in {"__main__", "__mp_main__"}:
