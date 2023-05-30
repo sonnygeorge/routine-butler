@@ -48,14 +48,13 @@ def configure_programs():
         "absolute-center w-10/12 flex flex-col content-center"
     ):
         with ui.card().classes(
-            "flex flex-row items-center justify-center"
+            "flex flex-row items-center justify-center mb-4"
         ).style("width: 853px"):
+            micro.program_svg(size=20, color="lightgray").classes("mx-1")
             program_select = micro.program_select(
                 state.program_titles + [ADD_NEW_PROGRAM_STR]
             )
-
-            ui.element("div").classes("w-40")
-
+            ui.element("div").style("width: 122px")  # blank space
             configure_button = ui.button("Configure").classes("w-40")
             delete_button = micro.delete_button().classes("w-40")
 

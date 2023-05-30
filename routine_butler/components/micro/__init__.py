@@ -20,6 +20,11 @@ from routine_butler.components.micro.ring_frequency_select import (
     ring_frequency_select,
 )
 from routine_butler.components.micro.row_superscript import row_superscript
+from routine_butler.components.micro.svgs import (
+    program_svg,
+    reward_svg,
+    routine_svg,
+)
 from routine_butler.components.micro.target_duration_slider import (
     target_duration_slider,
 )

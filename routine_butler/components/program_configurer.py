@@ -46,13 +46,16 @@ class ProgramConfigurer(ui.card):
         self.plugin = plugin_factory(program.plugin_type, program.plugin_dict)
 
         super().__init__()
-        self.classes("flex items-center justify-center").style("width: 853px")
+        self.classes("flex items-center justify-center")
+        self.style("width: 853px")
 
         with self:
-            with ui.row():
+            with ui.row().classes("items-center justify-start"):
+                micro.program_svg(size=20, color="lightgray").classes("mx-1")
                 self.title_input = (
                     ui.input(
                         value=program.title,
+                        label="title",
                         validation={
                             TAKEN_NAME_MSG: lambda v: v
                             not in state.program_titles
@@ -61,27 +64,38 @@ class ProgramConfigurer(ui.card):
                     .props(SDBR.DFLT_INPUT_PRPS)
                     .classes("w-64")
                 )
-
+                ui.separator().props("vertical").classes("mx-3")
                 self.plugin_select = micro.plugin_type_select(
                     value=program.plugin_type
                 ).classes("w-64")
                 choose_plugin_button = ui.button("choose").classes("w-40")
 
-            self.plugin_frame = ui.card()
+            ui.separator()
+
+            self.temp_filler = ui.label("choose a type...")
+            self.temp_filler.classes("text-gray-300 italic")
+
+            self.plugin_grid = ui.grid(columns=2).classes("mt-3 mb-6")
+            self.plugin_grid.classes("items-center justify-center w-3/5")
+            self.plugin_grid.set_visibility(False)
             self.plugin_input_elements: Dict[str, ui.input] = {}
+
+            ui.separator()
 
             # save_button is a class attribute so parent context can listen to it
             self.save_button = micro.save_button().classes("w-40")
 
-        self._update_plugin_frame_with_plugin_values()
+        self._update_plugin_grid_with_plugin_values()
 
         choose_plugin_button.on("click", self.hdl_choose_plugin)
         self.save_button.on("click", self.hdl_save)
 
-    def _update_plugin_frame_with_plugin_values(self):
+    def _update_plugin_grid_with_plugin_values(self):
         if self.plugin_select.value is None:
             return
-        self.plugin_frame.clear()
+        self.plugin_grid.clear()
+        self.temp_filler.set_visibility(False)
+        self.plugin_grid.set_visibility(True)
         plugin = state.plugin_types[self.plugin_select.value](
             **self.program.plugin_dict
         )
@@ -89,17 +103,14 @@ class ProgramConfigurer(ui.card):
             is_pydantic_valid = partial(
                 passes_pydantic_validation, plugin.__class__, key
             )  # partial seems to be necessary here, lambdas don't quite work
-            with self.plugin_frame:
-                with ui.element("div").classes(
-                    "grid grid-cols-2 justify-items-end items-center gap-2"
-                ):
-                    ui.label(key).classes("uppercase")
-                    self.plugin_input_elements[key] = ui.input(
-                        value=value,
-                        validation={f"{INVALID_MSG}": is_pydantic_valid},
-                    )
+            with self.plugin_grid:
+                ui.markdown(f"`{key}`")
+                self.plugin_input_elements[key] = ui.input(
+                    value=value,
+                    validation={f"{INVALID_MSG}": is_pydantic_valid},
+                )
 
-    def _update_plugin_with_plugin_frame_values(self):
+    def _update_plugin_with_plugin_grid_values(self):
         kwargs = {
             k: elem.value for k, elem in self.plugin_input_elements.items()
         }
@@ -109,12 +120,12 @@ class ProgramConfigurer(ui.card):
         if not self.plugin_select.value == self.program.plugin_type:
             self.program.plugin_type = self.plugin_select.value
             self.program.plugin_dict = {}
-            self._update_plugin_frame_with_plugin_values()
+            self._update_plugin_grid_with_plugin_values()
 
     def _update_program_with_widget_values(self):
         self.program.title = self.title_input.value
         self.program.plugin_type = self.plugin_select.value
-        self._update_plugin_with_plugin_frame_values()
+        self._update_plugin_with_plugin_grid_values()
         self.program.plugin_dict = self.plugin.dict()
 
     def hdl_save(self):

@@ -3,8 +3,8 @@ from typing import Union
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.components.primitives import SVG, IconExpansion
-from routine_butler.constants import ABS_PROGRAM_SVG_PATH, SDBR, SVG_SIZE
+from routine_butler.components.primitives import IconExpansion
+from routine_butler.constants import SDBR, SVG_SIZE
 from routine_butler.models.routine import (
     Routine,
     RoutineElement,
@@ -18,12 +18,12 @@ class ElementsExpansion(IconExpansion):
     def __init__(self, routine: Routine):
         self.routine = routine
 
-        svg_kwargs = {
-            "fpath": ABS_PROGRAM_SVG_PATH,
-            "size": SVG_SIZE.PROGRAM,
-            "color": "black",
-        }
-        super().__init__("Chronology", icon=SVG, icon_kwargs=svg_kwargs)
+        program_svg_kwargs = {"size": SVG_SIZE.PROGRAM, "color": "black"}
+        super().__init__(
+            "Chronology",
+            icon=micro.program_svg,
+            icon_kwargs=program_svg_kwargs,
+        )
         self.classes("justify-between items-center")
 
         with self:
