@@ -17,7 +17,7 @@ def program_select(
         ui.select(
             options=options,
             value=value,
-            label="program",
+            label="Program",
         )
         .props("standout dense")
         .classes("w-64")

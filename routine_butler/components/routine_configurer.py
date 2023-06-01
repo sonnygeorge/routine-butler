@@ -24,7 +24,7 @@ class RoutineConfigurer(IconExpansion):
             "color": "black",
         }
         super().__init__(
-            routine.title, icon=SVG, icon_kwargs=svg_kwargs, width="1100px"
+            routine.title, icon=SVG, icon_kwargs=svg_kwargs, width="965px"
         )
 
         with self:

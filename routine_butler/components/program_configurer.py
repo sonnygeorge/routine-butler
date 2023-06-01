@@ -39,22 +39,21 @@ def plugin_factory(  # TODO: move to utils and have RoutineAdministrator use it?
         return state.plugin_types[plugin_name](**plugin_dict)
 
 
-class ProgramConfigurer(ui.card):
+class ProgramConfigurer:
     def __init__(self, program: Program):
         self.program = program
         self.plugin = plugin_factory(program.plugin_type, program.plugin_dict)
 
-        super().__init__()
-        self.classes("flex items-center justify-center")
-        self.style("width: 853px")
+        card = micro.card()
+        card.classes("flex items-center justify-center").style("width: 853px")
 
-        with self:
+        with card:
             with ui.row().classes("items-center justify-start w-full"):
                 micro.program_svg(size=20, color="lightgray").classes("mx-1")
                 self.title_input = (
                     ui.input(
                         value=program.title,
-                        label="title",
+                        label="Title",
                         validation={
                             TAKEN_NAME_MSG: lambda v: v
                             not in state.program_titles
@@ -67,11 +66,11 @@ class ProgramConfigurer(ui.card):
                 self.plugin_select = micro.plugin_type_select(
                     value=program.plugin_type
                 ).classes("grow")
-                choose_plugin_button = ui.button("choose").classes("w-40")
+                choose_plugin_button = ui.button("Choose").classes("w-40")
 
             ui.separator()
 
-            self.temp_filler = ui.label("choose a type...")
+            self.temp_filler = ui.label("Choose a type...")
             self.temp_filler.classes("text-gray-300 italic")
 
             self.plugin_grid = ui.grid(columns=2).classes("mt-3 mb-6 w-1/2")

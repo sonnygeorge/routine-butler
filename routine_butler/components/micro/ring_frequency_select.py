@@ -7,6 +7,6 @@ def ring_frequency_select(value: float) -> ui.select:
     select = ui.select(
         [e.value for e in RingFrequency],
         value=value,
-        label="ring frequency",
+        label="Ring Frequency",
     )
     return select.props("standout dense")

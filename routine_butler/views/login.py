@@ -1,5 +1,6 @@
 from nicegui import ui
 
+from routine_butler.components import micro
 from routine_butler.components.header import Header
 from routine_butler.constants import PagePath
 from routine_butler.models.user import User
@@ -25,7 +26,7 @@ def login():
     apply_color_theme()
     Header(hide_buttons=True)
 
-    with ui.card() as base:
+    with micro.card() as base:
         base.classes("max-w-xl absolute-center container flex items-stretch")
 
         ui.label("Login")

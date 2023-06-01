@@ -6,6 +6,7 @@ from routine_butler.components.micro.buttons import (
     reward_button,
     save_button,
 )
+from routine_butler.components.micro.card import card
 from routine_butler.components.micro.plugin_type_select import (
     plugin_type_select,
 )

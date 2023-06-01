@@ -47,8 +47,7 @@ def configure_programs():
     with ui.row().classes(
         "absolute-center w-10/12 flex flex-col content-center"
     ):
-
-        with ui.card().classes(
+        with micro.card().classes(
             "flex flex-row items-center justify-center mb-4"
         ).style("width: 853px"):
             micro.program_svg(size=20, color="lightgray").classes("mx-1")

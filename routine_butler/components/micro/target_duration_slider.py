@@ -13,7 +13,7 @@ def target_duration_slider(duration_minutes, duration_enabled):
         label_classes = "text-white text-center text-s"
 
         minutes_display = ui.element("div").classes("flex items-center")
-        with minutes_display.classes("flex-row gap-x-0 rounded bg-gray-300"):
+        with minutes_display.classes("flex-row gap-x-0 rounded bg-gray-400"):
             dark_frame = ui.element("div").classes("flex bg-primary rounded")
             with dark_frame.classes("flex-row items-center justify-center"):
                 label = ui.label()

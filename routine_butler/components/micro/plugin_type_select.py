@@ -9,6 +9,6 @@ def plugin_type_select(value: Optional[str] = None) -> ui.select:
     plugin_select = ui.select(
         [p for p in state.plugin_types.keys()],
         value=value,
-        label="type",
+        label="Type",
     ).props("standout dense")
     return plugin_select

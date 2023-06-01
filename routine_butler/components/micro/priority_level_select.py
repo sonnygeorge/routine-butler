@@ -8,7 +8,7 @@ def priority_level_select(value: float) -> ui.select:
         ui.select(
             [e.value for e in PriorityLevel],
             value=value,
-            label="priority",
+            label="Priority",
         )
         .props("standout dense")
         .classes("w-40")
