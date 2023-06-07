@@ -2,7 +2,6 @@ from typing import List, Tuple
 
 from nicegui import ui
 
-
 from routine_butler.constants import PagePath
 from routine_butler.models.program import Program
 from routine_butler.models.routine import Routine

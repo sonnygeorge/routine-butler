@@ -44,14 +44,21 @@ def configure_programs():
     apply_color_theme()
     Header()
 
-    with ui.row():
-        with ui.card():
+    with ui.row().classes(
+        "absolute-center w-10/12 flex flex-col content-center"
+    ):
+        with ui.card().classes(
+            "flex flex-row items-center justify-center"
+        ).style("width: 853px"):
             program_select = micro.program_select(
                 state.program_titles + [ADD_NEW_PROGRAM_STR]
             )
-            with ui.row():
-                configure_button = ui.button("Configure")
-                delete_button = micro.delete_button()
+
+            ui.element("div").classes("w-40")
+
+            configure_button = ui.button("Configure").classes("w-40")
+            delete_button = micro.delete_button().classes("w-40")
+
         program_configurer_frame = ui.element("div")
 
     configure_button.on(

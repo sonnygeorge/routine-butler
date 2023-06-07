@@ -13,9 +13,15 @@ def program_select(
     options = [
         p.title if isinstance(p, Program) else p for p in program_titles
     ]
-    program_select = ui.select(
-        options=options,
-        value=value,
-        label="program",
-    ).props(SDBR.DFLT_INPUT_PRPS)
-    return program_select.classes("w-full")
+
+    program_select = (
+        ui.select(
+            options=options,
+            value=value,
+            label="program",
+        )
+        .props(SDBR.DFLT_INPUT_PRPS)
+        .classes("w-64")
+    )
+
+    return program_select

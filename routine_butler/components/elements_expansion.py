@@ -31,10 +31,10 @@ class ElementsExpansion(IconExpansion):
             self._update_rows_frame()
 
             with ui.row().classes(SDBR.DFLT_ROW_CLS + f" pb-{SDBR.V_SPACE}"):
-                add_routine_element_button = micro.add_button()
-                add_routine_element_button.classes("w-3/4")
-                add_reward_element_button = micro.reward_button()
-                add_reward_element_button.classes("w-1/5")
+                add_routine_element_button = micro.add_button().classes("w-64")
+                add_reward_element_button = micro.reward_button().classes(
+                    "w-64"
+                )
             add_routine_element_button.on("click", self.hdl_add_element)
             add_reward_element_button.on("click", self.hdl_add_reward)
 
@@ -77,21 +77,27 @@ class ElementsExpansion(IconExpansion):
         else:
             accent_color = "primary"
 
-        with ui.row().classes(SDBR.DFLT_ROW_CLS + " gap-x-0"):
+        with ui.row().classes("container flex justify-center p-1"):
             micro.row_superscript(row_superscript, accent_color)
-            with ui.element("div").style("width: 32%;"):
-                program_select = micro.program_select(
-                    state.program_titles, value=routine_element.program
-                )
-            with ui.element("div").style("width: 27%;"):
-                if isinstance(routine_element, RoutineReward):
+
+            program_select = micro.program_select(
+                state.program_titles, value=routine_element.program
+            )
+
+            if isinstance(routine_element, RoutineReward):
+                with ui.row().classes(
+                    "w-64 container flex justify-center items-center"
+                ):
                     micro.reward_icon_placeholder()
-                else:
-                    priority_level_select = micro.priority_level_select(
-                        routine_element.priority_level
-                    )
-            up_button, down_button = micro.order_buttons(accent_color)
-            with ui.element("div").style("width: 7%;"):
+            else:
+                priority_level_select = micro.priority_level_select(
+                    routine_element.priority_level
+                )
+
+            with ui.row().classes(
+                "w-64 self-center	items-center justify-center"
+            ):
+                up_button, down_button = micro.order_buttons(accent_color)
                 delete_button = micro.delete_button().props("dense")
 
             program_select.on(

@@ -23,12 +23,14 @@ def login():
         ui.open(PagePath.HOME)
 
     apply_color_theme()
-    Header()
+    Header(hide_buttons=True)
 
-    with ui.card():
+    with ui.card() as base:
+        base.classes("max-w-xl absolute-center container flex items-stretch")
+
         ui.label("Login")
         ui.separator()
-        username_input = ui.input("User:")
+        username_input = ui.input("User")
         btn = ui.button("Login")
         btn.on(
             "click",

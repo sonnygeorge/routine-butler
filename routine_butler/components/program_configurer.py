@@ -46,25 +46,32 @@ class ProgramConfigurer(ui.card):
         self.plugin = plugin_factory(program.plugin_type, program.plugin_dict)
 
         super().__init__()
+        self.classes("flex items-center justify-center").style("width: 853px")
 
         with self:
-            self.title_input = ui.input(
-                value=program.title,
-                validation={
-                    TAKEN_NAME_MSG: lambda v: v not in state.program_titles
-                },
-            ).props(SDBR.DFLT_INPUT_PRPS)
             with ui.row():
+                self.title_input = (
+                    ui.input(
+                        value=program.title,
+                        validation={
+                            TAKEN_NAME_MSG: lambda v: v
+                            not in state.program_titles
+                        },
+                    )
+                    .props(SDBR.DFLT_INPUT_PRPS)
+                    .classes("w-64")
+                )
+
                 self.plugin_select = micro.plugin_type_select(
                     value=program.plugin_type
-                )
-                choose_plugin_button = ui.button("choose")
+                ).classes("w-64")
+                choose_plugin_button = ui.button("choose").classes("w-40")
 
-            self.plugin_frame = ui.element("div")
+            self.plugin_frame = ui.card()
             self.plugin_input_elements: Dict[str, ui.input] = {}
 
             # save_button is a class attribute so parent context can listen to it
-            self.save_button = micro.save_button()
+            self.save_button = micro.save_button().classes("w-40")
 
         self._update_plugin_frame_with_plugin_values()
 
@@ -83,8 +90,10 @@ class ProgramConfigurer(ui.card):
                 passes_pydantic_validation, plugin.__class__, key
             )  # partial seems to be necessary here, lambdas don't quite work
             with self.plugin_frame:
-                with ui.row():
-                    ui.label(key)
+                with ui.element("div").classes(
+                    "grid grid-cols-2 justify-items-end items-center gap-2"
+                ):
+                    ui.label(key).classes("uppercase")
                     self.plugin_input_elements[key] = ui.input(
                         value=value,
                         validation={f"{INVALID_MSG}": is_pydantic_valid},
