@@ -12,7 +12,10 @@ except:
 
 
 class HX711:
-    """HX711 driver for Raspberry Pi"""
+    """HX711 driver for Raspberry Pi by Richard-Major
+
+    https://gist.github.com/Richard-Major/64e94338c2d08eb1221c2eca9e014362
+    """
 
     def __init__(self, dout=5, pd_sck=6, gain=128, bitsToRead=24):
         self.PD_SCK = pd_sck
