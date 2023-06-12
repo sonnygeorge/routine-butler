@@ -44,9 +44,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.elements import BinaryExpression, UnaryExpression
 
-# define and add custom log level for database events
-DB_EVENT_LOG_LVL = "DB EVENT"
-logger.level(DB_EVENT_LOG_LVL, no=33, color="<magenta>")
+from routine_butler.utils import DB_LOG_LVL
 
 
 def log_db_event(
@@ -67,7 +65,7 @@ def log_db_event(
         str_to_be_logged = f"{class_name}(uid:{uid}) - {method_name}()"
     else:
         str_to_be_logged = f"{class_name} - {method_name}()"
-    logger.log(DB_EVENT_LOG_LVL, str_to_be_logged)
+    logger.log(DB_LOG_LVL, str_to_be_logged)
 
 
 class AttemptedSetOnReadOnlyFieldError(Exception):

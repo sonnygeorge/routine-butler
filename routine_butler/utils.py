@@ -2,6 +2,7 @@ import importlib
 import os
 from typing import TYPE_CHECKING, Dict, Protocol, Type
 
+from loguru import logger
 from nicegui import ui
 
 from routine_butler.constants import ABS_PLUGINS_DIR_PATH, CLR_CODES, PagePath
@@ -70,3 +71,12 @@ def dynamically_get_plugins() -> Dict[str, Type[ProgramPlugin]]:
             class_name = snake_to_upper_camel(module_name)
             program_types[class_name] = getattr(module, class_name)
     return program_types
+
+
+# define and add custom log level for database events
+DB_LOG_LVL = "DB EVENT"
+logger.level(DB_LOG_LVL, no=33, color="<magenta>")
+
+# define and add custom log level for hardware events
+HW_LOG_LVL = "HW EVENT"
+logger.level(HW_LOG_LVL, no=34, color="<cyan>")
