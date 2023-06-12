@@ -90,4 +90,4 @@ def open_keyboard():
 
 def close_keyboard():
     print("CLOSING KEYBOARD")
-    subprocess.Popen(["killall", "matchbox-keyboard"])
+    subprocess.run(["killall", "matchbox-keyboard"])
