@@ -69,12 +69,14 @@ class Box:
 
     def lock(self):
         logger.log(HW_LOG_LVL, "Locking box...")
+        GPIO.setup(LOCK_PIN, GPIO.OUT)
         GPIO.output(LOCK_PIN, GPIO.LOW)
         time.sleep(LOCK_WAIT_SECONDS)
         GPIO.output(LOCK_PIN, GPIO.HIGH)
 
     def unlock(self):
         logger.log(HW_LOG_LVL, "Unlocking box...")
+        GPIO.setup(UNLOCK_PIN, GPIO.OUT)
         GPIO.output(UNLOCK_PIN, GPIO.LOW)
         time.sleep(LOCK_WAIT_SECONDS)
         GPIO.output(UNLOCK_PIN, GPIO.HIGH)
