@@ -15,6 +15,14 @@ except Exception as e:
     logger.warning(f"Failed to import RPi.GPIO: {e} - using Mock.GPIO instead")
     MOCK = True
 
+
+# HOW TO CALCULATE THE REFFERENCE UNIT
+#########################################
+# To set the reference unit to 1.
+# Call get_weight before and after putting 1000g weight on your sensor.
+# Divide difference with grams (1000g) and use it as reference unit.
+HX711_REFERENCE_UNIT = 397
+
 HX711_GAIN = 128
 HX711_BITS_TO_READ = 24
 HX711_DOUT_PIN = 14
@@ -42,10 +50,12 @@ class Box:
             gain=HX711_GAIN,
             bitsToRead=HX711_BITS_TO_READ,
         )
+        self.hx711.setReferenceUnit(HX711_REFERENCE_UNIT)
 
     def zero_scale(self):
         logger.log(HW_LOG_LVL, "Zeroing scale...")
         if not MOCK:
+            self.hx711.reset()
             self.hx711.tare()
 
     def passes_weight_check(self) -> bool:
