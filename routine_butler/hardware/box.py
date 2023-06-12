@@ -9,9 +9,10 @@ try:
     import RPi.GPIO as GPIO
 
     MOCK = False
-except:
+except Exception as e:
     import Mock.GPIO as GPIO
 
+    logger.warning(f"Failed to import RPi.GPIO: {e} - using Mock.GPIO instead")
     MOCK = True
 
 HX711_GAIN = 128
