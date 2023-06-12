@@ -51,7 +51,7 @@ class ProgramConfigurer:
             with ui.row().classes("items-center justify-start w-full"):
                 micro.program_svg(size=20, color="lightgray").classes("mx-1")
                 self.title_input = (
-                    ui.input(
+                    micro.input(
                         value=program.title,
                         label="Title",
                         validation={
@@ -110,7 +110,7 @@ class ProgramConfigurer:
                     text = ui.label(f"{key}:").classes("self-center")
                     text.classes("text-gray-800 text-xl")
                 # input
-                self.plugin_input_elements[key] = ui.input(
+                self.plugin_input_elements[key] = micro.input(
                     value=value,
                     validation={f"{INVALID_MSG}": is_pydantic_valid},
                 ).props("standout dense")

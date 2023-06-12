@@ -1,5 +1,6 @@
 import importlib
 import os
+import subprocess
 from typing import TYPE_CHECKING, Dict, Protocol, Type
 
 from loguru import logger
@@ -79,4 +80,14 @@ logger.level(DB_LOG_LVL, no=33, color="<magenta>")
 
 # define and add custom log level for hardware events
 HW_LOG_LVL = "HW EVENT"
-logger.level(HW_LOG_LVL, no=34, color="<cyan>")
+logger.level(HW_LOG_LVL, no=34, color="<yellow>")
+
+
+def open_keyboard():
+    print("OPENING KEYBOARD")
+    subprocess.Popen(["matchbox-keyboard"])
+
+
+def close_keyboard():
+    print("CLOSING KEYBOARD")
+    subprocess.Popen(["pkill", "matchbox-keyboard"])
