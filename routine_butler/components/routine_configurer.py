@@ -32,7 +32,7 @@ class RoutineConfigurer(IconExpansion):
             with top_row.classes("pt-4 gap-x-7 w-full"):
                 with ui.row().classes("items-center"):
                     ui.label("Title:")
-                    self.title_input = ui.input(
+                    self.title_input = micro.input(
                         value=routine.title,
                     ).props("standout dense")
                     title_save_button = micro.save_button().classes("w-20")

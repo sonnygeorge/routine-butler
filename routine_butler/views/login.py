@@ -31,7 +31,7 @@ def login():
 
         ui.label("Login")
         ui.separator()
-        username_input = ui.input("User")
+        username_input = micro.input("User")
         btn = ui.button("Login")
         btn.on(
             "click",

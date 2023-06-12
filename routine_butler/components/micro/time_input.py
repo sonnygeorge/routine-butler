@@ -2,7 +2,7 @@ from nicegui import ui
 
 
 def time_input(value: str) -> ui.time:
-    time_input = ui.input(value=value)
+    time_input = micro.input(value=value)
     time_input.props("standout dense")
     with time_input as input:
         with input.add_slot("append"):

@@ -83,11 +83,13 @@ HW_LOG_LVL = "HW EVENT"
 logger.level(HW_LOG_LVL, no=34, color="<yellow>")
 
 
+# Don't forget to change the default keyboard to keyboard-lq1.xml
+# stackoverflow.com/questions/70574505/how-to-change-the-default-matchbox-keyboard-layout
+
+
 def open_keyboard():
-    print("OPENING KEYBOARD")
     subprocess.Popen(["matchbox-keyboard"])
 
 
 def close_keyboard():
-    print("CLOSING KEYBOARD")
     subprocess.run(["killall", "matchbox-keyboard"])
