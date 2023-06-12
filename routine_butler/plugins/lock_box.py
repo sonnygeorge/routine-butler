@@ -21,7 +21,8 @@ class LockBoxGui:
         box.tolerance_grams = tolerance_grams
 
         with micro.card():
-            with ui.row():  # FIXME: make this look better
+            # FIXME: make this look better & show current grams on scale
+            with ui.row():
                 self.scale_zeroed_indicator = status_indicator(
                     self.scale_is_zeroed
                 )
