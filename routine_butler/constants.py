@@ -1,13 +1,14 @@
 """A central location for stylistic UI constants for quick iteration/experimentation"""
 
 import os
-from enum import IntEnum, StrEnum
+from enum import StrEnum
 
 _CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 ABS_ROUTINE_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/routine-icon.svg")
 ABS_PROGRAM_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/program-icon.svg")
 ABS_REWARD_SVG_PATH = os.path.join(_CURRENT_DIR, "assets/reward-icon.svg")
-ABS_PROGRAMS_DIR_PATH = os.path.join(_CURRENT_DIR, "plugins")
+
+ABS_PLUGINS_DIR_PATH = os.path.join(_CURRENT_DIR, "plugins")
 
 
 class PagePath(StrEnum):
@@ -61,30 +62,6 @@ class CLR_CODES:
 
 # for throttling events that would otherwise fire too often
 THROTTLE_SECONDS = 0.5
-
-
-class HDR:
-    BUTTON_STYLE = "height: 45px; width: 45px;"
-    APP_NAME = "RoutineButler"
-    APP_NAME_SIZE = "1.9rem"
-    RTN_SVG_SIZE: int = 30
-    PRGRM_SVG_SIZE: int = 25
-    TIME_SIZE = "1.1rem"
-    DATE_SIZE = ".7rem"
-
-
-class SVG_SIZE(IntEnum):
-    PROGRAM: int = 21
-    ROUTINE: int = 28
-    REWARD: int = 17
-
-
-class SDBR:
-    V_SPACE: int = 4
-    BREAKPOINT: str = "0"
-    DFLT_ROW_CLS: str = "justify-evenly items-center w-full px-4 pt-4"
-    DFLT_INPUT_PRPS: str = "standout dense"
-    WIDTH: str = "540"
 
 
 # a quick script to display ICON_STRS and CLR_CODES in a nicegui app

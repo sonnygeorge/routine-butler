@@ -9,6 +9,7 @@ class IconExpansion(ui.expansion):
         title: str,
         icon: Optional[Union[str, Callable]] = None,
         icon_kwargs: Optional[dict] = None,
+        width: Optional[str] = None,
     ):
         """Custom element that creates an expansion with both a title and an icon in the
         header slot
@@ -21,10 +22,12 @@ class IconExpansion(ui.expansion):
                 - callable that returns a some nicegui element
                 Defaults to None.
             icon_kwargs: optional kwargs to pass to the icon callable
+            width: css width of the expansion
         """
-        self.expansion_frame = ui.element("q-list").props("bordered")
-        self.expansion_frame.classes("rounded-borders w-full")
-        with self.expansion_frame:
+        self.bordered_frame = ui.element("q-list").props("bordered")
+        self.bordered_frame.classes("rounded-borders w-full")
+        self.bordered_frame.style(f"width: {width};")
+        with self.bordered_frame:
             super().__init__("")
             self.classes("w-full")
 

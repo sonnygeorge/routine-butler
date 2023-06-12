@@ -1,4 +1,5 @@
 loguru
+Mock.GPIO
 nicegui
 pre-commit
 pytest

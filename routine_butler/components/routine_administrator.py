@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from nicegui import ui
 
@@ -20,35 +20,61 @@ def get_programs_queues(
     return element_programs_queue, reward_programs_queue
 
 
-class RoutineAdministrator(ui.element):
+class RoutineAdministrator(ui.column):
     def __init__(self, routine: Routine):
-        super().__init__("div")
+        super().__init__()
+        self.classes("absolute-center items-center justify-center")
+
         self.routine = routine
         queues = get_programs_queues(routine)
         self.element_programs_queue, self.reward_programs_queue = queues
         self._administer_next_program()
 
+    @property
+    def has_only_rewards_left_to_administer(self) -> bool:
+        return (
+            len(self.element_programs_queue) == 0
+            and len(self.reward_programs_queue) > 0
+        )
+
+    @property
+    def has_nothing_left_to_administer(self) -> bool:
+        return (
+            len(self.element_programs_queue) == 0
+            and len(self.reward_programs_queue) == 0
+        )
+
+    @property
+    def current_program(self) -> Optional[Program]:
+        if self.has_nothing_left_to_administer:
+            return None
+        elif self.has_only_rewards_left_to_administer:
+            return self.reward_programs_queue[0]
+        else:
+            return self.element_programs_queue[0]
+
     def _administer_next_program(self):
-        if len(self.element_programs_queue) > 0:
-            program = self.element_programs_queue[0]
-        elif len(self.reward_programs_queue) > 0:
-            with self:
-                skip_button = ui.button("Skip Reward")
-            skip_button.on("click", self.hdle_program_completion)
-            program = self.reward_programs_queue[0]
-        else:  # routine is complete
+        if self.has_nothing_left_to_administer:
             redirect_to_page(PagePath.HOME)
             return
-        with self:
-            program.administer(on_complete=self.hdle_program_completion)
 
-    def _pop_from_queue(self):
+        with self:
+            self.current_program.administer(
+                on_complete=self.hdl_program_completion
+            )
+
+        if self.has_only_rewards_left_to_administer:
+            with self:
+                skip_button = ui.button("Skip Reward")
+                skip_button.on("click", self.hdl_program_completion)
+
+    def _pop_current_program_from_queue(self):
         if len(self.element_programs_queue) > 0:
             self.element_programs_queue.pop(0)
         elif len(self.reward_programs_queue) > 0:
             self.reward_programs_queue.pop(0)
 
-    def hdle_program_completion(self):
-        self.clear()  # remove current program ui
-        self._pop_from_queue()  # remove current program from queue
+    def hdl_program_completion(self):
+        self.clear()  # clear current program ui
+        self._pop_current_program_from_queue()  # remove program from queue
         self._administer_next_program()  # administer next program

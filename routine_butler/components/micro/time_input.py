@@ -1,11 +1,9 @@
 from nicegui import ui
 
-from routine_butler.constants import SDBR
-
 
 def time_input(value: str) -> ui.time:
     time_input = ui.input(value=value)
-    time_input.props(SDBR.DFLT_INPUT_PRPS).classes("w-full")
+    time_input.props("standout dense")
     with time_input as input:
         with input.add_slot("append"):
             icon = ui.icon("access_time").classes("cursor-pointer")

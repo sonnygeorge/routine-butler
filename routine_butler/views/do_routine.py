@@ -17,7 +17,7 @@ from routine_butler.utils import (
 def routine_run():
     redirect_if_user_is_none(state.user)
     apply_color_theme()
-    Header()
+    Header(hide_buttons=True)
 
     if state.pending_routine_to_run is None:
         ui.label("No routine to run... returning to home page")

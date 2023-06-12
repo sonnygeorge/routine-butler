@@ -5,7 +5,6 @@ from nicegui import ui
 from pydantic import BaseModel, ValidationError
 
 from routine_butler.components import micro
-from routine_butler.constants import SDBR
 from routine_butler.models.program import Program
 from routine_butler.state import state
 from routine_butler.utils import ProgramPlugin
@@ -40,48 +39,60 @@ def plugin_factory(  # TODO: move to utils and have RoutineAdministrator use it?
         return state.plugin_types[plugin_name](**plugin_dict)
 
 
-class ProgramConfigurer(ui.card):
+class ProgramConfigurer:
     def __init__(self, program: Program):
         self.program = program
         self.plugin = plugin_factory(program.plugin_type, program.plugin_dict)
 
-        super().__init__()
-        self.classes("flex items-center justify-center").style("width: 853px")
+        card = micro.card()
+        card.classes("flex items-center justify-center").style("width: 853px")
 
-        with self:
-            with ui.row():
+        with card:
+            with ui.row().classes("items-center justify-start w-full"):
+                micro.program_svg(size=20, color="lightgray").classes("mx-1")
                 self.title_input = (
-                    ui.input(
+                    micro.input(
                         value=program.title,
+                        label="Title",
                         validation={
                             TAKEN_NAME_MSG: lambda v: v
                             not in state.program_titles
                         },
                     )
-                    .props(SDBR.DFLT_INPUT_PRPS)
+                    .props("standout dense")
                     .classes("w-64")
                 )
-
+                ui.separator().props("vertical").classes("mx-3")
                 self.plugin_select = micro.plugin_type_select(
                     value=program.plugin_type
-                ).classes("w-64")
-                choose_plugin_button = ui.button("choose").classes("w-40")
+                ).classes("grow")
+                choose_plugin_button = ui.button("Choose").classes("w-40")
 
-            self.plugin_frame = ui.card()
+            ui.separator()
+
+            self.temp_filler = ui.label("Choose a type...")
+            self.temp_filler.classes("text-gray-300 italic")
+
+            self.plugin_grid = ui.grid(columns=2).classes("mt-3 mb-6 w-1/2")
+            self.plugin_grid.set_visibility(False)
             self.plugin_input_elements: Dict[str, ui.input] = {}
+
+            ui.separator()
 
             # save_button is a class attribute so parent context can listen to it
             self.save_button = micro.save_button().classes("w-40")
 
-        self._update_plugin_frame_with_plugin_values()
+        self._update_plugin_grid_with_plugin_values()
 
         choose_plugin_button.on("click", self.hdl_choose_plugin)
         self.save_button.on("click", self.hdl_save)
 
-    def _update_plugin_frame_with_plugin_values(self):
+    def _update_plugin_grid_with_plugin_values(self):
         if self.plugin_select.value is None:
             return
-        self.plugin_frame.clear()
+        self.plugin_grid.clear()
+        self.temp_filler.set_visibility(False)
+        self.plugin_grid.set_visibility(True)
         plugin = state.plugin_types[self.plugin_select.value](
             **self.program.plugin_dict
         )
@@ -89,17 +100,22 @@ class ProgramConfigurer(ui.card):
             is_pydantic_valid = partial(
                 passes_pydantic_validation, plugin.__class__, key
             )  # partial seems to be necessary here, lambdas don't quite work
-            with self.plugin_frame:
-                with ui.element("div").classes(
-                    "grid grid-cols-2 justify-items-end items-center gap-2"
-                ):
-                    ui.label(key).classes("uppercase")
-                    self.plugin_input_elements[key] = ui.input(
-                        value=value,
-                        validation={f"{INVALID_MSG}": is_pydantic_valid},
-                    )
+            with self.plugin_grid:
+                # label
+                key_label = ui.element("q-item").props("dense")
+                cls = "items-center justify-center border-secondary"
+                cls += " rounded w-full border-dotted border-2"
+                key_label.classes(cls).style("height: 2.5rem;")
+                with key_label:
+                    text = ui.label(f"{key}:").classes("self-center")
+                    text.classes("text-gray-800 text-xl")
+                # input
+                self.plugin_input_elements[key] = micro.input(
+                    value=value,
+                    validation={f"{INVALID_MSG}": is_pydantic_valid},
+                ).props("standout dense")
 
-    def _update_plugin_with_plugin_frame_values(self):
+    def _update_plugin_with_plugin_grid_values(self):
         kwargs = {
             k: elem.value for k, elem in self.plugin_input_elements.items()
         }
@@ -109,12 +125,12 @@ class ProgramConfigurer(ui.card):
         if not self.plugin_select.value == self.program.plugin_type:
             self.program.plugin_type = self.plugin_select.value
             self.program.plugin_dict = {}
-            self._update_plugin_frame_with_plugin_values()
+            self._update_plugin_grid_with_plugin_values()
 
     def _update_program_with_widget_values(self):
         self.program.title = self.title_input.value
         self.program.plugin_type = self.plugin_select.value
-        self._update_plugin_with_plugin_frame_values()
+        self._update_plugin_with_plugin_grid_values()
         self.program.plugin_dict = self.plugin.dict()
 
     def hdl_save(self):

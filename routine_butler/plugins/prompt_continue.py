@@ -1,17 +1,17 @@
 from nicegui import ui
 from pydantic import BaseModel
 
+from routine_butler.components import micro
 
-class PromptContinueGui(ui.card):
-    def __init__(self, read_affirmation: "PromptContinue"):
-        super().__init__()
 
-        with self:
-            ui.markdown(f"# {read_affirmation.prompt}")
+class PromptContinueGui:
+    def __init__(self, data: "PromptContinue"):
+        with micro.card():
+            ui.markdown(f"# {data.prompt}")
             self.confirmation_button = ui.button("Success")
             self.confirmation_button.set_visibility(False)
             ui.timer(
-                read_affirmation.wait_seconds,
+                data.wait_seconds,
                 lambda: self.confirmation_button.set_visibility(True),
                 once=True,
             )
