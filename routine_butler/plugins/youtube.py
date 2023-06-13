@@ -5,43 +5,55 @@ from pydantic import BaseModel
 
 from routine_butler.components import micro
 
+from .s_youtube.subscriptions_feed import subscriptions_feed
+
 
 class YoutubeGui:
     def __init__(self, data: "Youtube", on_complete: callable):
         self.data = data
         self.on_complete = on_complete
 
+        self.videos = self.get_queue()
+        self.current_video_index = 0
+
         with micro.card():
-            ui.label("Player that shows a queue of Youtube vids in succession")
-            skip_button = ui.button("Next Video")
+            self.video_index = ui.label("")
+            self.video_player = micro.YoutubeEmbed("")
 
-        skip_button.on("click", self.handle_video_complete)
-        # player.on("video_complete", self.handle_video_complete)
+            with ui.row() as root:
+                root.classes("w-full flex items-center justify-around")
 
-    def get_queue(self):
-        """Given the most recently published videos from the channels to which data.user
-        is subscribed, prepares a queue of youtube videos who summed watchtime aims to be
-        close to data.watchtime_minutes"""
-        pass
+                ui.button("<", on_click=self.handle_previous_video)
+                ui.label(f"Videos: {len(self.videos)}")
+                ui.button(">", on_click=self.handle_next_video)
 
-    def handle_video_complete(self):  # pseudocode
-        if "queue is empty":
-            self.on_complete()
-        else:
-            "switch to next video"
-            "queue.pop"
+        self.__update()
+
+    def get_queue(self) -> list[str]:
+        return subscriptions_feed(self.data.cookie)
+
+    def __update(self):
+        self.video_player.set_video_id(self.videos[self.current_video_index])
+        self.video_index.set_text(
+            f"Current Video: {self.current_video_index + 1}"
+        )
+
+    def handle_next_video(self):
+        self.current_video_index = (self.current_video_index + 1) % len(
+            self.videos
+        )
+        self.__update()
+
+    def handle_previous_video(self):
+        self.current_video_index = (self.current_video_index - 1) % len(
+            self.videos
+        )
+        self.__update()
 
 
 class Youtube(BaseModel):
-    # Youtube user whose subsriptions will be the source for generating the queue
-    username: Optional[str] = None
-    # Password (if needed)...
-    # If so, it would be good to for the components.program_configurer.plugin_grid
-    # input element to hide the password with ******** characters...
-    password: Optional[str] = None
-    # The total watchtime that the widget will aim for when generating the queue
+    cookie: str = ""
     watchtime_minutes: int = 25
-    # ...
 
     def administer(self, on_complete: callable):
         YoutubeGui(self, on_complete=on_complete)

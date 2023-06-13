@@ -32,3 +32,5 @@ from routine_butler.components.micro.target_duration_slider import (
 )
 from routine_butler.components.micro.time_input import time_input
 from routine_butler.components.micro.volume_knob import volume_knob
+
+from routine_butler.components.micro.youtube_embed import YoutubeEmbed
