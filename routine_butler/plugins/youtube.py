@@ -1,11 +1,8 @@
-from typing import Optional
-
 from nicegui import ui
 from pydantic import BaseModel
 
 from routine_butler.components import micro
-
-from .s_youtube.subscriptions_feed import subscriptions_feed
+from routine_butler.plugins._youtube.get_video_data import subscriptions_feed
 
 
 class YoutubeGui:

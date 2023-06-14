@@ -14,10 +14,13 @@
             "name": "Python: Current File from root",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}{file}",
+            "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${cwd}"
+            }
         }
     ]
 }
