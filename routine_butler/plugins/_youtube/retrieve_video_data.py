@@ -8,4 +8,6 @@ def retrieve_users_videos_data() -> list[Video]:
     for user_id in user_ids:
         # url = f"https://www.youtube.com/channel/{user_id}/videos"
         # TODO: make request(s) and extract data
+
+        # TODO: implement some sort of hard-stop if needed for performance
         pass
