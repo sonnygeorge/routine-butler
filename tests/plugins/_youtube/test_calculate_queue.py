@@ -129,9 +129,6 @@ def test_calculate_queue():
         n_videos_the_queue_can_hold = max_duration / TEST_VIDEO_LENGTH_SECONDS
         n_videos_the_queue_can_hold = int(n_videos_the_queue_can_hold)
 
-        if n_videos_the_queue_can_hold > len(videos_sorted_newest_to_oldest):
-            n_videos_the_queue_can_hold = len(videos_sorted_newest_to_oldest)
-
         expected_queue = videos_sorted_newest_to_oldest[
             :n_videos_the_queue_can_hold
         ]  # since the newer videos will have the higher queue scores
