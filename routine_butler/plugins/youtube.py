@@ -4,19 +4,25 @@ from pydantic import BaseModel
 from routine_butler.components import micro
 from routine_butler.plugins._youtube.calculate_queue import calculate_queue
 from routine_butler.plugins._youtube.retrieve_video_data import (
-    retrieve_users_videos_data,
+    retrieve_video_data,
 )
 
 
 class YoutubeGui:
     def __init__(self, data: "Youtube", on_complete: callable):
         self.data = data
-        self.on_complete = on_complete
-
-        self.videos = self.get_queue_of_video_ids()
+        self.on_complete = on_complete  # FIXME: This is never called
         self.current_video_index = 0
 
-        with micro.card():
+        self.card = micro.card()
+
+        with self.card:
+            self.progress_label = ui.label("Loading...")
+
+        ui.timer(0.1, self.generate_queue, once=True)
+
+    def add_player_to_ui(self):
+        with self.card:
             self.video_index = ui.label("")
             self.video_player = micro.YoutubeEmbed("")
 
@@ -27,12 +33,13 @@ class YoutubeGui:
                 ui.label(f"Videos: {len(self.videos)}")
                 ui.button(">", on_click=self.handle_next_video)
 
-        self.__update()
-
-    def get_queue_of_video_ids(self) -> list[str]:
-        videos = retrieve_users_videos_data()
+    def generate_queue(self) -> list[str]:
+        videos = retrieve_video_data(self.progress_label)
         queue = calculate_queue(videos, self.data.target_duration_minutes)
-        return [video.id for video in queue]
+        self.videos = [video.id for video in queue]
+        self.card.clear()
+        self.add_player_to_ui()
+        self.__update()
 
     def __update(self):
         self.video_player.set_video_id(self.videos[self.current_video_index])
