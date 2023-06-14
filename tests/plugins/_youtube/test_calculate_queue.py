@@ -6,7 +6,7 @@ from routine_butler.plugins._youtube.calculate_queue import (
     calculate_queue,
     calculate_video_queue_score,
 )
-from routine_butler.plugins._youtube.schema import ChannelScoringData, Video
+from routine_butler.plugins._youtube.utils import ChannelScoringData, Video
 
 TEST_VIDEO_ID = "test_video_id"
 TEST_USER_ID = "test_user_id"
@@ -32,7 +32,7 @@ TEST_SCORING_DATA = ChannelScoringData(
     priority_score=CHANNEL_PRIORITY_SCORE,
     substring_priority_scores=TEST_SUBSTRING_PRIORITY_SCORES,
 )
-TEST_QUEUE_GENERATION_PREFERENCES = {"test_user_id": TEST_SCORING_DATA}
+TEST_QUEUE_PARAMS = {"test_user_id": TEST_SCORING_DATA}
 
 
 def test_older_videos_score_worse():
@@ -47,7 +47,7 @@ def test_older_videos_score_worse():
         videos.append(video)
 
     queue_scores = [
-        calculate_video_queue_score(video, TEST_QUEUE_GENERATION_PREFERENCES)
+        calculate_video_queue_score(video, TEST_QUEUE_PARAMS)
         for video in videos
     ]
     assert queue_scores == sorted(queue_scores, reverse=True)
@@ -65,33 +65,31 @@ def test_longer_videos_score_worse():
         videos.append(video)
 
     queue_scores = [
-        calculate_video_queue_score(video, TEST_QUEUE_GENERATION_PREFERENCES)
+        calculate_video_queue_score(video, TEST_QUEUE_PARAMS)
         for video in videos
     ]
     assert queue_scores == sorted(queue_scores, reverse=True)
 
 
 def test_substring_priority_score_takes_precedence():
-    queue_generation_preferences = TEST_QUEUE_GENERATION_PREFERENCES.copy()
-    queue_generation_preferences[TEST_USER_ID].priority_score = 50
-    queue_generation_preferences[TEST_USER_ID].substring_priority_scores = {
-        "awesome": 100
-    }
+    queue_params = TEST_QUEUE_PARAMS.copy()
+    queue_params[TEST_USER_ID].priority_score = 50
+    queue_params[TEST_USER_ID].substring_priority_scores = {"awesome": 100}
 
     video = TEST_VIDEO.copy()
     video.description = "awesome description"
     video.title = "awesome title"
 
     queue_score_w_found_substring = calculate_video_queue_score(
-        video, queue_generation_preferences
+        video, queue_params
     )
 
-    queue_generation_preferences[TEST_USER_ID].substring_priority_scores = {
+    queue_params[TEST_USER_ID].substring_priority_scores = {
         "something not in the title or description": 100
     }
 
     queue_score_w_not_found_substring = calculate_video_queue_score(
-        video, queue_generation_preferences
+        video, queue_params
     )
 
     assert queue_score_w_found_substring > queue_score_w_not_found_substring
@@ -139,7 +137,7 @@ def test_calculate_queue():
         ]  # since the newer videos will have the higher queue scores
 
         calculated_queue = calculate_queue(
-            generation_preferences=TEST_QUEUE_GENERATION_PREFERENCES,
+            queue_params=TEST_QUEUE_PARAMS,
             videos=videos_sorted_newest_to_oldest,
             target_duration_minutes=target_duration_minutes,
         )

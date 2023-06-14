@@ -1,10 +1,8 @@
-import json
-import os
 from typing import List, Tuple
 
-from routine_butler.constants import ABS_CURRENT_DIR
-from routine_butler.plugins._youtube.schema import (
-    QueueGenerationPreferences,
+from routine_butler.plugins._youtube.utils import (
+    QUEUE_PARAMS,
+    QueueParams,
     Video,
 )
 
@@ -51,11 +49,9 @@ def calculate_max_duration_from_target_duration_seconds(
 
 def calculate_video_queue_score(
     video: Video,
-    user_queue_generation_preferences: QueueGenerationPreferences,
+    queue_params: QueueParams,
 ) -> float:
-    """Takes a video's data and scores it based on the user's preferences."""
-
-    scoring_data = user_queue_generation_preferences[video.user_id]
+    scoring_data = queue_params[video.user_id]
     priority_score = scoring_data.priority_score
     substring_priority_scores = scoring_data.substring_priority_scores
 
@@ -82,26 +78,19 @@ def calculate_video_queue_score(
     return float(priority_score)
 
 
-ABS_QUEUE_GENERATION_PREFERENCES_PATH = os.path.join(
-    ABS_CURRENT_DIR, "plugins/_youtube/queue_generation_preferences.json"
-)
-with open(ABS_QUEUE_GENERATION_PREFERENCES_PATH, "r") as f:
-    DEFAULT_PREFERENCES = QueueGenerationPreferences(**json.load(f))
-
-
 def calculate_queue(
     videos: List[Video],
     target_duration_minutes: int,
-    generation_preferences: QueueGenerationPreferences = DEFAULT_PREFERENCES,
+    queue_params: QueueParams = QUEUE_PARAMS,
 ) -> List[Video]:
-    """Takes a list of videos, calculates their individual priority scores, and
+    """Takes a list of videos, calculates their individual queue scores, and
     accordingly orders them into a queue of approximately the given target duration.
     """
 
     # calculate scores
     scores: List[Tuple[Video, float]] = []
     for video in videos:
-        score = calculate_video_queue_score(video, generation_preferences)
+        score = calculate_video_queue_score(video, queue_params)
         scores.append((video, score))
 
     # sort by score, descending
