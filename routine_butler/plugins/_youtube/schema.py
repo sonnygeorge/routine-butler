@@ -12,7 +12,7 @@ class ChannelScoringData(BaseModel):
 
 UserId = str
 
-YoutubeQueueGenerationPreferences = dict[UserId, ChannelScoringData]
+QueueGenerationPreferences = dict[UserId, ChannelScoringData]
 
 
 class Video(BaseModel):

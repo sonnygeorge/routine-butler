@@ -1,8 +1,11 @@
+import json
+import os
 from typing import List, Tuple
 
+from routine_butler.constants import ABS_CURRENT_DIR
 from routine_butler.plugins._youtube.schema import (
+    QueueGenerationPreferences,
     Video,
-    YoutubeQueueGenerationPreferences,
 )
 
 N_QUEUE_VIDEOS_SAFETY_LIMIT = 100
@@ -48,7 +51,7 @@ def calculate_max_duration_from_target_duration_seconds(
 
 def calculate_video_queue_score(
     video: Video,
-    user_queue_generation_preferences: YoutubeQueueGenerationPreferences,
+    user_queue_generation_preferences: QueueGenerationPreferences,
 ) -> float:
     """Takes a video's data and scores it based on the user's preferences."""
 
@@ -79,10 +82,17 @@ def calculate_video_queue_score(
     return float(priority_score)
 
 
+ABS_QUEUE_GENERATION_PREFERENCES_PATH = os.path.join(
+    ABS_CURRENT_DIR, "plugins/_youtube/queue_generation_preferences.json"
+)
+with open(ABS_QUEUE_GENERATION_PREFERENCES_PATH, "r") as f:
+    DEFAULT_PREFERENCES = QueueGenerationPreferences(**json.load(f))
+
+
 def calculate_queue(
-    queue_generation_preferences: YoutubeQueueGenerationPreferences,
     videos: List[Video],
     target_duration_minutes: int,
+    generation_preferences: QueueGenerationPreferences = DEFAULT_PREFERENCES,
 ) -> List[Video]:
     """Takes a list of videos, calculates their individual priority scores, and
     accordingly orders them into a queue of approximately the given target duration.
@@ -91,9 +101,7 @@ def calculate_queue(
     # calculate scores
     scores: List[Tuple[Video, float]] = []
     for video in videos:
-        score = calculate_video_queue_score(
-            video, queue_generation_preferences
-        )
+        score = calculate_video_queue_score(video, generation_preferences)
         scores.append((video, score))
 
     # sort by score, descending

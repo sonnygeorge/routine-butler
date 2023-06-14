@@ -139,7 +139,7 @@ def test_calculate_queue():
         ]  # since the newer videos will have the higher queue scores
 
         calculated_queue = calculate_queue(
-            queue_generation_preferences=TEST_QUEUE_GENERATION_PREFERENCES,
+            generation_preferences=TEST_QUEUE_GENERATION_PREFERENCES,
             videos=videos_sorted_newest_to_oldest,
             target_duration_minutes=target_duration_minutes,
         )

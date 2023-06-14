@@ -2,7 +2,10 @@ from nicegui import ui
 from pydantic import BaseModel
 
 from routine_butler.components import micro
-from routine_butler.plugins._youtube.get_video_data import subscriptions_feed
+from routine_butler.plugins._youtube.calculate_queue import calculate_queue
+from routine_butler.plugins._youtube.retrieve_video_data import (
+    retrieve_users_videos_data,
+)
 
 
 class YoutubeGui:
@@ -10,7 +13,7 @@ class YoutubeGui:
         self.data = data
         self.on_complete = on_complete
 
-        self.videos = self.get_queue()
+        self.videos = self.get_queue_of_video_ids()
         self.current_video_index = 0
 
         with micro.card():
@@ -26,8 +29,10 @@ class YoutubeGui:
 
         self.__update()
 
-    def get_queue(self) -> list[str]:
-        return subscriptions_feed(self.data.cookie)
+    def get_queue_of_video_ids(self) -> list[str]:
+        videos = retrieve_users_videos_data()
+        queue = calculate_queue(videos, self.data.target_duration_minutes)
+        return [video.id for video in queue]
 
     def __update(self):
         self.video_player.set_video_id(self.videos[self.current_video_index])
@@ -49,8 +54,7 @@ class YoutubeGui:
 
 
 class Youtube(BaseModel):
-    cookie: str = ""
-    watchtime_minutes: int = 25
+    target_duration_minutes: int = 25
 
     def administer(self, on_complete: callable):
         YoutubeGui(self, on_complete=on_complete)
