@@ -94,4 +94,5 @@ class RoutineConfigurer(IconExpansion):
         self.parent_element.remove(self.bordered_frame)
         self.parent_element.update()
         self.routine.delete_self_from_db(state.engine)
+        state.update_next_alarm()
         del self

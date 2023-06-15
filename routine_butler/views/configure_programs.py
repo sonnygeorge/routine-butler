@@ -6,7 +6,11 @@ from routine_butler.components.program_configurer import ProgramConfigurer
 from routine_butler.constants import PagePath
 from routine_butler.models.program import Program
 from routine_butler.state import state
-from routine_butler.utils import apply_color_theme, redirect_if_user_is_none
+from routine_butler.utils import (
+    apply_color_theme,
+    check_for_alarm_to_ring,
+    redirect_if_user_is_none,
+)
 
 ADD_NEW_PROGRAM_STR = "Add New..."
 
@@ -43,6 +47,7 @@ def configure_programs():
     redirect_if_user_is_none(state.user)
     apply_color_theme()
     Header()
+    ui.timer(60, lambda: check_for_alarm_to_ring(state))
 
     with ui.row().classes(
         "absolute-center w-10/12 flex flex-col content-center"

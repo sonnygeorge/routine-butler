@@ -1,15 +1,19 @@
+import datetime
 import importlib
 import os
 import subprocess
-from typing import TYPE_CHECKING, Dict, Protocol, Type
+from typing import TYPE_CHECKING, Dict, Optional, Protocol, Tuple, Type
 
 from loguru import logger
 from nicegui import ui
+from sqlalchemy.engine import Engine
 
 from routine_butler.constants import ABS_PLUGINS_DIR_PATH, CLR_CODES, PagePath
 
 if TYPE_CHECKING:
+    from routine_butler.models.routine import Alarm, Routine
     from routine_butler.models.user import User
+    from routine_butler.state import State
 
 
 def apply_color_theme():
@@ -72,6 +76,48 @@ def dynamically_get_plugins() -> Dict[str, Type[ProgramPlugin]]:
             class_name = snake_to_upper_camel(module_name)
             program_types[class_name] = getattr(module, class_name)
     return program_types
+
+
+# FIXME: make method of Alarm
+def calculate_seconds_until_alarm(alarm: "Alarm") -> int:
+    now = datetime.datetime.now()
+    alarm_time = datetime.datetime.strptime(alarm.time, "%H:%M").time()
+    alarm_datetime = datetime.datetime.combine(now.date(), alarm_time)
+    return int((alarm_datetime - now).total_seconds())
+
+
+SECONDS_IN_DAY = 24 * 60 * 60
+
+
+def get_next_alarm(
+    user: "User", engine: Engine
+) -> Tuple[Optional["Alarm"], Optional["Routine"]]:
+    next_alarm = None
+    next_alarms_routine = None
+    routines = user.get_routines(engine)
+    min_seconds_remaining = SECONDS_IN_DAY  # no alarm is more than day away
+    for routine in routines:
+        for alarm in routine.alarms:
+            if alarm.is_enabled:
+                seconds_remaining = calculate_seconds_until_alarm(alarm)
+                if seconds_remaining < 0:
+                    seconds_remaining += SECONDS_IN_DAY
+                if seconds_remaining < min_seconds_remaining:
+                    min_seconds_remaining = seconds_remaining
+                    next_alarm = alarm
+                    next_alarms_routine = routine
+    return next_alarm, next_alarms_routine
+
+
+# FIXME: make method of Alarm
+def should_ring(alarm: "Alarm") -> bool:
+    seconds_until_alarm = calculate_seconds_until_alarm(alarm)
+    return -60 < seconds_until_alarm <= 0  # if time passed w/in last minute
+
+
+def check_for_alarm_to_ring(state: "State") -> None:
+    if state.next_alarm is not None and should_ring(state.next_alarm):
+        state.next_alarm.ring()
 
 
 # define and add custom log level for database events

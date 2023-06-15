@@ -1,5 +1,3 @@
-"""A central location for stylistic UI constants for quick iteration/experimentation"""
-
 import os
 from enum import StrEnum
 
@@ -10,6 +8,11 @@ ABS_REWARD_SVG_PATH = os.path.join(ABS_CURRENT_DIR, "assets/reward-icon.svg")
 
 ABS_PLUGINS_DIR_PATH = os.path.join(ABS_CURRENT_DIR, "plugins")
 
+ABS_MP3_PATH = os.path.join(ABS_CURRENT_DIR, "assets/alarm_sound.mp3")
+
+CONSTANT_RING_INTERVAL = 1
+PERIODIC_RING_INTERVAL = 60
+
 
 class PagePath(StrEnum):
     HOME = "/"
@@ -17,6 +20,7 @@ class PagePath(StrEnum):
     SET_ROUTINES = "/configure-routines"
     SET_PROGRAMS = "/configure-programs"
     LOGIN = "/login"
+    RING = "/ring"
 
 
 class ICON_STRS:  # Quasar material icons

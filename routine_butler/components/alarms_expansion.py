@@ -69,11 +69,13 @@ class AlarmsExpansion(IconExpansion):
         new_alarm = Alarm()
         self.routine.alarms.append(new_alarm)
         self.routine.update_self_in_db(state.engine)
+        state.update_next_alarm()
         self._update_alarms_frame()
 
     def hdl_time_change(self, row_idx: int, new_time: str):
         self.routine.alarms[row_idx].time = new_time
         self.routine.update_self_in_db(state.engine)
+        state.update_next_alarm()
 
     def hdl_change_volume(self, row_idx: int, new_volume: float):
         self.routine.alarms[row_idx].volume = new_volume
@@ -88,8 +90,10 @@ class AlarmsExpansion(IconExpansion):
     def hdl_toggle_enabled(self, row_idx: int, value: bool):
         self.routine.alarms[row_idx].is_enabled = value
         self.routine.update_self_in_db(state.engine)
+        state.update_next_alarm()
 
     def hdl_delete_alarm(self, row_idx: int):
         self.routine.alarms.pop(row_idx)
         self.routine.update_self_in_db(state.engine)
+        state.update_next_alarm()
         self._update_alarms_frame()

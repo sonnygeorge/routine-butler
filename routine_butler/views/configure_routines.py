@@ -6,7 +6,11 @@ from routine_butler.components.routine_configurer import RoutineConfigurer
 from routine_butler.constants import PagePath
 from routine_butler.models.routine import Routine
 from routine_butler.state import state
-from routine_butler.utils import apply_color_theme, redirect_if_user_is_none
+from routine_butler.utils import (
+    apply_color_theme,
+    check_for_alarm_to_ring,
+    redirect_if_user_is_none,
+)
 
 
 @ui.page(path=PagePath.SET_ROUTINES)
@@ -24,6 +28,7 @@ def configure_routines():
     redirect_if_user_is_none(state.user)
     apply_color_theme()
     Header()
+    ui.timer(60, lambda: check_for_alarm_to_ring(state))
 
     content = ui.column().classes("justify-center items-center self-center")
     with content.classes("w-4/5 gap-y-4"):
