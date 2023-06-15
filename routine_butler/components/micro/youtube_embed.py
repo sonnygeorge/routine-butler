@@ -1,5 +1,17 @@
 from nicegui import ui
 
+# A note regarding embedding Youtube Videos:
+
+# “Video unavailable-watch on youtube” is a common occurance which stems from any of the
+# following:
+
+#   1. The creator restricted embedding in the Video Privacy settings
+#   2. The video is age-restricted and you are not logged in
+#   3. The video was given a copyright strike
+
+# Users should remove channels where this occurs often from their queue parameters in
+# order to have a better experience.
+
 
 class YoutubeEmbed(ui.element):
     def __init__(self, video_id: str) -> None:
