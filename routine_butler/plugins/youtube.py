@@ -6,6 +6,10 @@ from routine_butler.plugins._youtube.calculate_queue import calculate_queue
 from routine_butler.plugins._youtube.retrieve_video_data import (
     retrieve_video_data,
 )
+from routine_butler.plugins._youtube.utils import (
+    add_to_watched_video_history,
+    get_watched_video_history,
+)
 
 
 class YoutubeGui:
@@ -34,9 +38,17 @@ class YoutubeGui:
                 ui.button(">", on_click=self.handle_next_video)
 
     def generate_queue(self) -> list[str]:
+        # scrape video data
         videos = retrieve_video_data(self.progress_label)
+        # expunge watched
+        watched = get_watched_video_history()
+        videos = [v for v in videos if v.uid not in watched]
+        # generate queue
         queue = calculate_queue(videos, self.data.target_duration_minutes)
-        self.videos = [video.id for video in queue]
+        # save queue ids and add them to watch history
+        self.videos = [video.uid for video in queue]
+        add_to_watched_video_history(self.videos)
+        # update ui
         self.card.clear()
         self.add_player_to_ui()
         self.__update()
@@ -48,10 +60,11 @@ class YoutubeGui:
         )
 
     def handle_next_video(self):
-        self.current_video_index = (self.current_video_index + 1) % len(
-            self.videos
-        )
-        self.__update()
+        if self.current_video_index + 1 == len(self.videos):  # no more videos
+            self.on_complete()
+        else:
+            self.current_video_index += 1
+            self.__update()
 
     def handle_previous_video(self):
         self.current_video_index = (self.current_video_index - 1) % len(
