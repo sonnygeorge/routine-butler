@@ -15,7 +15,7 @@ from routine_butler.plugins._youtube.utils import (
 class YoutubeGui:
     def __init__(self, data: "Youtube", on_complete: callable):
         self.data = data
-        self.on_complete = on_complete  # FIXME: This is never called
+        self.on_complete = on_complete
         self.current_video_index = 0
 
         self.card = micro.card()

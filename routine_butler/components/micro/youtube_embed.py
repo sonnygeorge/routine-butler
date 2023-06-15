@@ -6,7 +6,7 @@ from nicegui import ui
 # following:
 
 #   1. The creator restricted embedding in the Video Privacy settings
-#   2. The video is age-restricted and you are not logged in
+#   2. The video is age-restricted (you must be logged in to view such videos)
 #   3. The video was given a copyright strike
 
 # Users should remove channels where this occurs often from their queue parameters in
