@@ -27,15 +27,14 @@ class YoutubeGui:
 
     def add_player_to_ui(self):
         with self.card:
-            self.video_index = ui.label("")
             self.video_player = micro.YoutubeEmbed("")
-
-            with ui.row() as root:
-                root.classes("w-full flex items-center justify-around")
-
-                ui.button("<", on_click=self.handle_previous_video)
-                ui.label(f"Videos: {len(self.videos)}")
-                ui.button(">", on_click=self.handle_next_video)
+            ui.separator().classes("my-2")
+            with ui.row().classes("w-full flex items-center justify-between"):
+                left_btn = ui.button("<", on_click=self.handle_previous_video)
+                left_btn.classes("w-1/3")
+                self.video_index_label = ui.label("")
+                right_btn = ui.button(">", on_click=self.handle_next_video)
+                right_btn.classes("w-1/3")
 
     def generate_queue(self) -> list[str]:
         # scrape video data
@@ -55,8 +54,8 @@ class YoutubeGui:
 
     def __update(self):
         self.video_player.set_video_id(self.videos[self.current_video_index])
-        self.video_index.set_text(
-            f"Current Video: {self.current_video_index + 1}"
+        self.video_index_label.set_text(
+            f"Video {self.current_video_index + 1}/{len(self.videos)}"
         )
 
     def handle_next_video(self):
