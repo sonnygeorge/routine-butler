@@ -109,7 +109,7 @@ def get_channel_videos(user_id: str, driver: WebDriver) -> List[Video]:
             uid=get_id_from_soup(video_element),
             user_id=user_id,
             title=get_title_from_soup(video_element),
-            description="",
+            description="",  # HOTFIX: description not available in video grid
             length_seconds=get_runtime_seconds_from_soup(video_element),
             days_since_upload=get_days_since_upload_from_soup(video_element),
         )
