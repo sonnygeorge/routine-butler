@@ -16,10 +16,9 @@ class YoutubeGui:
     def __init__(self, data: "Youtube", on_complete: callable):
         self.data = data
         self.on_complete = on_complete
-        self.current_video_index = 0
+        self.cur_video_idx = 0
 
-        self.card = micro.card()
-
+        self.card = micro.card().classes("flex flex-col items-center")
         with self.card:
             self.progress_label = ui.label("Loading...")
 
@@ -29,12 +28,12 @@ class YoutubeGui:
         with self.card:
             self.video_player = micro.YoutubeEmbed("")
             ui.separator().classes("my-2")
-            with ui.row().classes("w-full flex items-center justify-between"):
+            with ui.row().classes("w-5/6 flex items-center justify-between"):
                 left_btn = ui.button("<", on_click=self.handle_previous_video)
-                left_btn.classes("w-1/3")
-                self.video_index_label = ui.label("")
+                left_btn.classes("w-36")
+                self.idx_label = ui.label("").classes("text-lg text-gray-900")
                 right_btn = ui.button(">", on_click=self.handle_next_video)
-                right_btn.classes("w-1/3")
+                right_btn.classes("w-36")
 
     def generate_queue(self) -> list[str]:
         # scrape video data
@@ -53,22 +52,19 @@ class YoutubeGui:
         self.__update()
 
     def __update(self):
-        self.video_player.set_video_id(self.videos[self.current_video_index])
-        self.video_index_label.set_text(
-            f"Video {self.current_video_index + 1}/{len(self.videos)}"
-        )
+        self.video_player.set_video_id(self.videos[self.cur_video_idx])
+        label_text = f"Video {self.cur_video_idx + 1}/{len(self.videos)}"
+        self.idx_label.set_text(label_text)
 
     def handle_next_video(self):
-        if self.current_video_index + 1 == len(self.videos):  # no more videos
+        if self.cur_video_idx + 1 == len(self.videos):  # no more videos
             self.on_complete()
         else:
-            self.current_video_index += 1
+            self.cur_video_idx += 1
             self.__update()
 
     def handle_previous_video(self):
-        self.current_video_index = (self.current_video_index - 1) % len(
-            self.videos
-        )
+        self.cur_video_idx = (self.cur_video_idx - 1) % len(self.videos)
         self.__update()
 
 

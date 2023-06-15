@@ -1,3 +1,4 @@
+import re
 from typing import List
 
 import chromedriver_autoinstaller
@@ -32,6 +33,11 @@ RTIME_CLASS = "style-scope ytd-thumbnail-overlay-time-status-renderer"
 METADATA_ELMNT = "span"
 METADATA_CLASS = "inline-metadata-item style-scope ytd-video-meta-block"
 
+TIMESTAMP_RE = r"^(\d+:)*\d{2}$"
+
+DEFAULT_DAYS_SINCE_UPLOAD = 60
+DEFAULT_RUNTIME_SECONDS = 780
+
 
 def get_title_from_soup(video_soup: BeautifulSoup) -> str:
     return video_soup.find(TITLE_ELMNT, id=TITLE_ID).text
@@ -43,7 +49,24 @@ def get_id_from_soup(video_soup: BeautifulSoup) -> str:
 
 
 def get_runtime_seconds_from_soup(video_soup: BeautifulSoup) -> str:
-    runtime = video_soup.find(RTIME_ELMNT, class_=RTIME_CLASS).text
+    runtime_element = video_soup.find(RTIME_ELMNT, class_=RTIME_CLASS)
+
+    if runtime_element is None:
+        logger.warning(
+            "Could not find runtime in video grid element..."
+            f"Defaulting to {DEFAULT_RUNTIME_SECONDS} seconds"
+        )
+        return DEFAULT_RUNTIME_SECONDS
+
+    runtime = runtime_element.text.strip()
+
+    if not re.match(TIMESTAMP_RE, runtime):
+        logger.warning(
+            f'Could not parse runtime string "{runtime}"...'
+            f"Defaulting to {DEFAULT_RUNTIME_SECONDS} seconds"
+        )
+        return DEFAULT_RUNTIME_SECONDS
+
     split_string = runtime.split(":")
     if len(split_string) == 2:
         minutes, seconds = split_string
@@ -61,21 +84,29 @@ def get_days_since_upload_from_soup(video_soup: BeautifulSoup) -> str:
         logger.warning(
             "Unexpected number of inline metadata items in video grid element"
         )
-        return 60  # HOTFIX: default to 60 days if occurs
+        return DEFAULT_DAYS_SINCE_UPLOAD  # HOTFIX: default n days if occurs
 
     # 2nd metadata item ought to be time since upload (1st = view count)
     time_string = metadata_items[1].text
 
-    if "hour" in time_string:
-        return 0
-    elif "day" in time_string:
-        return int(time_string.split(" ")[0])
-    elif "week" in time_string:
-        return int(time_string.split(" ")[0]) * 7
-    elif "month" in time_string:
-        return int(time_string.split(" ")[0]) * 30
-    else:
-        return int(time_string.split(" ")[0]) * 365
+    try:
+        if "hour" in time_string:
+            return 0
+        elif "day" in time_string:
+            return int(time_string.split(" ")[0])
+        elif "week" in time_string:
+            return int(time_string.split(" ")[0]) * 7
+        elif "month" in time_string:
+            return int(time_string.split(" ")[0]) * 30
+        else:
+            return int(time_string.split(" ")[0]) * 365
+    except Exception as e:
+        logger.warning(
+            f'The time since upload string "{time_string}" was not '
+            f"parsed due to the following: {e}... defaulting to "
+            f"{DEFAULT_DAYS_SINCE_UPLOAD} days"
+        )
+        return DEFAULT_DAYS_SINCE_UPLOAD
 
 
 def wait_until_video_grid_is_loaded(driver: WebDriver) -> None:
