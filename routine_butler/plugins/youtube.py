@@ -1,3 +1,5 @@
+import asyncio
+
 from nicegui import ui
 from pydantic import BaseModel
 
@@ -11,6 +13,8 @@ from routine_butler.plugins._youtube.utils import (
     get_watched_video_history,
 )
 
+# FIXME: add listener to video finish to prevent navigation to suggested videos
+
 
 class YoutubeGui:
     def __init__(self, data: "Youtube", on_complete: callable):
@@ -20,7 +24,7 @@ class YoutubeGui:
 
         self.card = micro.card().classes("flex flex-col items-center")
         with self.card:
-            self.progress_label = ui.label("Loading...")
+            self.progress = ui.linear_progress()
 
         ui.timer(0.1, self.generate_queue, once=True)
 
@@ -35,9 +39,9 @@ class YoutubeGui:
                 right_btn = ui.button(">", on_click=self.handle_next_video)
                 right_btn.classes("w-36")
 
-    def generate_queue(self) -> list[str]:
+    async def generate_queue(self) -> list[str]:
         # scrape video data
-        videos = retrieve_video_data(self.progress_label)
+        videos = await retrieve_video_data(self.progress)
         # expunge watched
         watched = get_watched_video_history()
         videos = [v for v in videos if v.uid not in watched]

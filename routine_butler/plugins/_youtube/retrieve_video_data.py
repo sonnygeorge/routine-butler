@@ -1,3 +1,4 @@
+import asyncio
 import re
 from typing import List
 
@@ -37,6 +38,9 @@ TIMESTAMP_RE = r"^(\d+:)*\d{2}$"
 
 DEFAULT_DAYS_SINCE_UPLOAD = 60
 DEFAULT_RUNTIME_SECONDS = 780
+
+CHROME_OPTIONS = Options()
+CHROME_OPTIONS.add_argument("--headless")
 
 
 def get_title_from_soup(video_soup: BeautifulSoup) -> str:
@@ -148,21 +152,17 @@ def get_channel_videos(user_id: str, driver: WebDriver) -> List[Video]:
     return videos
 
 
-def retrieve_video_data(progress_label: ui.label) -> list[Video]:
+async def retrieve_video_data(progress: ui.linear_progress) -> list[Video]:
     """Using the Youtube channel IDs in QUEUE_PARAMS, retrieves data from each channel's
     videos page (usually shows up to 30 most recent videos) and returns a list of Video
     objects with the retrieved data."""
-
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    driver = webdriver.Chrome(options=chrome_options)
-
-    user_ids = QUEUE_PARAMS.keys()
+    driver = webdriver.Chrome(options=CHROME_OPTIONS)
+    channel_ids = QUEUE_PARAMS.keys()
     video_lists = []
-    for user_id in user_ids:
-        video_lists.append(get_channel_videos(user_id, driver))
-        msg = f"Scraped {len(video_lists)}/{len(user_ids)} YouTube channels"
-        progress_label.set_text(msg)  # FIXME: UI not updating
-        logger.info(msg)
-
-    return sum(video_lists, [])  # (flattens list of lists to a single list)
+    for channel_id in channel_ids:
+        channel_videos = get_channel_videos(channel_id, driver)
+        video_lists.append(channel_videos)
+        progress.value = len(video_lists) / len(channel_ids)
+        await asyncio.sleep(0.3)
+        logger.info(f"Scraped {len(video_lists)}/{len(channel_ids)} channels")
+    return sum(video_lists, [])
