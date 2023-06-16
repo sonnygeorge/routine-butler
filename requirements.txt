@@ -4,6 +4,7 @@ loguru
 Mock.GPIO
 nicegui
 pre-commit
+playsound
 pytest
 rich
 selenium
