@@ -32,7 +32,7 @@ class State:
             )
             logger.info(
                 f"Next alarm updated to {self.next_alarm} from routine: "
-                f'"{self.next_alarms_routine.title}"'
+                f'"{self.next_alarms_routine}"'
             )
 
     def set_user(self, user: "User"):
