@@ -1,5 +1,7 @@
 import asyncio
+import os
 import re
+from sys import platform
 from typing import List
 
 import chromedriver_autoinstaller
@@ -8,6 +10,7 @@ from loguru import logger
 from nicegui import ui
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
@@ -16,8 +19,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from routine_butler.plugins._youtube.schema import Video
 from routine_butler.plugins._youtube.utils import QUEUE_PARAMS
 
-chromedriver_autoinstaller.install()
-
+if platform == "darwin":
+    chromedriver_autoinstaller.install()
 
 VIDEO_GRID_ELMNT = "div"
 VIDEO_GRID_CLASS = "style-scope ytd-rich-grid-media"
@@ -39,6 +42,9 @@ TIMESTAMP_RE = r"^(\d+:)*\d{2}$"
 DEFAULT_DAYS_SINCE_UPLOAD = 60
 DEFAULT_RUNTIME_SECONDS = 780
 
+RPI_DRVR_PATH = "/usr/bin/chromium-browser"
+CHROME_DRIVER_PATH = RPI_DRVR_PATH if os.path.exists(RPI_DRVR_PATH) else None
+CHROME_SERVICE = Service(executable_path=CHROME_DRIVER_PATH)
 CHROME_OPTIONS = Options()
 CHROME_OPTIONS.add_argument("--headless")
 
@@ -156,7 +162,7 @@ async def retrieve_video_data(progress: ui.linear_progress) -> list[Video]:
     """Using the Youtube channel IDs in QUEUE_PARAMS, retrieves data from each channel's
     videos page (usually shows up to 30 most recent videos) and returns a list of Video
     objects with the retrieved data."""
-    driver = webdriver.Chrome(options=CHROME_OPTIONS)
+    driver = webdriver.Chrome(options=CHROME_OPTIONS, service=CHROME_SERVICE)
     channel_ids = QUEUE_PARAMS.keys()
     video_lists = []
     for channel_id in channel_ids:
