@@ -8,7 +8,7 @@ ABS_REWARD_SVG_PATH = os.path.join(ABS_CURRENT_DIR, "assets/reward-icon.svg")
 
 ABS_PLUGINS_DIR_PATH = os.path.join(ABS_CURRENT_DIR, "plugins")
 
-ABS_MP3_PATH = os.path.join(ABS_CURRENT_DIR, "assets/alarm_sound.mp3")
+ABS_ALARM_WAV_PATH = os.path.join(ABS_CURRENT_DIR, "assets/alarm_sound.wav")
 
 CONSTANT_RING_INTERVAL = 1
 PERIODIC_RING_INTERVAL = 60

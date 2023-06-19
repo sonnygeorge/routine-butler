@@ -24,7 +24,7 @@ class RingFrequency(StrEnum):
 class Alarm(BaseModel):
     time: str = "12:00"
     is_enabled: bool = True
-    volume: float = 0.5
+    volume: float = 1.0
     ring_frequency: RingFrequency = RingFrequency.CONSTANT
 
     def ring(self):

@@ -2,7 +2,7 @@ from nicegui import ui
 
 from routine_butler.components.header import Header
 from routine_butler.constants import (
-    ABS_MP3_PATH,
+    ABS_ALARM_WAV_PATH,
     CONSTANT_RING_INTERVAL,
     PERIODIC_RING_INTERVAL,
     PagePath,
@@ -11,7 +11,7 @@ from routine_butler.models.routine import RingFrequency
 from routine_butler.state import state
 from routine_butler.utils import (
     apply_color_theme,
-    play_mp3,
+    play_wav_with_volume_adjustment,
     redirect_if_user_is_none,
     redirect_to_page,
     should_ring,
@@ -34,7 +34,12 @@ def ring():
         if state.next_alarm.ring_frequency == RingFrequency.CONSTANT
         else PERIODIC_RING_INTERVAL
     )
-    ui.timer(interval, lambda: play_mp3(ABS_MP3_PATH, state.next_alarm.volume))
+    ui.timer(
+        interval,
+        lambda: play_wav_with_volume_adjustment(
+            ABS_ALARM_WAV_PATH, state.next_alarm.volume
+        ),
+    )
 
     state.pending_routine_to_run = state.next_alarms_routine
     state.update_next_alarm()
