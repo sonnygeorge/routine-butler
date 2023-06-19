@@ -7,7 +7,6 @@
 - 🥧 is designed to be run "kiosk-style" on a RaspberryPi connected to:
 
   - 📺 an LCD touchscreen interface
-
   - 📦 an electro-mechanically operated lockbox
 
 - 🏋️‍♀️ administers user-set routines with incentives (such as unlocking the box)
@@ -82,3 +81,11 @@ The app allows users to:
 - [ ] 🚧 End-of-video listener in Youtube plugin
 - [ ] 🚧 Make routine non-exitable with a power-off
 - [ ] 🚧 Display Youtube scrape progress in UI
+
+### Next-Next Actions
+
+- [ ] 🚧 Scrape Valetta
+- [ ] 🚧 Flashcards plugin
+- [ ] 🚧 System/model for plugin "run" data
+- [ ] 🚧 "Vases"
+- [ ] 🚧 DB Backups
