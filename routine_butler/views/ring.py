@@ -1,5 +1,4 @@
 from nicegui import ui
-from playsound import playsound
 
 from routine_butler.components.header import Header
 from routine_butler.constants import (
@@ -12,6 +11,7 @@ from routine_butler.models.routine import RingFrequency
 from routine_butler.state import state
 from routine_butler.utils import (
     apply_color_theme,
+    play_mp3,
     redirect_if_user_is_none,
     redirect_to_page,
     should_ring,
@@ -26,7 +26,6 @@ def ring():
     apply_color_theme()
     Header(hide_buttons=True)
 
-    # FIXME: Implement volume adjustment
     # FIXME: Implement snooze?
     # FIXME: Cache pending routine & have a reboot bring user back to routine runner
 
@@ -35,7 +34,7 @@ def ring():
         if state.next_alarm.ring_frequency == RingFrequency.CONSTANT
         else PERIODIC_RING_INTERVAL
     )
-    ui.timer(interval, lambda: playsound(ABS_MP3_PATH))
+    ui.timer(interval, lambda: play_mp3(ABS_MP3_PATH, state.next_alarm.volume))
 
     state.pending_routine_to_run = state.next_alarms_routine
     state.update_next_alarm()

@@ -4,6 +4,7 @@ import os
 import subprocess
 from typing import TYPE_CHECKING, Dict, Optional, Protocol, Tuple, Type
 
+import pygame
 from loguru import logger
 from nicegui import ui
 from sqlalchemy.engine import Engine
@@ -118,6 +119,17 @@ def should_ring(alarm: "Alarm") -> bool:
 def check_for_alarm_to_ring(state: "State") -> None:
     if state.next_alarm is not None and should_ring(state.next_alarm):
         state.next_alarm.ring()
+
+
+def play_mp3(file_path: str, volume: float = 1.0):
+    pygame.mixer.init()
+    pygame.mixer.music.load(file_path)
+    pygame.mixer.music.set_volume(volume)
+    pygame.mixer.music.play()
+
+    # Wait until the music finishes playing
+    while pygame.mixer.music.get_busy():
+        pass
 
 
 # define and add custom log level for database events
