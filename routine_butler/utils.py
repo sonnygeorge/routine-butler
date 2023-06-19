@@ -124,7 +124,7 @@ def check_for_alarm_to_ring(state: "State") -> None:
 
 
 def create_new_wav_given_volume_multiplier(
-    input_file, output_file, volume_multiplier
+    input_file: str, output_file: str, volume_multiplier: float
 ) -> None:
     with wave.open(input_file, "rb") as wav_in:
         params = wav_in.getparams()
