@@ -6,7 +6,7 @@ from routine_butler.components import micro
 
 class PromptContinueGui:
     def __init__(self, data: "PromptContinue"):
-        with micro.card():
+        with micro.card().classes("flex flex-col items-center"):
             ui.markdown(f"# {data.prompt}")
             self.confirmation_button = ui.button("Success")
             self.confirmation_button.set_visibility(False)
