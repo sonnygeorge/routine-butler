@@ -153,7 +153,7 @@ def play_wav(file_path: str) -> None:
         command = ["aplay", file_path]
     else:
         raise NotImplementedError(f"Unsupported os: {system}")
-    subprocess.run(command, check=True)
+    subprocess.run(command)
 
 
 def play_wav_with_volume_adjustment(

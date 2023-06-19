@@ -1,3 +1,6 @@
+import asyncio
+import functools
+
 from nicegui import ui
 
 from routine_butler.components.header import Header
@@ -17,6 +20,16 @@ from routine_butler.utils import (
     should_ring,
 )
 
+# FIXME: Implement snooze?
+# FIXME: Cache pending routine & have a reboot bring user back to routine runner
+
+
+async def async_play_wav_with_volume_adjustment(
+    file_path: str, volume: float = 1.0
+):
+    await asyncio.sleep(0.2)  # give downtime for app loop to do its thing
+    play_wav_with_volume_adjustment(file_path, volume)
+
 
 @ui.page(path=PagePath.RING)
 def ring():
@@ -26,24 +39,23 @@ def ring():
     apply_color_theme()
     Header(hide_buttons=True)
 
-    # FIXME: Implement snooze?
-    # FIXME: Cache pending routine & have a reboot bring user back to routine runner
-
-    interval = (
-        CONSTANT_RING_INTERVAL
-        if state.next_alarm.ring_frequency == RingFrequency.CONSTANT
-        else PERIODIC_RING_INTERVAL
-    )
-    ui.timer(
-        interval,
-        lambda: play_wav_with_volume_adjustment(
-            ABS_ALARM_WAV_PATH, state.next_alarm.volume
-        ),
-    )
-
+    # Update state
     state.pending_routine_to_run = state.next_alarms_routine
     state.update_next_alarm()
 
+    # Play the audio given the volume & ring frequency
+    play_audio_callable = functools.partial(
+        async_play_wav_with_volume_adjustment,
+        ABS_ALARM_WAV_PATH,
+        state.next_alarm.volume,
+    )
+    if state.next_alarm.ring_frequency == RingFrequency.CONSTANT:
+        timer_interval = CONSTANT_RING_INTERVAL
+    else:
+        timer_interval = PERIODIC_RING_INTERVAL
+    ui.timer(timer_interval, play_audio_callable)
+
+    # Build the UI
     with ui.column().classes("absolute-center"):
         ui.label(f"Time for {state.pending_routine_to_run.title}!")
         begin_button = ui.button("Begin Routine")
