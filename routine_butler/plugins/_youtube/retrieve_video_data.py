@@ -42,7 +42,7 @@ TIMESTAMP_RE = r"^(\d+:)*\d{2}$"
 DEFAULT_DAYS_SINCE_UPLOAD = 60
 DEFAULT_RUNTIME_SECONDS = 780
 
-RPI_DRVR_PATH = "/usr/bin/chromium-browser"
+RPI_DRVR_PATH = "/usr/bin/chromedriver"
 CHROME_SERVICE = (
     Service(executable_path=RPI_DRVR_PATH)
     if os.path.exists(RPI_DRVR_PATH)
