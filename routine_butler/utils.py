@@ -19,6 +19,15 @@ if TYPE_CHECKING:
     from routine_butler.state import State
 
 
+# define and add custom log level for database events
+DB_LOG_LVL = "DB EVENT"
+logger.level(DB_LOG_LVL, no=33, color="<magenta>")
+
+# define and add custom log level for hardware events
+HW_LOG_LVL = "HW EVENT"
+logger.level(HW_LOG_LVL, no=34, color="<yellow>")
+
+
 def apply_color_theme():
     ui.colors(
         primary=CLR_CODES.primary,
@@ -141,6 +150,7 @@ def create_new_wav_given_volume_multiplier(
 
 
 def play_wav(file_path: str) -> None:
+    logger.log(HW_LOG_LVL, f"Playing wav: {file_path}")
     system = platform.system()
     if system == "Windows":
         command = [
@@ -168,12 +178,3 @@ def play_wav_with_volume_adjustment(
         os.remove(temp_path)
     else:
         play_wav(file_path)
-
-
-# define and add custom log level for database events
-DB_LOG_LVL = "DB EVENT"
-logger.level(DB_LOG_LVL, no=33, color="<magenta>")
-
-# define and add custom log level for hardware events
-HW_LOG_LVL = "HW EVENT"
-logger.level(HW_LOG_LVL, no=34, color="<yellow>")
