@@ -15,4 +15,4 @@ if __name__ in {"__main__", "__mp_main__"}:
     help = "If used, the app will run in fullscreen mode"
     parser.add_argument("--kiosk", action="store_true", help=help)
     args: RunArgs = parser.parse_args()
-    main(testing=args.testing)
+    main(testing=args.testing, fullscreen=args.kiosk)
