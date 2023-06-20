@@ -6,7 +6,8 @@ from routine_butler.main import main
 
 class RunArgs(Protocol):
     testing: bool
-
+    kiosk: bool
+    native: bool
 
 if __name__ in {"__main__", "__mp_main__"}:
     parser = argparse.ArgumentParser(description="Runs RoutineButler")
