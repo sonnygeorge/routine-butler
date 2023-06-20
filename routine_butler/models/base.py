@@ -35,6 +35,7 @@ import sys
 import warnings
 from typing import List, Optional, Protocol, Self, Union
 
+import rich.pretty
 from loguru import logger
 from pydantic import BaseModel
 from sqlalchemy import Column, DateTime, Integer
@@ -332,3 +333,8 @@ class BaseDBPydanticModel(BaseModel):
         self.uid = None
         self.created_at = None
         self.updated_at = None
+
+    def __str__(self):
+        pretty_dict = rich.pretty.pretty_repr(self.dict())
+        out = f"<class '{self.__class__.__module__}.{self.__class__.__name__}"
+        return f"{out}'>\n{pretty_dict}"
