@@ -13,7 +13,7 @@ DB_URL = "sqlite:///db.sqlite"
 TEST_USER_USERNAME = "test"
 
 
-def main(testing: bool, fullscreen: bool):
+def main(testing: bool, fullscreen: bool, native: bool):
     db_url = TEST_DB_URL if testing else DB_URL
     state.engine = create_engine(db_url)
     SQLAlchemyBase.metadata.create_all(state.engine)
@@ -30,4 +30,4 @@ def main(testing: bool, fullscreen: bool):
         # set current user to test user
         state.set_user(test_user)
 
-    ui.run(favicon="🚀", native=True, fullscreen=fullscreen)
+    ui.run(favicon="🚀", native=native, fullscreen=fullscreen)
