@@ -114,7 +114,7 @@ def get_next_alarm(
             if alarm.is_enabled:
                 seconds_remaining = calculate_seconds_until_alarm(alarm)
                 print(seconds_remaining)
-                if seconds_remaining < 0:
+                if seconds_remaining <= 0:
                     seconds_remaining += SECONDS_IN_DAY
                 if seconds_remaining < min_seconds_remaining:
                     min_seconds_remaining = seconds_remaining
