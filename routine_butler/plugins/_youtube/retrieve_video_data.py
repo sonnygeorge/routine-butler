@@ -161,7 +161,7 @@ def get_channel_videos(user_id: str, driver: WebDriver) -> List[Video]:
     return videos
 
 
-async def retrieve_video_data(progress: ui.linear_progress) -> list[Video]:
+async def retrieve_video_data(progress: ui.label) -> list[Video]:
     """Using the Youtube channel IDs in QUEUE_PARAMS, retrieves data from each channel's
     videos page (usually shows up to 30 most recent videos) and returns a list of Video
     objects with the retrieved data."""
@@ -171,7 +171,8 @@ async def retrieve_video_data(progress: ui.linear_progress) -> list[Video]:
     for channel_id in channel_ids:
         channel_videos = get_channel_videos(channel_id, driver)
         video_lists.append(channel_videos)
-        progress.value = len(video_lists) / len(channel_ids)
+        progress_message = f"Scraped {len(video_lists)}/{len(channel_ids)} channels"
+        progress.set_text(progress_message)
         await asyncio.sleep(0.3)
-        logger.info(f"Scraped {len(video_lists)}/{len(channel_ids)} channels")
+        logger.info(progress_message)
     return sum(video_lists, [])

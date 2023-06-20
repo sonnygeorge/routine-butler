@@ -24,7 +24,7 @@ class YoutubeGui:
 
         self.card = micro.card().classes("flex flex-col items-center")
         with self.card:
-            self.progress = ui.linear_progress()
+            self.progress = ui.label("Loading...")
 
         ui.timer(0.1, self.generate_queue, once=True)
 
