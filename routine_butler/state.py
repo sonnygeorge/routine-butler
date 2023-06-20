@@ -32,8 +32,9 @@ class State:
             )
             if self.next_alarms_routine is not None:
                 logger.info(
-                    f"Next alarm updated to {self.next_alarm.time} from "
-                    f'routine: "{self.next_alarms_routine.title}"'
+                    f"Next alarm updated to:\nTime:{self.next_alarm.time}\n"
+                    f"Routine: {self.next_alarms_routine.title}\n"
+                    f"Ring Frequency: {self.next_alarm.ring_frequency}"
                 )
 
     def set_user(self, user: "User"):
