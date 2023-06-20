@@ -44,6 +44,7 @@ def redirect_to_page(
     page_path: PagePath, n_seconds_before_redirect: float = 0.1
 ):
     def _redirect_to_page():
+        logger.info(f"Redirecting to page: {page_path}")
         ui.open(page_path)
 
     ui.timer(n_seconds_before_redirect, _redirect_to_page, once=True)
@@ -112,6 +113,7 @@ def get_next_alarm(
         for alarm in routine.alarms:
             if alarm.is_enabled:
                 seconds_remaining = calculate_seconds_until_alarm(alarm)
+                print(seconds_remaining)
                 if seconds_remaining < 0:
                     seconds_remaining += SECONDS_IN_DAY
                 if seconds_remaining < min_seconds_remaining:

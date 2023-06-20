@@ -35,7 +35,7 @@ class AlarmsExpansion(IconExpansion):
         row = ui.row().classes("items-center w-full px-4 gap-x-2")
         with row.classes("justify-between").style("width: 725px;"):
             time_setter = micro.time_input(value=alarm.time).classes("w-40")
-            vol_knob = micro.volume_knob(alarm.volume)
+            vol_knob = micro.volume_knob(value=alarm.volume)
             ring_frequency_select = micro.ring_frequency_select(
                 value=alarm.ring_frequency
             ).classes("w-40")

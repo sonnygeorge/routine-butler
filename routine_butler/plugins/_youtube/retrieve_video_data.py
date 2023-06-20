@@ -172,7 +172,7 @@ async def retrieve_video_data(progress: ui.label) -> list[Video]:
         channel_videos = get_channel_videos(channel_id, driver)
         video_lists.append(channel_videos)
         progress_message = f"Scraped {len(video_lists)}/{len(channel_ids)} channels"
+        logger.info(progress_message)
         progress.set_text(progress_message)
         await asyncio.sleep(0.3)
-        logger.info(progress_message)
     return sum(video_lists, [])
