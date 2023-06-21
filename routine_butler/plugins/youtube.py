@@ -1,5 +1,3 @@
-import asyncio
-
 from nicegui import ui
 from pydantic import BaseModel
 
@@ -30,13 +28,13 @@ class YoutubeGui:
 
     def add_player_to_ui(self):
         with self.card:
-            self.video_player = micro.YoutubeEmbed("")
+            self.video_player = micro.youtube_embed("")
             ui.separator().classes("my-2")
             with ui.row().classes("w-5/6 flex items-center justify-between"):
-                left_btn = ui.button("<", on_click=self.handle_previous_video)
+                left_btn = ui.button("<", on_click=self.hdl_previous_video)
                 left_btn.classes("w-36")
                 self.idx_label = ui.label("").classes("text-lg text-gray-900")
-                right_btn = ui.button(">", on_click=self.handle_next_video)
+                right_btn = ui.button(">", on_click=self.hdl_next_video)
                 right_btn.classes("w-36")
 
     async def generate_queue(self) -> list[str]:
@@ -60,14 +58,14 @@ class YoutubeGui:
         label_text = f"Video {self.cur_video_idx + 1}/{len(self.videos)}"
         self.idx_label.set_text(label_text)
 
-    def handle_next_video(self):
+    def hdl_next_video(self):
         if self.cur_video_idx + 1 == len(self.videos):  # no more videos
             self.on_complete()
         else:
             self.cur_video_idx += 1
             self.__update()
 
-    def handle_previous_video(self):
+    def hdl_previous_video(self):
         self.cur_video_idx = (self.cur_video_idx - 1) % len(self.videos)
         self.__update()
 

@@ -2,8 +2,8 @@ from typing import Tuple
 
 from nicegui import ui
 
-from routine_butler.components.primitives import SVG
-from routine_butler.constants import ABS_REWARD_SVG_PATH, ICON_STRS
+from routine_butler.components.micro.svg import svg
+from routine_butler.configs import ICON_STRS, REWARD_SVG_PATH
 
 
 def add_button() -> ui.button:
@@ -40,8 +40,8 @@ def play_button() -> ui.button:
 def reward_button() -> ui.button:
     reward_button = ui.button().classes("bg-secondary")
     with reward_button:
-        SVG(
-            ABS_REWARD_SVG_PATH,
+        svg(
+            REWARD_SVG_PATH,
             size=17,
             color="white",
         )

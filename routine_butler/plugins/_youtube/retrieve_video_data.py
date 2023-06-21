@@ -20,7 +20,10 @@ from routine_butler.plugins._youtube.schema import Video
 from routine_butler.plugins._youtube.utils import QUEUE_PARAMS
 
 if platform == "darwin":
-    chromedriver_autoinstaller.install()
+    try:
+        chromedriver_autoinstaller.install()
+    except Exception as e:
+        logger.warning(f"Could not auto-update chromedriver: {e}")
 
 VIDEO_GRID_ELMNT = "div"
 VIDEO_GRID_CLASS = "style-scope ytd-rich-grid-media"
@@ -171,7 +174,9 @@ async def retrieve_video_data(progress: ui.label) -> list[Video]:
     for channel_id in channel_ids:
         channel_videos = get_channel_videos(channel_id, driver)
         video_lists.append(channel_videos)
-        progress_message = f"Scraped {len(video_lists)}/{len(channel_ids)} channels"
+        progress_message = (
+            f"Scraped {len(video_lists)}/{len(channel_ids)} channels"
+        )
         logger.info(progress_message)
         progress.set_text(progress_message)
         await asyncio.sleep(0.3)

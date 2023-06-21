@@ -3,8 +3,8 @@ from typing import Union
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.components.primitives import IconExpansion
-from routine_butler.models.routine import (
+from routine_butler.models import (
+    PriorityLevel,
     Routine,
     RoutineElement,
     RoutineReward,
@@ -13,7 +13,7 @@ from routine_butler.state import state
 from routine_butler.utils import move_down_in_list, move_up_in_list
 
 
-class ChronologyExpansion(IconExpansion):
+class ChronologyConfigurer(micro.ExpandableCard):
     def __init__(self, routine: Routine):
         self.routine = routine
 
@@ -28,7 +28,7 @@ class ChronologyExpansion(IconExpansion):
         with self:
             self.rows_frame = ui.column()
             self.rows_frame.classes("items-center justify-center pt-4")
-            self._update_rows_frame()
+            self._update_ui()
 
     @property
     def num_elements(self):
@@ -43,10 +43,8 @@ class ChronologyExpansion(IconExpansion):
         add_routine_element_button.on("click", self.hdl_add_element)
         add_reward_element_button.on("click", self.hdl_add_reward)
 
-    def _update_rows_frame(self):
-        """Clear and repopulates the 'div'/frame containing `RoutineElementRow`s
-        in order to accomplish reording
-        """
+    def _update_ui(self):
+        """Clear and repopulates the 'div'/frame containing `RoutineElementRow`s"""
         self.rows_frame.clear()
         with self.rows_frame:
             for idx, element in enumerate(self.routine.elements):
@@ -85,13 +83,15 @@ class ChronologyExpansion(IconExpansion):
         with row.classes("px-4 gap-x-2").style("width: 800px"):
             micro.row_superscript(row_superscript, accent_color)
             program_select = micro.program_select(
-                state.program_titles, value=routine_element.program
+                value=routine_element.program,
+                program_titles=state.program_titles,
             )
             if isinstance(routine_element, RoutineReward):
                 micro.reward_icon_placeholder()
             else:
                 priority_level_select = micro.priority_level_select(
-                    routine_element.priority_level
+                    value=routine_element.priority_level,
+                    priority_levels=PriorityLevel,
                 )
             up_button, down_button = micro.order_buttons(accent_color)
             delete_button = micro.delete_button().props("dense")
@@ -123,13 +123,13 @@ class ChronologyExpansion(IconExpansion):
         new_element = RoutineElement()
         self.routine.elements.append(new_element)
         self.routine.update_self_in_db(state.engine)
-        self._update_rows_frame()
+        self._update_ui()
 
     def hdl_add_reward(self):
         new_reward = RoutineReward()
         self.routine.rewards.append(new_reward)
         self.routine.update_self_in_db(state.engine)
-        self._update_rows_frame()
+        self._update_ui()
 
     def _is_superscript_of_first_reward(self, row_superscript: int) -> bool:
         return row_superscript == self.num_elements + 1
@@ -150,7 +150,7 @@ class ChronologyExpansion(IconExpansion):
                 idx = self._elements_idx_from_row_superscript(row_superscript)
                 move_up_in_list(self.routine.elements, idx)
             self.routine.update_self_in_db(state.engine)
-            self._update_rows_frame()
+            self._update_ui()
 
     def _is_superscript_of_last_reward(self, row_superscript: int) -> bool:
         return row_superscript == len(
@@ -173,7 +173,7 @@ class ChronologyExpansion(IconExpansion):
                 idx = self._elements_idx_from_row_superscript(row_superscript)
                 move_down_in_list(self.routine.elements, idx)
             self.routine.update_self_in_db(state.engine)
-            self._update_rows_frame()
+            self._update_ui()
 
     def hdl_delete_row(self, row_superscript: int):
         if self._is_superscript_of_reward(row_superscript):
@@ -183,7 +183,7 @@ class ChronologyExpansion(IconExpansion):
             idx = self._elements_idx_from_row_superscript(row_superscript)
             self.routine.elements.pop(idx)
         self.routine.update_self_in_db(state.engine)
-        self._update_rows_frame()
+        self._update_ui()
 
     def hdl_select_program(self, row_superscript: int, new_program: str):
         if self._is_superscript_of_reward(row_superscript):
@@ -193,10 +193,10 @@ class ChronologyExpansion(IconExpansion):
             idx = self._elements_idx_from_row_superscript(row_superscript)
             self.routine.elements[idx].program = new_program
         self.routine.update_self_in_db(state.engine)
-        self._update_rows_frame()
+        self._update_ui()
 
     def hdl_select_priority(self, row_superscript: int, new_priority: int):
         idx = self._elements_idx_from_row_superscript(row_superscript)
         self.routine.elements[idx].priority_level = new_priority
         self.routine.update_self_in_db(state.engine)
-        self._update_rows_frame()
+        self._update_ui()

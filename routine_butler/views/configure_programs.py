@@ -1,16 +1,11 @@
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.components.header import Header
 from routine_butler.components.program_configurer import ProgramConfigurer
-from routine_butler.constants import PagePath
-from routine_butler.models.program import Program
+from routine_butler.configs import PagePath
+from routine_butler.models import Program
 from routine_butler.state import state
-from routine_butler.utils import (
-    apply_color_theme,
-    check_for_alarm_to_ring,
-    redirect_if_user_is_none,
-)
+from routine_butler.utils import initialize_page
 
 ADD_NEW_PROGRAM_STR = "Add New..."
 
@@ -44,10 +39,7 @@ def configure_programs():
         state.program_titles.pop(idx)
         _update_program_select_options()
 
-    redirect_if_user_is_none(state.user)
-    apply_color_theme()
-    Header()
-    ui.timer(60, lambda: check_for_alarm_to_ring(state))
+    initialize_page(page=PagePath.SET_PROGRAMS, state=state)
 
     with ui.row().classes(
         "absolute-center w-10/12 flex flex-col content-center"
@@ -57,7 +49,8 @@ def configure_programs():
         ).style("width: 853px"):
             micro.program_svg(size=20, color="lightgray").classes("mx-1")
             program_select = micro.program_select(
-                state.program_titles + [ADD_NEW_PROGRAM_STR]
+                value="",
+                program_titles=state.program_titles + [ADD_NEW_PROGRAM_STR],
             )
             ui.separator().props("vertical").classes("mx-3")
             configure_button = ui.button("Configure").classes("grow")

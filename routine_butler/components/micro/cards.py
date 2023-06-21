@@ -3,7 +3,12 @@ from typing import Callable, Optional, Union
 from nicegui import ui
 
 
-class IconExpansion(ui.expansion):
+def card():
+    card = ui.card().props("bordered")
+    return card.classes("rounded-borders border-gray-200 shadow-none")
+
+
+class ExpandableCard(ui.expansion):
     def __init__(
         self,
         title: str,
@@ -44,3 +49,14 @@ class IconExpansion(ui.expansion):
             with self:
                 # now, anything added to this object will come after this seperator
                 ui.separator()
+
+
+def expandable_card(
+    title: str,
+    icon: Optional[Union[str, Callable]] = None,
+    icon_kwargs: Optional[dict] = None,
+    width: Optional[str] = None,
+) -> ExpandableCard:
+    return ExpandableCard(
+        title=title, icon=icon, icon_kwargs=icon_kwargs, width=width
+    )

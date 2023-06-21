@@ -2,9 +2,8 @@ from typing import List, Optional, Tuple
 
 from nicegui import ui
 
-from routine_butler.constants import PagePath
-from routine_butler.models.program import Program
-from routine_butler.models.routine import Routine
+from routine_butler.configs import PagePath
+from routine_butler.models import Program, Routine
 from routine_butler.state import state
 from routine_butler.utils import redirect_to_page
 

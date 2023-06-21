@@ -5,9 +5,9 @@ from nicegui import ui
 from pydantic import BaseModel, ValidationError
 
 from routine_butler.components import micro
-from routine_butler.models.program import Program
+from routine_butler.models import Program
 from routine_butler.state import state
-from routine_butler.utils import ProgramPlugin
+from routine_butler.utils import Plugin
 
 # TODO: fix taken name validation failure when editing self
 
@@ -29,7 +29,7 @@ def passes_pydantic_validation(
 
 def plugin_factory(  # TODO: move to utils and have RoutineAdministrator use it?
     plugin_name: Optional[str], plugin_dict: Optional[Dict[str, Any]]
-) -> Optional[ProgramPlugin]:
+) -> Optional[Plugin]:
     """Retrieves a plugin type from state.plugin_types and instantiates it with kwargs"""
     if plugin_name is None:
         return None
@@ -64,7 +64,7 @@ class ProgramConfigurer:
                 )
                 ui.separator().props("vertical").classes("mx-3")
                 self.plugin_select = micro.plugin_type_select(
-                    value=program.plugin_type
+                    value=program.plugin_type, plugin_types=state.plugin_types
                 ).classes("grow")
                 choose_plugin_button = ui.button("Choose").classes("w-40")
 
@@ -82,12 +82,12 @@ class ProgramConfigurer:
             # save_button is a class attribute so parent context can listen to it
             self.save_button = micro.save_button().classes("w-40")
 
-        self._update_plugin_grid_with_plugin_values()
+        self._update_ui()
 
         choose_plugin_button.on("click", self.hdl_choose_plugin)
         self.save_button.on("click", self.hdl_save)
 
-    def _update_plugin_grid_with_plugin_values(self):
+    def _update_ui(self):
         if self.plugin_select.value is None:
             return
         self.plugin_grid.clear()
@@ -115,26 +115,26 @@ class ProgramConfigurer:
                     validation={f"{INVALID_MSG}": is_pydantic_valid},
                 ).props("standout dense")
 
-    def _update_plugin_with_plugin_grid_values(self):
+    def _update_plugin_with_ui_values(self):
         kwargs = {
             k: elem.value for k, elem in self.plugin_input_elements.items()
         }
         self.plugin = plugin_factory(self.program.plugin_type, kwargs)
 
+    def _update_program_with_ui_values(self):
+        self.program.title = self.title_input.value
+        self.program.plugin_type = self.plugin_select.value
+        self._update_plugin_with_ui_values()
+        self.program.plugin_dict = self.plugin.dict()
+
     def hdl_choose_plugin(self):
         if not self.plugin_select.value == self.program.plugin_type:
             self.program.plugin_type = self.plugin_select.value
             self.program.plugin_dict = {}
-            self._update_plugin_grid_with_plugin_values()
-
-    def _update_program_with_widget_values(self):
-        self.program.title = self.title_input.value
-        self.program.plugin_type = self.plugin_select.value
-        self._update_plugin_with_plugin_grid_values()
-        self.program.plugin_dict = self.plugin.dict()
+            self._update_ui()
 
     def hdl_save(self):
-        self._update_program_with_widget_values()
+        self._update_program_with_ui_values()
         if not self.program.uid:
             self.program.add_self_to_db(state.engine)
             state.user.add_program(state.engine, self.program)

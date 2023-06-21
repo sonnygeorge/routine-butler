@@ -23,10 +23,12 @@ class YoutubeEmbed(ui.element):
         self.props(f"src=https://www.youtube-nocookie.com/embed/{video_id}")
 
     def default_style(self) -> None:
-        self.props("width=560")
-        self.props("height=315")
-        self.props("frameborder=0")
+        self.props("width=560 height=315 frameborder=0 allowfullscreen")
         self.props(
-            "allow=accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            "allow=accelerometer; autoplay; clipboard-write; encrypted-media; "
+            "gyroscope; picture-in-picture; web-share"
         )
-        self.props("allowfullscreen")
+
+
+def youtube_embed(video_id: str) -> YoutubeEmbed:
+    return YoutubeEmbed(video_id=video_id)

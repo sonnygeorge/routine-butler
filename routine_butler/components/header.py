@@ -3,7 +3,7 @@ from datetime import datetime
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.constants import PagePath
+from routine_butler.configs import PagePath
 
 BUTTON_STYLE = "height: 45px; width: 45px;"
 APP_NAME = "RoutineButler"
@@ -32,7 +32,7 @@ class HeaderClock(ui.column):
 
 
 class Header(ui.header):
-    def __init__(self, hide_buttons=False):
+    def __init__(self, hide_navigation_buttons=False):
         super().__init__()
         self.classes("justify-between items-center bg-secondary")
         self.props("elevated")
@@ -41,7 +41,7 @@ class Header(ui.header):
             left_content = ui.row().style("align-items: center")
             right_content = ui.row().style("align-items: center")
             with left_content:
-                if hide_buttons:
+                if hide_navigation_buttons:
                     ui.element("div").style(BUTTON_STYLE)
                 else:
                     routines_button = ui.button().style(BUTTON_STYLE)
@@ -53,13 +53,13 @@ class Header(ui.header):
                 ui.label(APP_NAME).style(f"font-size: {APP_NAME_SIZE}")
             with right_content:
                 HeaderClock()
-                if hide_buttons:
+                if hide_navigation_buttons:
                     ui.element("div").style(BUTTON_STYLE)
                 else:
                     programs_button = ui.button().style(BUTTON_STYLE)
                     with programs_button:
                         micro.program_svg(PRGRM_SVG_SIZE, color="white")
 
-        if not hide_buttons:
+        if not hide_navigation_buttons:
             routines_button.on("click", lambda: ui.open(PagePath.SET_ROUTINES))
             programs_button.on("click", lambda: ui.open(PagePath.SET_PROGRAMS))

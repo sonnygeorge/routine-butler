@@ -1,8 +1,8 @@
 from nicegui import ui
 from sqlalchemy import create_engine
 
+from routine_butler.models import User
 from routine_butler.models.base import SQLAlchemyBase
-from routine_butler.models.user import User
 from routine_butler.state import state
 
 # import views

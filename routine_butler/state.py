@@ -3,16 +3,20 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Type
 from loguru import logger
 from sqlalchemy.engine import Engine
 
-from routine_butler.models.routine import Alarm, Routine
 from routine_butler.utils import (
-    ProgramPlugin,
-    dynamically_get_plugins,
-    get_next_alarm,
+    STATE_CHANGE_LOG_LVL,
+    Plugin,
+    dynamically_get_plugins_from_directory,
+    get_next_alarm_and_routine_from_db,
 )
 
 if TYPE_CHECKING:
-    from routine_butler.models.program import Program
-    from routine_butler.models.user import User
+    from routine_butler.models import Alarm, Program, Routine, User
+
+
+NEXT_UPDATE_STR = (
+    "next_alarm=({time}, {ring_frequency}), next_routine=({routine_title})"
+)
 
 
 class State:
@@ -20,27 +24,28 @@ class State:
     user: "User" = None
     programs: List["Program"] = []
     program_titles: List[str] = []
-    plugin_types: Dict[str, Type[ProgramPlugin]] = {}
-    pending_routine_to_run: Optional[Routine] = None
-    next_alarm: Optional[Alarm] = None
-    next_alarms_routine: Optional[Routine] = None
+    plugin_types: Dict[str, Type[Plugin]] = {}
+    # TODO: persist this and code redirect on boot
+    current_routine: Optional["Routine"] = None
+    next_alarm: Optional["Alarm"] = None
+    next_routine: Optional["Routine"] = None
 
-    def update_next_alarm(self):
+    def update_next_alarm_and_next_routine(self):
         if self.user is not None:
-            self.next_alarm, self.next_alarms_routine = get_next_alarm(
-                self.user, self.engine
-            )
-            if self.next_alarms_routine is not None:
-                logger.info(
-                    f"Next alarm updated to:\nTime:{self.next_alarm.time}\n"
-                    f"Routine: {self.next_alarms_routine.title}\n"
-                    f"Ring Frequency: {self.next_alarm.ring_frequency}"
+            al, rt = get_next_alarm_and_routine_from_db(self.user, self.engine)
+            self.next_alarm, self.next_routine = al, rt
+            if self.next_routine is not None:
+                log_msg = NEXT_UPDATE_STR.format(
+                    time=self.next_alarm.time,
+                    ring_frequency=self.next_alarm.ring_frequency,
+                    routine_title=self.next_routine.title,
                 )
+                logger.log(STATE_CHANGE_LOG_LVL, log_msg)
 
     def set_user(self, user: "User"):
         self.user = user
-        self.update_next_alarm()
-        self.plugin_types = dynamically_get_plugins()
+        self.update_next_alarm_and_next_routine()
+        self.plugin_types = dynamically_get_plugins_from_directory()
         self.update_programs()
 
     def update_programs(self):
