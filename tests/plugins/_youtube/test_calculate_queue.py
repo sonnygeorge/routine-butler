@@ -6,7 +6,8 @@ from routine_butler.plugins._youtube.calculate_queue import (
     calculate_queue,
     calculate_video_queue_score,
 )
-from routine_butler.plugins._youtube.utils import ChannelScoringData, Video
+from routine_butler.plugins._youtube.schema import Video
+from routine_butler.plugins._youtube.utils import ChannelScoringData
 
 TEST_VIDEO_ID = "test_video_id"
 TEST_USER_ID = "test_user_id"
