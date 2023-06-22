@@ -37,6 +37,11 @@ class YoutubeGui:
                 right_btn = ui.button(">", on_click=self.hdl_next_video)
                 right_btn.classes("w-36")
 
+    def _update_ui(self):
+        self.video_player.set_video_id(self.videos[self.cur_video_idx])
+        label_text = f"Video {self.cur_video_idx + 1}/{len(self.videos)}"
+        self.idx_label.set_text(label_text)
+
     async def generate_queue(self) -> list[str]:
         # scrape video data
         videos = await retrieve_video_data(self.progress)
@@ -51,23 +56,18 @@ class YoutubeGui:
         # update ui
         self.card.clear()
         self.add_player_to_ui()
-        self.__update()
-
-    def __update(self):
-        self.video_player.set_video_id(self.videos[self.cur_video_idx])
-        label_text = f"Video {self.cur_video_idx + 1}/{len(self.videos)}"
-        self.idx_label.set_text(label_text)
+        self._update_ui()
 
     def hdl_next_video(self):
         if self.cur_video_idx + 1 == len(self.videos):  # no more videos
             self.on_complete()
         else:
             self.cur_video_idx += 1
-            self.__update()
+            self._update_ui()
 
     def hdl_previous_video(self):
         self.cur_video_idx = (self.cur_video_idx - 1) % len(self.videos)
-        self.__update()
+        self._update_ui()
 
 
 class Youtube(BaseModel):
