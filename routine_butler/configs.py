@@ -5,8 +5,9 @@ CURRENT_DIR_PATH: str = os.path.dirname(os.path.abspath(__file__))
 ROUTINE_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/routine-icon.svg")
 PROGRAM_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/program-icon.svg")
 REWARD_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/reward-icon.svg")
-PLUGINS_DIR_PATH = os.path.join(CURRENT_DIR_PATH, "plugins")
 ALARM_WAV_PATH = os.path.join(CURRENT_DIR_PATH, "assets/alarm_sound.wav")
+PLUGINS_DIR_PATH = os.path.join(CURRENT_DIR_PATH, "plugins")
+PLUGINS_IMPORT_STR = "routine_butler.plugins.{module}"
 
 CONSTANT_RING_INTERVAL = 1
 PERIODIC_RING_INTERVAL = 60
@@ -23,6 +24,13 @@ class PagePath(StrEnum):
     SET_PROGRAMS = "/configure-programs"
     LOGIN = "/login"
     RING = "/ring"
+
+
+PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW = [
+    PagePath.DO_ROUTINE,
+    PagePath.RING,
+    PagePath.LOGIN,
+]
 
 
 class ICON_STRS:  # Quasar material icons

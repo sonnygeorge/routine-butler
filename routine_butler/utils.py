@@ -1,33 +1,25 @@
 import importlib
 import os
-from typing import TYPE_CHECKING, Dict, Optional, Protocol, Tuple, Type
+from typing import TYPE_CHECKING, Dict, Protocol, Type
 
 from loguru import logger
 from nicegui import ui
-from sqlalchemy.engine import Engine
 
 from routine_butler.components.header import Header
 from routine_butler.configs import (
     CLR_CODES,
     N_SECONDS_BETWEEN_ALARM_CHECKS,
+    PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW,
     PLUGINS_DIR_PATH,
+    PLUGINS_IMPORT_STR,
     PagePath,
 )
 
 if TYPE_CHECKING:
-    from routine_butler.models import Alarm, Routine, User
     from routine_butler.state import State
 
 
-IMPORT_STR_FOR_PLUGINS = "routine_butler.plugins.{module}"
-
 SECONDS_IN_DAY = 24 * 60 * 60
-
-PAGES_WITH_IMPERATIVE_ACTION_PATH_FOR_USER_TO_FOLLOW = [
-    PagePath.DO_ROUTINE,
-    PagePath.RING,
-    PagePath.LOGIN,
-]
 
 DATABASE_LOG_LVL = "DB EVENT"
 HARDWARE_LOG_LVL = "HW EVENT"
@@ -38,63 +30,54 @@ logger.level(HARDWARE_LOG_LVL, no=34, color="<yellow>")
 logger.level(STATE_CHANGE_LOG_LVL, no=34, color="<blue>")
 
 
-def get_next_alarm_and_routine_from_db(
-    user: "User", engine: Engine
-) -> Tuple[Optional["Alarm"], Optional["Routine"]]:
-    # query db for user's routines
-    routines = user.get_routines(engine)
-    # iterate through alarms in routines to find the next alarm/routine
-    next_alarm = None
-    next_routine = None
-    min_seconds_until_alarm = SECONDS_IN_DAY  # no alarm is more than day away
-    for routine in routines:
-        for alarm in routine.alarms:
-            # only consider enabled alarms
-            if not alarm.is_enabled:
-                continue
-            # get seconds until alarm
-            cur_seconds_until_alarm = alarm.get_seconds_until_time()
-            # if past, add a day's worth of seconds to negative amount
-            if cur_seconds_until_alarm <= 0:
-                cur_seconds_until_alarm += SECONDS_IN_DAY
-            # if less than current min, update min
-            if cur_seconds_until_alarm < min_seconds_until_alarm:
-                min_seconds_until_alarm = cur_seconds_until_alarm
-                next_alarm = alarm
-                next_routine = routine
-    return next_alarm, next_routine
-
-
 class Plugin(Protocol):
     """Protocol for plugins within the plugin system of the app"""
 
-    def administer(self, on_complete: callable):
+    def administer(self, on_complete: callable) -> None:
         ...
 
     def dict(self) -> dict:
         ...
 
 
-def snake_to_upper_camel(snake_case_str: str) -> str:
-    return "".join(word.capitalize() for word in snake_case_str.split("_"))
+def move_up_in_list(list_: list, idx_to_move: int) -> None:
+    """Moves an item in a list up by one index."""
+    list_.insert(idx_to_move - 1, list_.pop(idx_to_move))
+
+
+def move_down_in_list(list_: list, idx_to_move: int) -> None:
+    """Moves an item in a list down by one index."""
+    list_.insert(idx_to_move + 1, list_.pop(idx_to_move))
+
+
+def snake_to_upper_camel_case(snake_case_str: str) -> str:
+    """Converts a snake_case string to UpperCamelCase."""
+    return snake_case_str.title().replace("_", "")
 
 
 def dynamically_get_plugins_from_directory() -> Dict[str, Type[Plugin]]:
-    """Dynamically loads all program types from the programs directory"""
-    program_types = {}
+    """
+    Dynamically loads all plugin from the plugins directory.
+
+    Returns:
+        A dictionary mapping plugin names to their corresponding plugins.
+    """
+    plugins = {}
     for file_name in os.listdir(PLUGINS_DIR_PATH):
         if not file_name.startswith("_") and file_name.endswith(".py"):
             module_name = file_name[:-3]
-            import_str = IMPORT_STR_FOR_PLUGINS.format(module=module_name)
+            import_str = PLUGINS_IMPORT_STR.format(module=module_name)
             module = importlib.import_module(import_str)
-            class_name = snake_to_upper_camel(module_name)
-            program_types[class_name] = getattr(module, class_name)
-    return program_types
+            class_name = snake_to_upper_camel_case(module_name)
+            plugins[class_name] = getattr(module, class_name)
+    return plugins
 
 
 def redirect_to_page(
     page_path: PagePath, n_seconds_before_redirect: float = 0.1
-):
+) -> None:
+    """Invokes a NiceGUI timer to redirect to a given page after a given delay."""
+
     def _redirect_to_page():
         logger.info(f"Redirecting to page: {page_path}")
         ui.open(page_path)
@@ -103,13 +86,16 @@ def redirect_to_page(
 
 
 def redirect_to_ring_page_if_next_alarms_time_reached(state: "State") -> None:
+    """Redirects to the ring page if the time of the next alarm has been reached."""
     if state.next_alarm is not None and state.next_alarm.should_ring():
         redirect_to_page(PagePath.RING)
 
 
-def initialize_page(page: PagePath, state: "State"):
-    # apply universal color scheme
-    ui.colors(
+def initialize_page(page: PagePath, state: "State") -> None:
+    """Performs a set of standard actions that should be performed at the onset of any
+    page load
+    """
+    ui.colors(  # apply universal color scheme
         primary=CLR_CODES.primary,
         secondary=CLR_CODES.secondary,
         accent=CLR_CODES.accent,
@@ -122,7 +108,7 @@ def initialize_page(page: PagePath, state: "State"):
     if page != PagePath.LOGIN and state.user is None:
         redirect_to_page(PagePath.LOGIN)
     # add header
-    if page in PAGES_WITH_IMPERATIVE_ACTION_PATH_FOR_USER_TO_FOLLOW:
+    if page in PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW:
         Header(hide_navigation_buttons=True)
     else:
         Header()
@@ -131,11 +117,3 @@ def initialize_page(page: PagePath, state: "State"):
             N_SECONDS_BETWEEN_ALARM_CHECKS,
             lambda: redirect_to_ring_page_if_next_alarms_time_reached(state),
         )
-
-
-def move_up_in_list(list_: list, idx_to_move: int):
-    list_.insert(idx_to_move - 1, list_.pop(idx_to_move))
-
-
-def move_down_in_list(list_: list, idx_to_move: int):
-    list_.insert(idx_to_move + 1, list_.pop(idx_to_move))

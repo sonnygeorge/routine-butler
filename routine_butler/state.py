@@ -7,14 +7,13 @@ from routine_butler.utils import (
     STATE_CHANGE_LOG_LVL,
     Plugin,
     dynamically_get_plugins_from_directory,
-    get_next_alarm_and_routine_from_db,
 )
 
 if TYPE_CHECKING:
     from routine_butler.models import Alarm, Program, Routine, User
 
 
-NEXT_UPDATE_STR = (
+NEXT_ALARM_UPDATE_STR = (
     "next_alarm=({time}, {ring_frequency}), next_routine=({routine_title})"
 )
 
@@ -25,17 +24,16 @@ class State:
     programs: List["Program"] = []
     program_titles: List[str] = []
     plugin_types: Dict[str, Type[Plugin]] = {}
-    # TODO: persist this and code redirect on boot
     current_routine: Optional["Routine"] = None
     next_alarm: Optional["Alarm"] = None
     next_routine: Optional["Routine"] = None
 
     def update_next_alarm_and_next_routine(self):
         if self.user is not None:
-            al, rt = get_next_alarm_and_routine_from_db(self.user, self.engine)
-            self.next_alarm, self.next_routine = al, rt
+            alarm, routine = self.user.get_next_alarm_and_routine(self.engine)
+            self.next_alarm, self.next_routine = alarm, routine
             if self.next_routine is not None:
-                log_msg = NEXT_UPDATE_STR.format(
+                log_msg = NEXT_ALARM_UPDATE_STR.format(
                     time=self.next_alarm.time,
                     ring_frequency=self.next_alarm.ring_frequency,
                     routine_title=self.next_routine.title,
@@ -53,4 +51,4 @@ class State:
         self.program_titles = [p.title for p in self.programs]
 
 
-state = State()  # instantiate singleton for the app to import
+state = State()  # instantiate singleton for the rest of the app to import

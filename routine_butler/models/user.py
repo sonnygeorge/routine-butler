@@ -1,9 +1,10 @@
-from typing import List, Union
+from typing import List, Optional, Tuple, Union
 
 from pydantic import constr
 from sqlalchemy import Column, String
 from sqlalchemy.engine import Engine
 
+from routine_butler.models.alarm import Alarm
 from routine_butler.models.base import (
     BaseDBORMModel,
     BaseDBPydanticModel,
@@ -11,6 +12,8 @@ from routine_butler.models.base import (
 )
 from routine_butler.models.program import Program
 from routine_butler.models.routine import Routine
+
+SECONDS_IN_A_DAY = 24 * 60 * 60
 
 
 class UserORM(BaseDBORMModel):
@@ -67,3 +70,34 @@ class User(BaseDBPydanticModel):
     def get_programs(self, engine: Engine) -> List[Program]:
         """Queries the database for all programs belonging to this user"""
         return self._get_children(engine, Program)
+
+    def get_next_alarm_and_routine(
+        self, engine: Engine
+    ) -> Tuple[Optional[Alarm], Optional[Routine]]:
+        """Queries the database for the user's routines and determines the next upcoming
+        alarm/routine.
+
+        Returns:
+            A tuple w/ the next alarm and routine or (None, None) if there are no alarms.
+        """
+        routines = self.get_routines(engine)  # query db for user's routines
+        # iterate through alarms in routines to find the next alarm/routine
+        next_alarm = None
+        next_routine = None
+        min_seconds_until_alarm = SECONDS_IN_A_DAY
+        for routine in routines:
+            for alarm in routine.alarms:
+                # only consider enabled alarms
+                if not alarm.is_enabled:
+                    continue
+                # get seconds until alarm
+                cur_seconds_until_alarm = alarm.get_seconds_until_time()
+                # if earlier in the day, add a day's worth of seconds
+                if cur_seconds_until_alarm <= 0:
+                    cur_seconds_until_alarm += SECONDS_IN_A_DAY
+                # if less than current min, update min
+                if cur_seconds_until_alarm < min_seconds_until_alarm:
+                    min_seconds_until_alarm = cur_seconds_until_alarm
+                    next_alarm = alarm
+                    next_routine = routine
+        return next_alarm, next_routine
