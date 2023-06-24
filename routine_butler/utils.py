@@ -19,8 +19,6 @@ if TYPE_CHECKING:
     from routine_butler.state import State
 
 
-SECONDS_IN_DAY = 24 * 60 * 60
-
 DATABASE_LOG_LVL = "DB EVENT"
 HARDWARE_LOG_LVL = "HW EVENT"
 STATE_CHANGE_LOG_LVL = "STT CHNG"
