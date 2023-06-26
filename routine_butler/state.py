@@ -43,12 +43,13 @@ class State:
         if self.user is not None:
             alarm, routine = self.user.get_next_alarm_and_routine(self.engine)
             self.next_alarm, self.next_routine = alarm, routine
-            log_msg = (
-                f"next_alarm=({self.next_alarm.time}, "
-                f"{self.next_alarm.ring_frequency}), "
-                f"next_routine=({self.next_routine.title})"
-            )
-            logger.log(STATE_CHANGE_LOG_LVL, log_msg)
+            if self.next_alarm is not None and self.next_routine is not None:
+                log_msg = (
+                    f"next_alarm=({self.next_alarm.time}, "
+                    f"{self.next_alarm.ring_frequency}), "
+                    f"next_routine=({self.next_routine.title})"
+                )
+                logger.log(STATE_CHANGE_LOG_LVL, log_msg)
 
 
 state = State()  # Instantiate singleton for the rest of the app to use

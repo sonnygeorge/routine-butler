@@ -51,7 +51,8 @@ def ring_next_alarm():
 def ring():
     if state.next_alarm is None or not state.next_alarm.should_ring():
         redirect_to_page(PagePath.HOME)
-
+        return
+    
     initialize_page(page=PagePath.RING, state=state)
 
     ring_next_alarm()

@@ -22,6 +22,9 @@ def configure_routines():
 
     initialize_page(page=PagePath.SET_ROUTINES, state=state)
 
+    if state.user is None:
+        return
+
     content = ui.column().classes("justify-center items-center self-center")
     with content.classes("w-4/5 gap-y-4"):
         routines_frame = ui.column().classes("w-full")
