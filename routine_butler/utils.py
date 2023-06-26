@@ -91,7 +91,7 @@ def redirect_to_ring_page_if_next_alarms_time_reached(state: "State") -> None:
 
 def initialize_page(page: PagePath, state: "State") -> None:
     """Performs a set of standard actions that should be performed at the onset of any
-    page load
+    page load.
     """
     ui.colors(  # apply universal color scheme
         primary=CLR_CODES.primary,

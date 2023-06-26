@@ -34,9 +34,9 @@ def plugin_factory(  # TODO: move to utils and have RoutineAdministrator use it?
     if plugin_name is None:
         return None
     elif plugin_dict is None:
-        return state.plugin_types[plugin_name]()
+        return state.plugins[plugin_name]()
     else:
-        return state.plugin_types[plugin_name](**plugin_dict)
+        return state.plugins[plugin_name](**plugin_dict)
 
 
 class ProgramConfigurer:
@@ -64,7 +64,7 @@ class ProgramConfigurer:
                 )
                 ui.separator().props("vertical").classes("mx-3")
                 self.plugin_select = micro.plugin_type_select(
-                    value=program.plugin_type, plugin_types=state.plugin_types
+                    value=program.plugin_type, plugin_types=state.plugins
                 ).classes("grow")
                 choose_plugin_button = ui.button("Choose").classes("w-40")
 
@@ -93,7 +93,7 @@ class ProgramConfigurer:
         self.plugin_grid.clear()
         self.temp_filler.set_visibility(False)
         self.plugin_grid.set_visibility(True)
-        plugin = state.plugin_types[self.plugin_select.value](
+        plugin = state.plugins[self.plugin_select.value](
             **self.program.plugin_dict
         )
         for key, value in plugin.dict().items():

@@ -7,11 +7,17 @@ from nicegui import ui
 
 
 def open_keyboard():
-    subprocess.Popen(["matchbox-keyboard"])
+    try:
+        subprocess.Popen(["matchbox-keyboard"])
+    except FileNotFoundError:
+        pass
 
 
 def close_keyboard():
-    subprocess.run(["killall", "matchbox-keyboard"])
+    try:
+        subprocess.run(["killall", "matchbox-keyboard"])
+    except FileNotFoundError:
+        pass
 
 
 def input(*args, **kwargs):
