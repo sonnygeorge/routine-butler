@@ -7,9 +7,9 @@ N_QUEUE_VIDEOS_SAFETY_LIMIT = 100
 
 DURATION_SECONDS_SCORE_MULTIPLIERS = [
     (0, 1.0),  # 0-1 minutes
-    (5 * 60, 0.84),  # 5-9 minutes
-    (10 * 60, 0.74),  # 10-14 minutes
-    (15 * 60, 0.63),  # 15+ minutes
+    (5 * 60, 0.92),  # 5-9 minutes
+    (10 * 60, 0.83),  # 10-14 minutes
+    (15 * 60, 0.67),  # 15+ minutes
 ]
 DAYS_SINCE_UPLOAD_SCORE_MULTIPLIERS = [
     (0, 1.0),  # 0-1 days ago

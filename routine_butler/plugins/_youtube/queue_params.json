@@ -1,4 +1,8 @@
 {
+    "@legendb_": {
+        "substring_priority_scores": {},
+        "priority_score": 78
+    },
     "@JavaTheCraft": {
         "substring_priority_scores": {},
         "priority_score": 78
@@ -12,12 +16,10 @@
         "priority_score": 68
     },
     "@andrewhuang": {
-        "substring_priority_scores": {},
+        "substring_priority_scores": {
+            "4 PRODUCERS": 75
+        },
         "priority_score": 49
-    },
-    "@RiotHomeRecording": {
-        "substring_priority_scores": {},
-        "priority_score": 5
     },
     "@aldenharris18": {
         "substring_priority_scores": {},
@@ -29,11 +31,11 @@
     },
     "@Mogswamp": {
         "substring_priority_scores": {},
-        "priority_score": 77
+        "priority_score": 78
     },
     "@SB737": {
         "substring_priority_scores": {},
-        "priority_score": 44
+        "priority_score": 43
     },
     "@jacobcollier": {
         "substring_priority_scores": {},
@@ -42,6 +44,70 @@
     "@casey": {
         "substring_priority_scores": {},
         "priority_score": 39
+    },
+    "@ArjanCodes": {
+        "substring_priority_scores": {},
+        "priority_score": 50
+    },
+    "@theschooloflifetv": {
+        "substring_priority_scores": {},
+        "priority_score": 38
+    },
+    "@GeorgeCollier": {
+        "substring_priority_scores": {},
+        "priority_score": 59
+    },
+    "@ClarkElieson": {
+        "substring_priority_scores": {},
+        "priority_score": 61
+    },
+    "@TheProteinChef": {
+        "substring_priority_scores": {},
+        "priority_score": 53
+    },
+    "@MakingShorts": {
+        "substring_priority_scores": {},
+        "priority_score": 48
+    },
+    "@Reverb": {
+        "substring_priority_scores": {
+            "What's That Sound?": 37
+        },
+        "priority_score": 5
+    },
+    "@SmallishBeans": {
+        "substring_priority_scores": {
+            "Hardcore": 64
+        },
+        "priority_score": 48
+    },
+    "@Core-Electronics": {
+        "substring_priority_scores": {},
+        "priority_score": 48
+    },
+    "@CodeAesthetic": {
+        "substring_priority_scores": {},
+        "priority_score": 77
+    },
+    "@vlogbrothers": {
+        "substring_priority_scores": {},
+        "priority_score": 37
+    },
+    "@programmersarealsohuman5909": {
+        "substring_priority_scores": {},
+        "priority_score": 45
+    },
+    "@JackPGM": {
+        "substring_priority_scores": {},
+        "priority_score": 25
+    },
+    "@sportscentertop10daily": {
+        "substring_priority_scores": {},
+        "priority_score": 38
+    },
+    "@BackGuy": {
+        "substring_priority_scores": {},
+        "priority_score": 19
     },
     "@TheWeeklyThing": {
         "substring_priority_scores": {},
@@ -63,13 +129,33 @@
         "substring_priority_scores": {},
         "priority_score": 53
     },
+    "@MrBeastGaming": {
+        "substring_priority_scores": {},
+        "priority_score": 37
+    },
+    "@R.M.DiscGolf": {
+        "substring_priority_scores": {},
+        "priority_score": 53
+    },
+    "@bigthink": {
+        "substring_priority_scores": {},
+        "priority_score": 48
+    },
+    "@kurzgesagt": {
+        "substring_priority_scores": {},
+        "priority_score": 43
+    },
+    "@TheMealPrepManual": {
+        "substring_priority_scores": {},
+        "priority_score": 69
+    },
     "@DailyDoseOfInternet": {
         "substring_priority_scores": {},
-        "priority_score": 73
+        "priority_score": 61
     },
     "@LexClips": {
         "substring_priority_scores": {},
-        "priority_score": 49
+        "priority_score": 37
     },
     "@rekrap1": {
         "substring_priority_scores": {
@@ -87,12 +173,118 @@
     },
     "@JomboyMedia": {
         "substring_priority_scores": {
-            "a breakdown": 65
+            "a breakdown": 51,
+            "Things You Missed": 38
         },
         "priority_score": 11
     },
-    "@doreensjazzneworleans8454": {
+    "@TrixyBlox": {
         "substring_priority_scores": {},
-        "priority_score": 95
+        "priority_score": 42
+    },
+    "@Jeracraft": {
+        "substring_priority_scores": {},
+        "priority_score": 42
+    },
+    "@MasterChefWorld": {
+        "substring_priority_scores": {},
+        "priority_score": 21
+    },
+    "@Houseofhighlights": {
+        "substring_priority_scores": {},
+        "priority_score": 15
+    },
+    "@shovel241": {
+        "substring_priority_scores": {},
+        "priority_score": 74
+    },
+    "@ai-explained-": {
+        "substring_priority_scores": {},
+        "priority_score": 66
+    },
+    "@TheAiGrid": {
+        "substring_priority_scores": {},
+        "priority_score": 57
+    },
+    "@BeastReacts": {
+        "substring_priority_scores": {},
+        "priority_score": 36
+    },
+    "@incy000": {
+        "substring_priority_scores": {},
+        "priority_score": 66
+    },
+    "@NeuralNine": {
+        "substring_priority_scores": {
+            "GPT": 63
+        },
+        "priority_score": 52
+    },
+    "@WheelsYT": {
+        "substring_priority_scores": {},
+        "priority_score": 41
+    },
+    "@BlockdownBuilds": {
+        "substring_priority_scores": {},
+        "priority_score": 56
+    },
+    "@MarkRober": {
+        "substring_priority_scores": {},
+        "priority_score": 82
+    },
+    "@StuffMadeHere": {
+        "substring_priority_scores": {},
+        "priority_score": 66
+    },
+    "@smartereveryday": {
+        "substring_priority_scores": {},
+        "priority_score": 59
+    },
+    "@jamesbruton": {
+        "substring_priority_scores": {},
+        "priority_score": 56
+    },
+    "@simonegiertz": {
+        "substring_priority_scores": {},
+        "priority_score": 51
+    },
+    "@TheQ_original": {
+        "substring_priority_scores": {},
+        "priority_score": 56
+    },
+    "@colinfurze": {
+        "substring_priority_scores": {},
+        "priority_score": 56
+    },
+    "@MaxFosh": {
+        "substring_priority_scores": {},
+        "priority_score": 61
+    },
+    "@ChuckSutton": {
+        "substring_priority_scores": {},
+        "priority_score": 56
+    },
+    "@theintellectualcircle": {
+        "substring_priority_scores": {},
+        "priority_score": 53
+    },
+    "@SquatUniversity": {
+        "substring_priority_scores": {},
+        "priority_score": 53
+    },
+    "@adultswim": {
+        "substring_priority_scores": {
+            "Rick and Morty": 45,
+            "Eric Andre": 62
+        },
+        "priority_score": 29
+    },
+    "@MasterChefBrasilOficial": {
+        "substring_priority_scores": {},
+        "priority_score": 43
+    },
+    "@EasySpanish": {
+        "substring_priority_scores": {},
+        "priority_score": 39
     }
 }
