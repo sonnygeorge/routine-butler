@@ -1,5 +1,6 @@
 import asyncio
 import os
+import random
 import re
 from sys import platform
 from typing import List
@@ -24,6 +25,8 @@ if platform == "darwin":
         chromedriver_autoinstaller.install()
     except Exception as e:
         logger.warning(f"Could not auto-update chromedriver: {e}")
+
+MAX_CHANNELS_TO_SCRAPE = 38
 
 VIDEO_GRID_ELMNT = "div"
 VIDEO_GRID_CLASS = "style-scope ytd-rich-grid-media"
@@ -169,14 +172,16 @@ async def retrieve_video_data(progress: ui.label) -> list[Video]:
     videos page (usually shows up to 30 most recent videos) and returns a list of Video
     objects with the retrieved data."""
     driver = webdriver.Chrome(options=CHROME_OPTIONS, service=CHROME_SERVICE)
-    channel_ids = QUEUE_PARAMS.keys()
+    n_channels = min(MAX_CHANNELS_TO_SCRAPE, len(QUEUE_PARAMS))
+    channel_ids = random.sample(list(QUEUE_PARAMS.keys()), n_channels)
     video_lists = []
     for channel_id in channel_ids:
-        channel_videos = get_channel_videos(channel_id, driver)
-        video_lists.append(channel_videos)
-        progress_message = (
-            f"Scraped {len(video_lists)}/{len(channel_ids)} channels"
-        )
+        try:
+            channel_videos = get_channel_videos(channel_id, driver)
+            video_lists.append(channel_videos)
+        except Exception as e:
+            logger.warning(f"Couldn't get videos from {channel_id}: {e}")
+        progress_message = f"Scraped {len(video_lists)}/{n_channels} channels"
         logger.info(progress_message)
         progress.set_text(progress_message)
         await asyncio.sleep(0.3)
