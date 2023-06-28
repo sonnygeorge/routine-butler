@@ -5,7 +5,7 @@ from routine_butler.components.program_configurer import ProgramConfigurer
 from routine_butler.configs import PagePath
 from routine_butler.models import Program
 from routine_butler.state import state
-from routine_butler.utils import initialize_page
+from routine_butler.utils.misc import initialize_page
 
 ADD_NEW_PROGRAM_STR = "Add New..."
 

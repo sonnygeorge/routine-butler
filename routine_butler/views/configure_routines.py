@@ -5,7 +5,7 @@ from routine_butler.components.routine_configurer import RoutineConfigurer
 from routine_butler.configs import PagePath
 from routine_butler.models import Routine
 from routine_butler.state import state
-from routine_butler.utils import initialize_page
+from routine_butler.utils.misc import initialize_page
 
 
 @ui.page(path=PagePath.SET_ROUTINES)

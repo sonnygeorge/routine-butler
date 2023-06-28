@@ -6,7 +6,7 @@ import wave
 
 from loguru import logger
 
-from routine_butler.utils import HARDWARE_LOG_LVL
+from routine_butler.utils.misc import HARDWARE_LOG_LVL
 
 
 def create_new_wav_given_volume_multiplier(

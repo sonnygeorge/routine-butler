@@ -45,7 +45,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.elements import BinaryExpression, UnaryExpression
 
-from routine_butler.utils import DATABASE_LOG_LVL
+from routine_butler.utils.misc import DATABASE_LOG_LVL
 
 
 def log_db_event(

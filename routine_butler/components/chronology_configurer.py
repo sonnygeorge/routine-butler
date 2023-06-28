@@ -10,7 +10,7 @@ from routine_butler.models import (
     RoutineReward,
 )
 from routine_butler.state import state
-from routine_butler.utils import move_down_in_list, move_up_in_list
+from routine_butler.utils.misc import move_down_in_list, move_up_in_list
 
 
 class ChronologyConfigurer(micro.ExpandableCard):

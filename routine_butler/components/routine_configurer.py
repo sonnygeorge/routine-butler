@@ -8,7 +8,7 @@ from routine_butler.components.chronology_configurer import (
 from routine_butler.configs import ROUTINE_SVG_PATH, PagePath
 from routine_butler.models import Routine
 from routine_butler.state import state
-from routine_butler.utils import redirect_to_page
+from routine_butler.utils.misc import redirect_to_page
 
 
 class RoutineConfigurer(micro.ExpandableCard):

@@ -7,7 +7,7 @@ from pydantic import BaseModel, ValidationError
 from routine_butler.components import micro
 from routine_butler.models import Program
 from routine_butler.state import state
-from routine_butler.utils import Plugin
+from routine_butler.utils.misc import Plugin
 
 # TODO: fix taken name validation failure when editing self
 

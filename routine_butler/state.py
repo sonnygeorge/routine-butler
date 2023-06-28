@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Type
 from loguru import logger
 from sqlalchemy.engine import Engine
 
-from routine_butler.utils import (
+from routine_butler.utils.misc import (
     STATE_CHANGE_LOG_LVL,
     Plugin,
     dynamically_get_plugins_from_directory,

@@ -5,7 +5,7 @@ from nicegui import ui
 from routine_butler.configs import PagePath
 from routine_butler.models import Program, Routine
 from routine_butler.state import state
-from routine_butler.utils import redirect_to_page
+from routine_butler.utils.misc import redirect_to_page
 
 
 def get_programs_queues(

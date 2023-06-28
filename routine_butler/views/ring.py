@@ -12,7 +12,7 @@ from routine_butler.configs import (
 from routine_butler.hardware.audio import play_wav_with_volume_adjustment
 from routine_butler.models import RingFrequency
 from routine_butler.state import state
-from routine_butler.utils import initialize_page, redirect_to_page
+from routine_butler.utils.misc import initialize_page, redirect_to_page
 
 # FIXME: Implement snooze?
 # FIXME: Cache current routine & have a reboot bring user back to routine runner
@@ -52,7 +52,7 @@ def ring():
     if state.next_alarm is None or not state.next_alarm.should_ring():
         redirect_to_page(PagePath.HOME)
         return
-    
+
     initialize_page(page=PagePath.RING, state=state)
 
     ring_next_alarm()

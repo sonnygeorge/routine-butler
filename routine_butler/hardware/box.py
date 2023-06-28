@@ -3,7 +3,7 @@ import time
 from loguru import logger
 
 from routine_butler.hardware.hx711 import HX711
-from routine_butler.utils import HARDWARE_LOG_LVL
+from routine_butler.utils.misc import HARDWARE_LOG_LVL
 
 try:
     import RPi.GPIO as GPIO

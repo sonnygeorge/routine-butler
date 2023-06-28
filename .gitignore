@@ -171,3 +171,7 @@ cython_debug/
 
 # YouTube watch history
 *watched_videos*
+
+# Google API files
+google_credentials.json
+token.json
