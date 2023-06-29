@@ -175,3 +175,6 @@ cython_debug/
 # Google API files
 google_credentials.json
 token.json
+
+# _test.py
+_test.py
