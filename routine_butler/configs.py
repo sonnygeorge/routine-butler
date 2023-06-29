@@ -10,8 +10,14 @@ ROUTINE_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/routine-icon.svg")
 PROGRAM_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/program-icon.svg")
 REWARD_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/reward-icon.svg")
 ALARM_WAV_PATH = os.path.join(CURRENT_DIR_PATH, "assets/alarm_sound.wav")
+
 PLUGINS_DIR_PATH = os.path.join(CURRENT_DIR_PATH, "plugins")
 PLUGINS_IMPORT_STR = "routine_butler.plugins.{module}"
+
+GDRIVE_FOLDER_NAME = "Routine Butler"
+GDRIVE_CREDENTIALS_PATH = os.path.join(
+    CURRENT_DIR_PATH, "gdrive_credentials.json"
+)
 
 CONSTANT_RING_INTERVAL = 1
 PERIODIC_RING_INTERVAL = 60
