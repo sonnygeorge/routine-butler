@@ -17,7 +17,6 @@ except Exception as e:
 
 
 # HOW TO CALCULATE THE REFFERENCE UNIT
-#########################################
 # To set the reference unit to 1.
 # Call get_weight before and after putting 1000g weight on your sensor.
 # Divide difference with grams (1000g) and use it as reference unit.
@@ -32,8 +31,8 @@ UNLOCK_PIN = 10
 IS_CLOSED_CIRCUIT_PIN = 12
 GREEN_LED_PIN = 20
 RED_LED_PIN = 21
-DEFAULT_TARGET_GRAMS = 200
-DEFAULT_TOLERANCE_GRAMS = 200
+DEFAULT_TARGET_GRAMS = 2200
+DEFAULT_TOLERANCE_GRAMS = 150
 LOCK_WAIT_SECONDS = 3.5
 
 GPIO.setwarnings(False)

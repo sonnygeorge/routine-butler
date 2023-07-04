@@ -7,7 +7,7 @@ from routine_butler.hardware import box
 
 def status_indicator(is_positive=False) -> ui.button:
     color = "positive" if is_positive else "negative"
-    return ui.button("").props(f"color={color}")
+    return ui.button("").props(f"color={color}").classes("mx-3")
 
 
 class LockBoxGui:
@@ -48,7 +48,8 @@ class LockBoxGui:
             )
             self.scale_indicator.props(f"color={scale_color}")
             if box.last_weight_measurement is not None:
-                self.weight_label.set_text(f"{box.last_weight_measurement}g")
+                label_text = f"{round(box.last_weight_measurement)}g"
+                self.weight_label.set_text(label_text)
         closed_color = "positive" if box.is_closed() else "negative"
         self.closed_indicator.props(f"color={closed_color}")
 
