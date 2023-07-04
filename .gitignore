@@ -178,3 +178,6 @@ token.json
 
 # _test.py
 _test.py
+
+# log files
+*.log
