@@ -18,16 +18,20 @@ class LockBoxGui:
         self.on_complete = on_complete
 
         box.target_grams = target_grams
-        box.tolerance_grams = tolerance_grams
+        box.allowed_grams_upper_bound = tolerance_grams
 
         with micro.card():
             # FIXME: make this look better & show current grams on scale
             with ui.row():
-                self.scale_zeroed_indicator = status_indicator(
-                    self.scale_is_zeroed
-                )
-                self.scale_indicator = status_indicator(False)
-                self.closed_indicator = status_indicator(box.is_closed())
+                with ui.column():
+                    self.scale_zeroed_indicator = status_indicator(
+                        self.scale_is_zeroed
+                    )
+                with ui.column():
+                    self.scale_indicator = status_indicator(False)
+                    self.weight_label = ui.label("")
+                with ui.column():
+                    self.closed_indicator = status_indicator(box.is_closed())
                 ui.timer(0.8, self.update_status_indicators)
 
             with ui.row():
@@ -43,6 +47,8 @@ class LockBoxGui:
                 "positive" if box.passes_weight_check() else "negative"
             )
             self.scale_indicator.props(f"color={scale_color}")
+            if box.last_weight_measurement is not None:
+                self.weight_label.set_text(f"{box.last_weight_measurement}g")
         closed_color = "positive" if box.is_closed() else "negative"
         self.closed_indicator.props(f"color={closed_color}")
 

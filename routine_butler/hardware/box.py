@@ -43,7 +43,9 @@ GPIO.setmode(GPIO.BCM)
 class Box:
     def __init__(self, target_grams, tolerance_grams):
         self.target_grams = target_grams
-        self.tolerance_grams = tolerance_grams
+        self.allowed_grams_upper_bound = target_grams + tolerance_grams
+        self.allowed_grams_lower_bound = target_grams - tolerance_grams
+        self.last_weight_measurement = None
         self.hx711 = HX711(
             dout=HX711_DOUT_PIN,
             pd_sck=HX711_PD_SCK_PIN,
@@ -61,14 +63,15 @@ class Box:
     def passes_weight_check(self) -> bool:
         if MOCK:
             return True
-        current_weight_grams = self.hx711.getWeight()
+        self.last_weight_measurement = self.hx711.getWeight()
         logger.log(
-            HARDWARE_LOG_LVL, f"Read {current_weight_grams} grams on scale"
+            HARDWARE_LOG_LVL,
+            f"Read {self.last_weight_measurement} grams on scale",
         )
         return (
-            self.target_grams - self.tolerance_grams
-            <= current_weight_grams
-            <= self.target_grams + self.tolerance_grams
+            self.allowed_grams_lower_bound
+            <= self.last_weight_measurement
+            <= self.allowed_grams_upper_bound
         )
 
     def is_closed(self) -> bool:
