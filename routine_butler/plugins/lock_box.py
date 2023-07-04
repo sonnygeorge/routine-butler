@@ -20,16 +20,16 @@ class LockBoxGui:
         box.target_grams = target_grams
         box.allowed_grams_upper_bound = tolerance_grams
 
-        with micro.card():
+        with micro.card().classes("flex flex-col items-center"):
             # FIXME: make this look better & show current grams on scale
             with ui.row():
                 with ui.column():
                     self.scale_zeroed_indicator = status_indicator(
                         self.scale_is_zeroed
                     )
-                with ui.column():
+                with ui.column().classes("items-center"):
                     self.scale_indicator = status_indicator(False)
-                    self.weight_label = ui.label("")
+                    self.weight_label = ui.label("Pending...")
                 with ui.column():
                     self.closed_indicator = status_indicator(box.is_closed())
                 ui.timer(0.8, self.update_status_indicators)
@@ -57,6 +57,7 @@ class LockBoxGui:
         box.zero_scale()
         self.scale_is_zeroed = True
         self.scale_zeroed_indicator.props("color=positive")
+        self.weight_label.set_text("0g")
 
     def hdl_lock_box(self):
         unable_message = ""
