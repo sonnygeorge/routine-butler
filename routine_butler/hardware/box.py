@@ -63,10 +63,10 @@ class Box:
         if MOCK:
             return True
         self.last_weight_measurement = self.hx711.getWeight()
-        logger.log(
-            HARDWARE_LOG_LVL,
-            f"Read {self.last_weight_measurement} grams on scale",
-        )
+        msg = f"Scale check: {self.allowed_grams_lower_bound} <= "
+        msg += f"{self.last_weight_measurement} <= "
+        msg += f"{self.allowed_grams_upper_bound}"
+        logger.log(HARDWARE_LOG_LVL, msg)
         return (
             self.allowed_grams_lower_bound
             <= self.last_weight_measurement
