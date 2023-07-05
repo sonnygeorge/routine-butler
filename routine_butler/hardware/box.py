@@ -41,9 +41,9 @@ GPIO.setmode(GPIO.BCM)
 
 class Box:
     def __init__(self, target_grams, tolerance_grams):
-        self.target_grams = target_grams
-        self.allowed_grams_upper_bound = target_grams + tolerance_grams
-        self.allowed_grams_lower_bound = target_grams - tolerance_grams
+        self._target_grams = target_grams
+        self._tolerance_grams = tolerance_grams
+        self._update_tolerance_bounds()
         self.last_weight_measurement = None
         self.hx711 = HX711(
             dout=HX711_DOUT_PIN,
@@ -53,6 +53,22 @@ class Box:
         )
         self.hx711.setReferenceUnit(HX711_REFERENCE_UNIT)
 
+    def _update_tolerance_bounds(self):
+        self._allowed_grams_upper_bound = (
+            self._target_grams + self._tolerance_grams
+        )
+        self._allowed_grams_lower_bound = (
+            self._target_grams - self._tolerance_grams
+        )
+
+    def set_target_grams(self, target_grams: int):
+        self._target_grams = target_grams
+        self._update_tolerance_bounds()
+
+    def set_tolerance_grams(self, tolerance_grams: int):
+        self._tolerance_grams = tolerance_grams
+        self._update_tolerance_bounds()
+
     def zero_scale(self):
         logger.log(HARDWARE_LOG_LVL, "Zeroing scale...")
         if not MOCK:
@@ -61,16 +77,17 @@ class Box:
 
     def passes_weight_check(self) -> bool:
         if MOCK:
-            return True
-        self.last_weight_measurement = self.hx711.getWeight()
-        msg = f"Scale check: {self.allowed_grams_lower_bound} <= "
+            self.last_weight_measurement = self._target_grams
+        else:
+            self.last_weight_measurement = self.hx711.getWeight()
+        msg = f"Scale check: {self._allowed_grams_lower_bound} <= "
         msg += f"{self.last_weight_measurement} <= "
-        msg += f"{self.allowed_grams_upper_bound}"
+        msg += f"{self._allowed_grams_upper_bound}"
         logger.log(HARDWARE_LOG_LVL, msg)
         return (
-            self.allowed_grams_lower_bound
+            self._allowed_grams_lower_bound
             <= self.last_weight_measurement
-            <= self.allowed_grams_upper_bound
+            <= self._allowed_grams_upper_bound
         )
 
     def is_closed(self) -> bool:

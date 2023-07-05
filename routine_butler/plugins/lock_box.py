@@ -17,11 +17,10 @@ class LockBoxGui:
         self.scale_is_zeroed: bool = False
         self.on_complete = on_complete
 
-        box.target_grams = target_grams
-        box.allowed_grams_upper_bound = tolerance_grams
+        box.set_target_grams(target_grams)
+        box.set_tolerance_grams(tolerance_grams)
 
         with micro.card().classes("flex flex-col items-center"):
-            # FIXME: make this look better & show current grams on scale
             with ui.row():
                 with ui.column():
                     self.scale_zeroed_indicator = status_indicator(
@@ -77,7 +76,7 @@ class LockBoxGui:
 
 
 class LockBox(BaseModel):
-    target_grams: int = 200
+    target_grams: int = 2200
     tolerance_grams: int = 200
 
     def administer(self, on_complete: callable):
