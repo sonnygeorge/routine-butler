@@ -3,12 +3,11 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Type
 from loguru import logger
 from sqlalchemy.engine import Engine
 
+from routine_butler.utils.logging import STATE_CHANGE_LOG_LVL
 from routine_butler.utils.misc import (
     Plugin,
     dynamically_get_plugins_from_directory,
 )
-from routine_butler.utils.logging import STATE_CHANGE_LOG_LVL
-
 
 if TYPE_CHECKING:
     from routine_butler.models import Alarm, Program, Routine, User
@@ -21,10 +20,19 @@ class State:
     user: "User" = None
     plugins: Dict[str, Type[Plugin]] = {}
     programs: List["Program"] = []
-    program_titles: List[str] = []
     next_alarm: Optional["Alarm"] = None
     next_routine: Optional["Routine"] = None
     current_routine: Optional["Routine"] = None
+
+    def __new__(cls):
+        """Custom __new__ method to make this a singleton class."""
+        if not hasattr(cls, "instance"):
+            cls.instance = super(State, cls).__new__(cls)
+        return cls.instance
+
+    @property
+    def program_titles(self):
+        return [p.title for p in self.programs]
 
     def set_user(self, user: "User"):
         """Set the current user within the global state."""
@@ -36,7 +44,6 @@ class State:
     def update_programs(self):
         """Pulls from the database and updates the global state's list of programs."""
         self.programs = self.user.get_programs(self.engine)
-        self.program_titles = [p.title for p in self.programs]
 
     def update_next_alarm_and_next_routine(self):
         """Pulls from the database and updates the global state's next alarm and next
