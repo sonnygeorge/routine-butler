@@ -4,10 +4,11 @@ from loguru import logger
 from sqlalchemy.engine import Engine
 
 from routine_butler.utils.misc import (
-    STATE_CHANGE_LOG_LVL,
     Plugin,
     dynamically_get_plugins_from_directory,
 )
+from routine_butler.utils.logging import STATE_CHANGE_LOG_LVL
+
 
 if TYPE_CHECKING:
     from routine_butler.models import Alarm, Program, Routine, User
