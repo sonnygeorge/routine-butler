@@ -8,7 +8,7 @@ from nicegui import ui
 from routine_butler.components.header import Header
 from routine_butler.configs import (
     CLR_CODES,
-    N_SECONDS_BETWEEN_ALARM_CHECKS,
+    N_SECONDS_BW_RING_CHECKS,
     PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW,
     PLUGINS_DIR_PATH,
     PLUGINS_IMPORT_STR,
@@ -103,6 +103,6 @@ def initialize_page(page: PagePath, state: "State") -> None:
         Header()
         # monitor for the arrival of the time of the next alarm
         ui.timer(
-            N_SECONDS_BETWEEN_ALARM_CHECKS,
+            N_SECONDS_BW_RING_CHECKS,
             lambda: redirect_to_ring_page_if_next_alarms_time_reached(state),
         )

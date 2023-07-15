@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import List, Optional, Tuple, Union
 
 from pydantic import constr
@@ -12,8 +13,6 @@ from routine_butler.models.base import (
 )
 from routine_butler.models.program import Program
 from routine_butler.models.routine import Routine
-
-SECONDS_IN_A_DAY = 24 * 60 * 60
 
 
 class UserORM(BaseDBORMModel):
@@ -82,22 +81,19 @@ class User(BaseDBPydanticModel):
         """
         routines = self.get_routines(engine)  # query db for user's routines
         # iterate through alarms in routines to find the next alarm/routine
-        next_alarm = None
-        next_routine = None
-        min_seconds_until_alarm = SECONDS_IN_A_DAY
+        now = datetime.now()
+        cur_closest_alarm = None
+        cur_closest_routine = None
+        cur_min_time_until_ring = timedelta(days=1)
         for routine in routines:
             for alarm in routine.alarms:
                 # only consider enabled alarms
                 if not alarm.is_enabled:
                     continue
-                # get seconds until alarm
-                cur_seconds_until_alarm = alarm.get_seconds_until_time()
-                # if earlier in the day, add a day's worth of seconds
-                if cur_seconds_until_alarm <= 0:
-                    cur_seconds_until_alarm += SECONDS_IN_A_DAY
-                # if less than current min, update min
-                if cur_seconds_until_alarm < min_seconds_until_alarm:
-                    min_seconds_until_alarm = cur_seconds_until_alarm
-                    next_alarm = alarm
-                    next_routine = routine
-        return next_alarm, next_routine
+                time_until_ring = alarm.get_next_ring_datetime() - now
+                # if time until next trigger time
+                if time_until_ring < cur_min_time_until_ring:
+                    cur_min_time_until_ring = time_until_ring
+                    cur_closest_alarm = alarm
+                    cur_closest_routine = routine
+        return cur_closest_alarm, cur_closest_routine
