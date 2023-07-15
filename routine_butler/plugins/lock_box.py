@@ -1,3 +1,5 @@
+import asyncio
+
 from nicegui import ui
 from pydantic import BaseModel
 
@@ -31,16 +33,25 @@ class LockBoxGui:
                     self.weight_label = ui.label("Pending...")
                 with ui.column():
                     self.closed_indicator = status_indicator(box.is_closed())
-                ui.timer(0.8, self.update_status_indicators)
 
             with ui.row():
-                zero_scale_button = ui.button("Zero Scale")
-                lock_box_button = ui.button("Lock Box")
+                self.zero_scale_button = ui.button("Zero Scale")
+                self.lock_box_button = ui.button("Lock Box")
 
-            zero_scale_button.on("click", self.hdl_zero_scale)
-            lock_box_button.on("click", self.hdl_lock_box)
+            self.zero_scale_button.on("click", self.hdl_zero_scale)
+            self.lock_box_button.on("click", self.hdl_lock_box)
 
-    def update_status_indicators(self):
+        self.status_check_timer = ui.timer(0.8, self._update_status_indicators)
+
+    def _disable_buttons(self):
+        self.zero_scale_button.set_visibility(False)
+        self.lock_box_button.set_visibility(False)
+
+    def _enable_buttons(self):
+        self.zero_scale_button.set_visibility(True)
+        self.lock_box_button.set_visibility(True)
+
+    def _update_status_indicators(self):
         if self.scale_is_zeroed:
             scale_color = (
                 "positive" if box.passes_weight_check() else "negative"
@@ -52,13 +63,19 @@ class LockBoxGui:
         closed_color = "positive" if box.is_closed() else "negative"
         self.closed_indicator.props(f"color={closed_color}")
 
-    def hdl_zero_scale(self):
+    async def hdl_zero_scale(self):
+        self._disable_buttons()
+        await asyncio.sleep(0.2)
         box.zero_scale()
         self.scale_is_zeroed = True
         self.scale_zeroed_indicator.props("color=positive")
         self.weight_label.set_text("0g")
+        self._enable_buttons()
 
-    def hdl_lock_box(self):
+    async def hdl_lock_box(self):
+        self._disable_buttons()
+        await asyncio.sleep(0.2)
+
         unable_message = ""
         if not self.scale_is_zeroed:
             unable_message += " --must zero the scale"
@@ -69,7 +86,9 @@ class LockBoxGui:
 
         if unable_message != "":
             ui.notify("Unable to close:" + unable_message)
+            self._enable_buttons()
         else:
+            self.status_check_timer.deactivate()
             box.lock()
             ui.notify("Box locked!")
             ui.timer(1, self.on_complete, once=True)
