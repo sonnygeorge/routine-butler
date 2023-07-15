@@ -70,7 +70,7 @@ class RoutineConfigurer(micro.ExpandableCard):
         )
         target_duration_enabled_switch.on(
             "click",
-            lambda: self.hdl_target_duration_enabled_update(
+            lambda: self.hdl_target_duration_enabled_change(
                 target_duration_enabled_switch.value
             ),
         )
@@ -91,7 +91,7 @@ class RoutineConfigurer(micro.ExpandableCard):
         self.routine.update_self_in_db(state.engine)
 
     def hdl_start(self):
-        state.current_routine = self.routine
+        state.set_current_routine(self.routine)
         redirect_to_page(PagePath.DO_ROUTINE)
 
     def hdl_delete(self):

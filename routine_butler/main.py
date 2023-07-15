@@ -12,7 +12,7 @@ from routine_butler.views import *  # noqa: F401, F403
 
 def initialize_db(testing: bool = False) -> None:
     db_url = TEST_DB_URL if testing else DB_URL
-    state.engine = create_engine(db_url)
+    state.set_engine(create_engine(db_url))
     SQLAlchemyBase.metadata.create_all(state.engine)
 
 
