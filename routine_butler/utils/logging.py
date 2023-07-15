@@ -8,5 +8,5 @@ logger.level(DATABASE_LOG_LVL, no=33, color="<magenta>")
 logger.level(HARDWARE_LOG_LVL, no=34, color="<yellow>")
 logger.level(STATE_CHANGE_LOG_LVL, no=34, color="<blue>")
 
-# add a log file destination
-logger.add("routine_butler.log")
+# add a log-file
+logger.add("routine_butler.log", rotation="3 days", retention="12 days")
