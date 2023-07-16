@@ -91,6 +91,7 @@ class User(BaseDBPydanticModel):
                 if not alarm.is_enabled:
                     continue
                 time_until_ring = alarm.get_next_ring_datetime() - now
+                print(f"time_until_ring={time_until_ring}")
                 # if time until next trigger time
                 if time_until_ring < cur_min_time_until_ring:
                     cur_min_time_until_ring = time_until_ring

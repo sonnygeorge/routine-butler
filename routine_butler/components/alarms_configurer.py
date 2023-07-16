@@ -33,7 +33,9 @@ class AlarmsConfigurer(micro.ExpandableCard):
     def _add_ui_row(self, row_idx: int, alarm: Alarm):
         row = ui.row().classes("items-center w-full px-4 gap-x-2")
         with row.classes("justify-between").style("width: 725px;"):
-            time_setter = micro.time_input(value=alarm.time).classes("w-40")
+            time_setter = micro.time_input(value=alarm.time_str).classes(
+                "w-40"
+            )
             vol_knob = micro.volume_knob(value=alarm.volume)
             ring_frequency_select = micro.ring_frequency_select(
                 value=alarm.ring_frequency, ring_frequencies=RingFrequency
@@ -72,7 +74,7 @@ class AlarmsConfigurer(micro.ExpandableCard):
         self._update_ui()
 
     def hdl_time_change(self, row_idx: int, new_time: str):
-        self.routine.alarms[row_idx].time = new_time
+        self.routine.alarms[row_idx].time_str = new_time
         self.routine.update_self_in_db(state.engine)
         state.update_next_alarm_and_next_routine()
 
