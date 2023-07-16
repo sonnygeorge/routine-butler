@@ -1,6 +1,7 @@
 import asyncio
 import functools
 
+from loguru import logger
 from nicegui import ui
 
 from routine_butler.configs import (
@@ -27,6 +28,7 @@ async def async_play_wav_with_volume_adjustment(
 
 def ring_next_alarm():
     """Does the steps associated with "ringing" the next alarm of the global state"""
+    logger.debug("ring_next_alarm() called")
     # Make the alarm's current routine the pending routine in the global state
     state.set_current_routine(state.next_routine)
     # Pre-initialize the asynchronous play-audio function with volume and file path
