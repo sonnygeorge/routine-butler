@@ -9,6 +9,7 @@ class RunArgs(Protocol):
     kiosk: bool
     native: bool
 
+
 if __name__ in {"__main__", "__mp_main__"}:
     parser = argparse.ArgumentParser(description="Runs RoutineButler")
 

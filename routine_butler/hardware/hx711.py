@@ -5,7 +5,7 @@ try:
     import RPi.GPIO as GPIO
 
     MOCK = False
-except:
+except:  # noqa
     import Mock.GPIO as GPIO
 
     MOCK = True
