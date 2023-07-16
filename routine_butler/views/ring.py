@@ -1,7 +1,6 @@
 import asyncio
 import functools
 
-from loguru import logger
 from nicegui import ui
 
 from routine_butler.configs import (
