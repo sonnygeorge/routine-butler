@@ -94,7 +94,7 @@ class State:
             self._next_alarm, self._next_routine = alarm, routine
             if self._next_alarm is not None and self._next_routine is not None:
                 log_msg = (
-                    f"next_alarm=({self._next_alarm.time}, "
+                    f"next_alarm=({self._next_alarm.time_str}, "
                     f"{self._next_alarm.ring_frequency}), "
                     f"next_routine=({self._next_routine.title})"
                 )
