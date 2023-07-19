@@ -26,7 +26,7 @@ if platform == "darwin":
     except Exception as e:
         logger.warning(f"Could not auto-update chromedriver: {e}")
 
-MAX_CHANNELS_TO_SCRAPE = 23
+MAX_CHANNELS_TO_SCRAPE = 20
 
 VIDEO_GRID_ELMNT = "div"
 VIDEO_GRID_CLASS = "style-scope ytd-rich-grid-media"
@@ -167,7 +167,7 @@ def get_channel_videos(user_id: str, driver: WebDriver) -> List[Video]:
     return videos
 
 
-async def retrieve_video_data(progress: ui.label) -> list[Video]:
+async def retrieve_video_data(progress_label: ui.label) -> list[Video]:
     """Using the Youtube channel IDs in QUEUE_PARAMS, retrieves data from each channel's
     videos page (usually shows up to 30 most recent videos) and returns a list of Video
     objects with the retrieved data."""
@@ -183,7 +183,7 @@ async def retrieve_video_data(progress: ui.label) -> list[Video]:
     n_channels = min(MAX_CHANNELS_TO_SCRAPE, len(QUEUE_PARAMS))
     channel_ids = random.sample(list(QUEUE_PARAMS.keys()), n_channels)
     video_lists = []
-    for channel_id in channel_ids:
+    for i, channel_id in enumerate(channel_ids):
         try:
             channel_videos = get_channel_videos(channel_id, driver)
             video_lists.append(channel_videos)
@@ -191,8 +191,9 @@ async def retrieve_video_data(progress: ui.label) -> list[Video]:
             msg = f"Couldn't get videos from {channel_id}: {e}"
             logger.warning(msg)
             ui.notify(msg)
-        progress_message = f"Scraped {len(video_lists)}/{n_channels} channels"
-        logger.info(progress_message)
-        progress.set_text(progress_message)
+        progress_message = f"Scraped {i}/{n_channels} channels"
+        if i % 5 == 0:
+            logger.info(progress_message)
+        progress_label.set_text(progress_message)
         await asyncio.sleep(0.3)
     return sum(video_lists, [])

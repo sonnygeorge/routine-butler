@@ -46,9 +46,23 @@ def ring_next_alarm():
     state.update_next_alarm_and_next_routine()
 
 
+def should_redirect_to_home():
+    """Returns True if the user should be redirected to the home page, False
+    otherwise."""
+    if state.next_alarm is None:
+        return True
+    if (
+        state.next_alarm.is_enabled
+        and state.next_alarm.has_passed_in_the_last_n_minutes(n_minutes=3)
+    ):
+        return False
+    else:
+        return True
+
+
 @ui.page(path=PagePath.RING)
 def ring():
-    if state.next_alarm is None or not state.next_alarm.should_ring():
+    if should_redirect_to_home():
         redirect_to_page(PagePath.HOME)
         return
 

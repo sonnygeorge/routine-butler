@@ -23,6 +23,7 @@ from routine_butler.components.micro.reward_icon_placeholder import (
 )
 from routine_butler.components.micro.row_superscript import row_superscript
 from routine_butler.components.micro.svg import (
+    app_logo_svg,
     program_svg,
     reward_svg,
     routine_svg,

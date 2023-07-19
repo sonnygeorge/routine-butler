@@ -22,7 +22,7 @@ class RoutineConfigurer(micro.ExpandableCard):
         svg_kwargs = {
             "fpath": ROUTINE_SVG_PATH,
             "size": 28,
-            "color": "black",
+            "color": "lightgray",
         }
         super().__init__(
             routine.title,

@@ -13,6 +13,7 @@ class ExpandableCard(ui.expansion):
         self,
         title: str,
         icon: Optional[Union[str, Callable]] = None,
+        icon_color: Optional[str] = None,
         icon_kwargs: Optional[dict] = None,
         width: Optional[str] = None,
     ):
@@ -40,7 +41,7 @@ class ExpandableCard(ui.expansion):
                 with ui.row().classes("justify-start items-center w-full"):
                     # add icon
                     if isinstance(icon, str):
-                        ui.icon(icon).props("size=sm")
+                        ui.icon(icon, color=icon_color).props("size=sm")
                     else:
                         icon(**icon_kwargs)
                     # add title

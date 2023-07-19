@@ -1,65 +1,114 @@
 from datetime import datetime
+from typing import Optional
 
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.configs import PagePath
+from routine_butler.configs import ICON_STRS, PagePath
 
-BUTTON_STYLE = "height: 45px; width: 45px;"
 APP_NAME = "RoutineButler"
-APP_NAME_SIZE = "1.9rem"
-RTN_SVG_SIZE: int = 30
-PRGRM_SVG_SIZE: int = 25
-TIME_SIZE = "1.1rem"
-DATE_SIZE = ".7rem"
+APP_NAME_SIZE = "1.7rem"
+TEXT_BLOCK_WIDTH = "width: 4.5rem;"
+ICON_BLOCK_WIDTH = "width: 2.7rem;"
+APP_LOGO_SVG_SIZE: int = 22
+RTN_SVG_SIZE: int = 28
+PRGRM_SVG_SIZE: int = 22
+LARGE_TEXT_SIZE = "1.1rem"
+SMALL_TEXT_SIZE = ".6rem"
 
 
-class HeaderClock(ui.column):
-    def __init__(self, *args, **kwargs):
-        def update_time_and_date_labels():
-            time_label.set_text(datetime.now().strftime("%H:%M:%S"))
-            date_label.set_text(datetime.now().strftime("%b %d, %Y"))
+def vertical_separator():
+    return ui.separator().props("vertical").classes("mx-0")
 
-        super().__init__(*args, **kwargs)
 
-        self.classes("-space-y-1 gap-0 items-center")
-        with self:
-            time_label = ui.label().style(f"font-size: {TIME_SIZE}")
-            time_label.classes("items-center")
-            date_label = ui.label().style(f"font-size: {DATE_SIZE}")
-            date_label.classes("items-center")
-            ui.timer(0.1, update_time_and_date_labels)
+def header_button(*args, **kwargs) -> ui.button:
+    return ui.button(*args, **kwargs).props("flat").style(ICON_BLOCK_WIDTH)
+
+
+def header_clock():
+    def update_time_and_date_labels():
+        time_label.set_text(datetime.now().strftime("%H:%M:%S"))
+        date_label.set_text(datetime.now().strftime("%b %d, %Y"))
+
+    column = ui.column().style(TEXT_BLOCK_WIDTH)
+    with column.classes("-space-y-1 gap-0 items-center"):
+        time_label = ui.label().classes("items-center")
+        time_label.style(f"font-size: {LARGE_TEXT_SIZE}")
+        date_label = ui.label().classes("items-center")
+        date_label.style(f"font-size: {SMALL_TEXT_SIZE}")
+        ui.timer(0.1, update_time_and_date_labels)
+
+
+class NextAlarmDisplay:
+    DEFAULT_ALARM_STR = "─:─"
+
+    def __init__(self, alarm_str: Optional[str] = None):
+        alarm_str = alarm_str or self.DEFAULT_ALARM_STR
+        column = ui.column().style(TEXT_BLOCK_WIDTH)
+        with column.classes("-space-y-1 gap-0 items-center"):
+            self.time_label = ui.label(alarm_str)
+            self.time_label.style(f"font-size: {LARGE_TEXT_SIZE}")
+            ui.label("Next Alarm").style(f"font-size: {SMALL_TEXT_SIZE}")
+
+    def update(self, alarm_str: Optional[str] = None):
+        alarm_str = alarm_str or self.DEFAULT_ALARM_STR
+        self.time_label.set_text(alarm_str)
 
 
 class Header(ui.header):
     def __init__(self, hide_navigation_buttons=False):
         super().__init__()
-        self.classes("justify-between items-center bg-secondary")
-        self.props("elevated")
+        self.classes("justify-between items-center bg-primary shadow-lg py-3")
 
         with self:
-            left_content = ui.row().style("align-items: center")
-            right_content = ui.row().style("align-items: center")
-            with left_content:
-                if hide_navigation_buttons:
-                    ui.element("div").style(BUTTON_STYLE)
-                else:
-                    routines_button = ui.button().style(BUTTON_STYLE)
-                    with routines_button:
-                        micro.routine_svg(
-                            RTN_SVG_SIZE,
-                            color="white",
-                        )
+            left_row = ui.row().style("align-items: center").classes("pl-3")
+            right_row = ui.row().style("align-items: center").classes("pr-3")
+
+            with left_row:
+                # app logo
+                vertical_separator()
+                with ui.row().classes("justify-center").style(
+                    ICON_BLOCK_WIDTH
+                ):
+                    micro.app_logo_svg(APP_LOGO_SVG_SIZE, color="white")
+                # app name
+                vertical_separator()
                 ui.label(APP_NAME).style(f"font-size: {APP_NAME_SIZE}")
-            with right_content:
-                HeaderClock()
-                if hide_navigation_buttons:
-                    ui.element("div").style(BUTTON_STYLE)
-                else:
-                    programs_button = ui.button().style(BUTTON_STYLE)
-                    with programs_button:
+                vertical_separator()
+
+            if not hide_navigation_buttons:
+                with right_row:
+                    vertical_separator()
+                    # configure-routines nav button
+                    routine_button = header_button()
+                    with routine_button:
+                        micro.routine_svg(RTN_SVG_SIZE, color="white")
+                    vertical_separator()
+                    # configure-programs nav button
+                    program_button = header_button()
+                    with program_button:
                         micro.program_svg(PRGRM_SVG_SIZE, color="white")
 
-        if not hide_navigation_buttons:
-            routines_button.on("click", lambda: ui.open(PagePath.SET_ROUTINES))
-            programs_button.on("click", lambda: ui.open(PagePath.SET_PROGRAMS))
+            with right_row:
+                vertical_separator()
+                dark = ui.dark_mode()
+                # dark mode button
+                header_button(
+                    icon=ICON_STRS.dark_mode, on_click=dark.enable
+                ).props("text-color=white")
+                vertical_separator()
+                # light mode button
+                header_button(
+                    icon=ICON_STRS.light_mode, on_click=dark.disable
+                ).props("text-color=white")
+                vertical_separator()
+                # next alarm display
+                self.next_alarm_display = NextAlarmDisplay()
+                vertical_separator()
+                # clock
+                header_clock()
+                vertical_separator()
+
+        if not hide_navigation_buttons:  # add handlers for nav buttons
+            routine_button.on("click", lambda: ui.open(PagePath.SET_ROUTINES))
+            program_button.on("click", lambda: ui.open(PagePath.SET_PROGRAMS))

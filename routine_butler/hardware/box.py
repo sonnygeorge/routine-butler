@@ -3,7 +3,7 @@ import time
 from loguru import logger
 
 from routine_butler.hardware.hx711 import HX711
-from routine_butler.utils.logging import HARDWARE_LOG_LVL
+from routine_butler.utils.logging import BOX_LOG_LVL
 
 try:
     import RPi.GPIO as GPIO
@@ -70,7 +70,7 @@ class Box:
         self._update_tolerance_bounds()
 
     def zero_scale(self):
-        logger.log(HARDWARE_LOG_LVL, "Zeroing scale...")
+        logger.log(BOX_LOG_LVL, "Zeroing scale...")
         if not MOCK:
             self.hx711.reset()
             self.hx711.tare()
@@ -83,7 +83,7 @@ class Box:
         msg = f"Scale check: {self._allowed_grams_lower_bound} <= "
         msg += f"{self.last_weight_measurement} <= "
         msg += f"{self._allowed_grams_upper_bound}"
-        logger.log(HARDWARE_LOG_LVL, msg)
+        logger.log(BOX_LOG_LVL, msg)
         return (
             self._allowed_grams_lower_bound
             <= self.last_weight_measurement
@@ -95,42 +95,40 @@ class Box:
             return True
         GPIO.setup(IS_CLOSED_CIRCUIT_PIN, GPIO.IN)
         is_closed = GPIO.input(IS_CLOSED_CIRCUIT_PIN) == 1
-        logger.log(
-            HARDWARE_LOG_LVL, f"Box IS {'' if is_closed else 'NOT '}closed"
-        )
+        logger.log(BOX_LOG_LVL, f"Box IS {'' if is_closed else 'NOT '}closed")
         return is_closed
 
     def lock(self):
-        logger.log(HARDWARE_LOG_LVL, "Locking box...")
+        logger.info("Locking box...")
         GPIO.setup(LOCK_PIN, GPIO.OUT)
         GPIO.output(LOCK_PIN, GPIO.LOW)
         time.sleep(LOCK_WAIT_SECONDS)
         GPIO.output(LOCK_PIN, GPIO.HIGH)
 
     def unlock(self):
-        logger.log(HARDWARE_LOG_LVL, "Unlocking box...")
+        logger.info(BOX_LOG_LVL, "Unlocking box...")
         GPIO.setup(UNLOCK_PIN, GPIO.OUT)
         GPIO.output(UNLOCK_PIN, GPIO.LOW)
         time.sleep(LOCK_WAIT_SECONDS)
         GPIO.output(UNLOCK_PIN, GPIO.HIGH)
 
     def turn_green_led_on():
-        logger.log(HARDWARE_LOG_LVL, "Turning green LED on...")
+        logger.info(BOX_LOG_LVL, "Turning green LED on...")
         GPIO.setup(GREEN_LED_PIN, GPIO.OUT)
         GPIO.output(GREEN_LED_PIN, GPIO.HIGH)
 
     def turn_green_led_off():
-        logger.log(HARDWARE_LOG_LVL, "Turning green LED off...")
+        logger.info(BOX_LOG_LVL, "Turning green LED off...")
         GPIO.setup(GREEN_LED_PIN, GPIO.OUT)
         GPIO.output(GREEN_LED_PIN, GPIO.LOW)
 
     def turn_red_led_on():
-        logger.log(HARDWARE_LOG_LVL, "Turning red LED on...")
+        logger.info(BOX_LOG_LVL, "Turning red LED on...")
         GPIO.setup(RED_LED_PIN, GPIO.OUT)
         GPIO.output(RED_LED_PIN, GPIO.HIGH)
 
     def turn_red_led_off():
-        logger.log(HARDWARE_LOG_LVL, "Turning red LED off...")
+        logger.info(BOX_LOG_LVL, "Turning red LED off...")
         GPIO.setup(RED_LED_PIN, GPIO.OUT)
         GPIO.output(RED_LED_PIN, GPIO.LOW)
 

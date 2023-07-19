@@ -6,6 +6,7 @@ from typing import Optional, Union
 from nicegui import ui
 
 from routine_butler.configs import (
+    APP_LOGO_SVG_PATH,
     PROGRAM_SVG_PATH,
     REWARD_SVG_PATH,
     ROUTINE_SVG_PATH,
@@ -77,3 +78,4 @@ def svg(
 program_svg = partial(svg, PROGRAM_SVG_PATH)
 reward_svg = partial(svg, REWARD_SVG_PATH)
 routine_svg = partial(svg, ROUTINE_SVG_PATH)
+app_logo_svg = partial(svg, APP_LOGO_SVG_PATH)

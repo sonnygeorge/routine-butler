@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Dict, Protocol, Type
 from loguru import logger
 from nicegui import ui
 
-from routine_butler.components.header import Header
 from routine_butler.configs import (
     CLR_CODES,
     N_SECONDS_BW_RING_CHECKS,
@@ -77,6 +76,7 @@ def redirect_to_page(
 def redirect_to_ring_page_if_next_alarms_time_reached(state: "State") -> None:
     """Redirects to the ring page if the time of the next alarm has been reached."""
     if state.next_alarm is not None and state.next_alarm.should_ring():
+        logger.info(f"⏰ Alarm time reached: {state.next_alarm}")
         redirect_to_page(PagePath.RING)
 
 
@@ -84,6 +84,9 @@ def initialize_page(page: PagePath, state: "State") -> None:
     """Performs a set of standard actions that should be performed at the onset of any
     page load.
     """
+    logger.info(f'📱 Initializing page "{page}"... ')
+    state.log_state()
+
     ui.colors(  # apply universal color scheme
         primary=CLR_CODES.primary,
         secondary=CLR_CODES.secondary,
@@ -98,9 +101,9 @@ def initialize_page(page: PagePath, state: "State") -> None:
         redirect_to_page(PagePath.LOGIN)
     # add header
     if page in PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW:
-        Header(hide_navigation_buttons=True)
+        state.build_header(hide_navigation_buttons=True)
     else:
-        Header()
+        state.build_header()
         # monitor for the arrival of the time of the next alarm
         ui.timer(
             N_SECONDS_BW_RING_CHECKS,

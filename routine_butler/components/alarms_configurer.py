@@ -9,7 +9,12 @@ from routine_butler.state import state
 class AlarmsConfigurer(micro.ExpandableCard):
     def __init__(self, routine: Routine):
         self.routine = routine
-        super().__init__("Alarms", icon=ICON_STRS.alarm, width="850px")
+        super().__init__(
+            "Alarms",
+            icon=ICON_STRS.alarm,
+            icon_color="lightgray",
+            width="850px",
+        )
 
         with self:
             self.alarms_frame = ui.column()

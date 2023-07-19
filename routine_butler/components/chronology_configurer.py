@@ -17,7 +17,7 @@ class ChronologyConfigurer(micro.ExpandableCard):
     def __init__(self, routine: Routine):
         self.routine = routine
 
-        program_svg_kwargs = {"size": 21, "color": "black"}
+        program_svg_kwargs = {"size": 21, "color": "lightgray"}
         super().__init__(
             "Chronology",
             icon=micro.program_svg,

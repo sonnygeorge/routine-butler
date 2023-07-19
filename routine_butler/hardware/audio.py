@@ -6,7 +6,7 @@ import wave
 
 from loguru import logger
 
-from routine_butler.utils.logging import HARDWARE_LOG_LVL
+from routine_butler.utils.logging import AUDIO_LOG_LVL
 
 
 def create_new_wav_given_volume_multiplier(
@@ -27,7 +27,7 @@ def create_new_wav_given_volume_multiplier(
 
 
 def play_wav(file_path: str) -> None:
-    logger.log(HARDWARE_LOG_LVL, f"Playing wav: {file_path.split('/')[-1]}")
+    logger.log(AUDIO_LOG_LVL, f"Playing wav: {file_path.split('/')[-1]}")
     system = platform.system()
     if system == "Windows":
         command = [

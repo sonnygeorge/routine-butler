@@ -31,18 +31,22 @@ class YoutubeGui:
     def add_player_to_ui(self):
         with self.card:
             self.video_player = micro.youtube_embed("")
-            ui.separator().classes("my-2")
+            ui.separator().classes("my-1")
             with ui.row().classes("w-5/6 flex items-center justify-between"):
                 left_btn = ui.button("<", on_click=self.hdl_previous_video)
                 left_btn.classes("w-36")
-                self.idx_label = ui.label("").classes("text-lg text-gray-900")
+                with ui.column().classes("items-center"):
+                    self.idx_label = ui.label("").style("font-size: 1.25rem")
+                    self.id_label = ui.label("").classes("text-xs")
                 right_btn = ui.button(">", on_click=self.hdl_next_video)
                 right_btn.classes("w-36")
 
     def _update_ui(self):
         if len(self.video_uids) == 0:
             return
-        self.video_player.set_video_id(self.video_uids[self.cur_video_idx])
+        cur_id = self.video_uids[self.cur_video_idx]
+        self.id_label.set_text(cur_id)
+        self.video_player.set_video_id(cur_id)
         label_text = f"Video {self.cur_video_idx + 1}/{len(self.video_uids)}"
         self.idx_label.set_text(label_text)
 

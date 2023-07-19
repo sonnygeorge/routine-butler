@@ -9,6 +9,7 @@ CURRENT_DIR_PATH: str = os.path.dirname(os.path.abspath(__file__))
 ROUTINE_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/routine-icon.svg")
 PROGRAM_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/program-icon.svg")
 REWARD_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/reward-icon.svg")
+APP_LOGO_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/app-logo.svg")
 ALARM_WAV_PATH = os.path.join(CURRENT_DIR_PATH, "assets/alarm_sound.wav")
 
 PLUGINS_DIR_PATH = os.path.join(CURRENT_DIR_PATH, "plugins")
@@ -51,6 +52,8 @@ class ICON_STRS:  # Quasar material icons
     down_arrow = "arrow_downward"
     up_arrow = "arrow_upward"
     alarm = "alarm"
+    dark_mode = "dark_mode"
+    light_mode = "light_mode"
     # Maybe use some of these later?
     # app = "token"
     # settings = "settings"
@@ -67,8 +70,8 @@ class ICON_STRS:  # Quasar material icons
 
 
 class CLR_CODES:
-    primary = "#2e5cb8"  # buttons
-    secondary = "#5c85d6"  # header
+    primary = "#2a5cbf"
+    secondary = "#5c85d6"
     accent = "#2399cf"
     positive = "#23cf59"
     negative = "#cf2342"

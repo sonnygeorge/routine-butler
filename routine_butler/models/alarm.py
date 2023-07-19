@@ -17,6 +17,13 @@ class Alarm(BaseModel):
     volume: float = 1.0
     ring_frequency: RingFrequency = RingFrequency.CONSTANT
 
+    def __str__(self):
+        """Custom __str__ method for logging."""
+        return (
+            f"[{self.time_str}, {'enabled' if self.is_enabled else 'disabled'}"
+            f", vol={self.volume}, ring={self.ring_frequency}]"
+        )
+
     @property
     def _time(self) -> datetime.time:
         return datetime.datetime.strptime(self.time_str, "%H:%M").time()
@@ -28,10 +35,18 @@ class Alarm(BaseModel):
     def has_just_passed_as_of_last_ring_check(self):
         """Returns True if the alarm has just passed as of the last ring check, False
         otherwise."""
-        secs_until_todays_ring_dtime = (
-            self.get_todays_ring_datetime() - datetime.datetime.now()
+        secs_since_todays_ring_dtime = (
+            datetime.datetime.now() - self.get_todays_ring_datetime()
         ).total_seconds()
-        return -N_SECONDS_BW_RING_CHECKS <= secs_until_todays_ring_dtime <= 0
+        return 0 <= secs_since_todays_ring_dtime <= N_SECONDS_BW_RING_CHECKS
+
+    def has_passed_in_the_last_n_minutes(self, n_minutes: int) -> bool:
+        """Returns True if the alarm has passed in the last n minutes, False
+        otherwise."""
+        secs_since_todays_ring_dtime = (
+            datetime.datetime.now() - self.get_todays_ring_datetime()
+        ).total_seconds()
+        return 0 <= secs_since_todays_ring_dtime <= n_minutes * 60
 
     def should_ring(self) -> bool:
         """Returns True if the alarm should be rung, False otherwise."""
