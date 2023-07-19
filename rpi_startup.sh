@@ -14,7 +14,7 @@ fi
 echo "Running rpi_startup.sh from the routine-butler repository directory."
 
 ## Check and activate the virtual environment
-venv_dir="venv"
+venv_dir="/home/raspberry/routine-butler/venv"
 if [ ! -d "$venv_dir" ]; then
   echo "Error: Virtual environment directory '$venv_dir' not found. Please create or verify the virtual environment."
   exit 1
