@@ -1,14 +1,9 @@
 #!/bin/bash
 # chains the necessary commands for running RoutineButler on a Raspberry Pi
 
-current_dir=$(basename "$PWD")
-echo "Running rpi_startup.sh from current directory: '$current_dir'"
-
-## Make sure the current directory's name is "routine-butler"
-if [ "$current_dir" != "routine-butler" ]; then
-  echo "Error: This startup script must run from the routine_butler directory."
-  exit 1
-fi
+## Change directory to the routine-butler repository
+cd /home/raspberry/routine-butler
+echo "Running rpi_startup.sh from the routine-butler repository directory."
 
 ## Check and activate the virtual environment
 venv_dir="venv"
@@ -49,7 +44,7 @@ nohup chromium-browser --kiosk http://127.0.0.1:8080 >/dev/null 2>&1 &
 # Function to execute run.py
 start_routine_butler() {
   echo "Attempting to start RoutineButler in single-user mode..."
-  python3 run.py --single-user
+  nohup python3 run.py --single-user
 }
 
 if ! start_routine_butler; then

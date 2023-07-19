@@ -181,3 +181,6 @@ _test.py
 
 # log files
 *.log
+
+# nohup.out
+nohup.out
