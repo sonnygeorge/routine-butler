@@ -1,7 +1,13 @@
 from nicegui import ui
 from sqlalchemy import create_engine
 
-from routine_butler.configs import DB_URL, TEST_DB_URL, TEST_USER_USERNAME
+from routine_butler.configs import (
+    BINDING_REFRESH_INTERVAL_SECONDS,
+    DB_URL,
+    SINGLE_USER_MODE_USERNAME,
+    TEST_DB_URL,
+    TEST_USER_USERNAME,
+)
 from routine_butler.models.base import SQLAlchemyBase
 from routine_butler.models.user import User
 from routine_butler.state import state
@@ -16,24 +22,44 @@ def initialize_db(testing: bool = False) -> None:
     SQLAlchemyBase.metadata.create_all(state.engine)
 
 
-def login_test_user() -> None:
-    # check if test user already exists in DB
-    is_test_user_filter_expr = (
-        User.Config.orm_model.username == TEST_USER_USERNAME
-    )
-    test_user = User.query_one(state.engine, is_test_user_filter_expr)
-    if test_user is None:
-        # create test user if not
-        test_user = User(username=TEST_USER_USERNAME)
-        test_user.add_self_to_db(state.engine)
-    state.set_user(test_user)  # set current user to test user
+def auto_login_username(username: str) -> None:
+    # check if user already exists in DB
+    is_user_filter_expr = User.Config.orm_model.username == username
+    user = User.query_one(state.engine, is_user_filter_expr)
+    if user is None:
+        # create user if not
+        user = User(username=username)
+        user.add_self_to_db(state.engine)
+    state.set_user(user)  # set current user to user
 
 
-def main(testing: bool, fullscreen: bool, native: bool):
+def main(
+    testing: bool,
+    single_user: bool,
+    native: bool,
+    fullscreen: bool,
+    open_browser: bool,
+):
     """Main entrypoint for the app."""
 
-    initialize_db(testing=testing)
-    if testing:
-        login_test_user()
+    if fullscreen and not native:
+        raise ValueError("'fullscreen' doesn't apply outside of 'native' mode")
+    if single_user and testing:
+        raise ValueError("both 'single_user' & 'testing' args can't be true")
+    if native and open_browser:
+        raise ValueError("'open_browser' doesn't apply in 'native' mode")
 
-    ui.run(favicon="🚀", native=native, fullscreen=fullscreen)
+    initialize_db(testing=testing)
+
+    if testing:
+        auto_login_username(TEST_USER_USERNAME)
+    if single_user:
+        auto_login_username(SINGLE_USER_MODE_USERNAME)
+
+    ui.run(
+        favicon="🎩",
+        native=native,
+        fullscreen=fullscreen,
+        binding_refresh_interval=BINDING_REFRESH_INTERVAL_SECONDS,
+        show=open_browser,
+    )

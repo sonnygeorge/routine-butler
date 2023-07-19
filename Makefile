@@ -12,14 +12,6 @@ activate:
 install:
 	pip install -r requirements.txt
 
-# Run app
-run:
-	python3 run.py
-
-# Run app in test mode
-test:
-	python3 run.py --test
-
 # Clean up repo junk files
 cleanse:
 	@echo "Cleaning up junk files..."

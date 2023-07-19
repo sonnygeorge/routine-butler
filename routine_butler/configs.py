@@ -4,6 +4,9 @@ from enum import StrEnum
 TEST_DB_URL = "sqlite:///test_db.sqlite"
 DB_URL = "sqlite:///db.sqlite"
 TEST_USER_USERNAME = "test"
+SINGLE_USER_MODE_USERNAME = "CVxaUwC0Lkg7znaOMtwQP"
+
+BINDING_REFRESH_INTERVAL_SECONDS = 0.3  # higher is more cpu friendly
 
 CURRENT_DIR_PATH: str = os.path.dirname(os.path.abspath(__file__))
 ROUTINE_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/routine-icon.svg")
