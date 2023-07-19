@@ -2,7 +2,15 @@
 # chains the necessary commands for running RoutineButler on a Raspberry Pi
 
 ## Change directory to the routine-butler repository
-cd /home/raspberry/routine-butler
+navigate_to_routine_butler_repository() {
+  cd /home/raspberry/routine-butler
+}
+
+if not navigate_to_routine_butler_repository; then
+  echo "Error: Failed to navigate to the /home/raspberry/routine-butler."
+  exit 1
+fi
+
 echo "Running rpi_startup.sh from the routine-butler repository directory."
 
 ## Check and activate the virtual environment
@@ -57,6 +65,6 @@ echo "Spawning RoutineButler process..."
 nohup start_routine_butler_process > start_routine_butler_process.log 2>&1 &
 
 ## Start Chromium in kiosk mode
-echo "Spawning Chromium in kiosk mode..."
+echo "Spawning Chromium process..."
 nohup chromium-browser --kiosk http://127.0.0.1:8080 > chromium.log 2>&1 &
 
