@@ -26,7 +26,6 @@ fi
 git pull
 
 ## Set RPi volume
-# Function to set system volume
 set_system_volume() {
   echo "Attempting to set volume..."
   amixer set PCM -- 60%
@@ -36,23 +35,28 @@ if ! set_system_volume; then
   echo "Error: Failed to set the volume with 'amixer set PCM -- 60%' command."
 fi
 
-## Start Chromium in kiosk mode
-echo "Opening Chromium in kiosk mode..."
-nohup chromium-browser --kiosk http://127.0.0.1:8080 >/dev/null 2>&1 &
-
 ## Start RoutineButler
-# Function to execute run.py
-start_routine_butler() {
-  echo "Attempting to start RoutineButler in single-user mode..."
-  nohup python3 run.py --single-user
+start_routine_butler_process() {
+    start_routine_butler() {
+    echo "Attempting to start RoutineButler in single-user mode..."
+    python3 run.py --single-user
+    }
+
+    if ! start_routine_butler; then
+        echo "Error: RoutineButler failed to start. Attempting to install dependencies..."
+        pip3 install -r requirements.txt
+        echo "Re-attempting to start RoutineButler in single-user mode..."
+        if ! start_routine_butler; then
+            echo "Error: Failed to start RoutineButler even after installing dependencies."
+            exit 1
+        fi
+    fi
 }
 
-if ! start_routine_butler; then
-  echo "Error: RoutineButler failed to start. Attempting to install dependencies..."
-  pip3 install -r requirements.txt
-  echo "Re-attempting to start RoutineButler in single-user mode..."
-  if ! start_routine_butler; then
-    echo "Error: Failed to start RoutineButler even after installing dependencies."
-    exit 1
-  fi
-fi
+echo "Spawning RoutineButler process..."
+nohup start_routine_butler_process > start_routine_butler_process.log 2>&1 &
+
+## Start Chromium in kiosk mode
+echo "Spawning Chromium in kiosk mode..."
+nohup chromium-browser --kiosk http://127.0.0.1:8080 > chromium.log 2>&1 &
+
