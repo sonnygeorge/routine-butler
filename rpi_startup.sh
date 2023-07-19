@@ -3,6 +3,7 @@
 
 REPO_DIR_PATH="/home/raspberry/routine-butler"
 VENV_DIR_PATH="/home/raspberry/routine-butler/venv"
+PYTHON_SCRIPT_PATH="/home/raspberry/routine-butler/run.py"
 
 ## Change directory to the routine-butler repository
 navigate_to_routine_butler_repository() {
@@ -46,7 +47,7 @@ fi
 ## Start RoutineButler
 run_routine_butler() {
   echo "Attempting to run RoutineButler in single-user mode..."
-  python3 run.py --single-user
+  python3 "$PYTHON_SCRIPT_PATH" --single-user
 }
 
 if ! run_routine_butler; then
