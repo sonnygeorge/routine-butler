@@ -10,3 +10,25 @@ Its purpose is to alart and administer "routines" 🏋️‍♂️  to users in 
 Here is a picture of my current setup which I am actively using as my morning and evening alarm clock:
 
 ![picture of the lockbox and kiosk](https://i.imgur.com/64x0Byw.jpeg)
+
+## Running RoutineButler Kiosk-Style "On Boot" on a RaspberryPi
+
+What is currently working for me is the following:
+
+1. Creating a `/etc/xdg/autostart/routine_butler.desktop` file with the following contents:
+
+    ```bash
+    [Desktop Entry]
+    Exec=chromium-browser --kiosk http://127.0.0.1:8080
+    ```
+
+2. Adding the following line to `/etc/rc.local` before the `exit 0` line:
+
+    ```bash
+    sudo /bin/bash /home/raspberry/routine_butler/rpi_on_boot.sh > /dev/null 2>&1 &
+    ```
+
+Hints:
+
+- The `> /dev/null 2>&1 &` part is to make sure that the script runs in the background and does not block the boot process.
+- Always use absolute file names in the invoked bash script.
