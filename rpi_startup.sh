@@ -44,22 +44,18 @@ if ! set_system_volume; then
   echo "Error: Failed to set the volume with 'amixer set PCM -- 60%' command."
 fi
 
-## Start RoutineButler in a subprocess
-start_routine_butler_subprocess() {
-  run_routine_butler() {
-    echo "Attempting to run RoutineButler in single-user mode..."
-    python3 "$PYTHON_SCRIPT_PATH" --single-user
-  }
-
-  if ! run_routine_butler; then
-    echo "Error: RoutineButler failed to start. Attempting to install dependencies..."
-    pip3 install -r requirements.txt
-    echo "Re-attempting to start RoutineButler in single-user mode..."
-    if ! run_routine_butler; then
-      echo "Error: Failed to start RoutineButler even after installing dependencies."
-      exit 1
-    fi
-  fi
+## Start RoutineButler
+run_routine_butler() {
+  echo "Attempting to run RoutineButler in single-user mode..."
+  python3 "$PYTHON_SCRIPT_PATH" --single-user
 }
 
-nohup start_routine_butler_subprocess > /dev/null 2>&1 &
+if ! run_routine_butler; then
+  echo "Error: RoutineButler failed to start. Attempting to install dependencies..."
+  pip3 install -r requirements.txt
+  echo "Re-attempting to start RoutineButler in single-user mode..."
+  if ! run_routine_butler; then
+    echo "Error: Failed to start RoutineButler even after installing dependencies."
+    exit 1
+  fi
+fi
