@@ -23,12 +23,11 @@ fi
 echo "Activating virtual environment..."
 source "$venv_dir/bin/activate"
 
-## Git pull latest version
+## Attempt to git pull latest version
 echo "Updating with the latest version..."
 git_status=$(git status --porcelain)
 if [ -n "$git_status" ]; then
-  echo "Error: Local changes exist. Please commit or discard changes before running 'git pull'."
-  exit 1
+  echo "Warning: Local changes exist. Please commit or discard changes before running 'git pull'."
 fi
 
 git pull
@@ -44,22 +43,17 @@ if ! set_system_volume; then
 fi
 
 ## Start RoutineButler
-run_routine_butler_processs() {
-    run_routine_butler() {
-    echo "Attempting to start RoutineButler in single-user mode..."
-    python3 run.py --single-user
-    }
-
-    if ! run_routine_butler; then
-        echo "Error: RoutineButler failed to start. Attempting to install dependencies..."
-        pip3 install -r requirements.txt
-        echo "Re-attempting to start RoutineButler in single-user mode..."
-        if ! run_routine_butler; then
-            echo "Error: Failed to start RoutineButler even after installing dependencies."
-            exit 1
-        fi
-    fi
+run_routine_butler() {
+echo "Attempting to run RoutineButler in single-user mode..."
+python3 run.py --single-user
 }
 
-echo "Spawning RoutineButler process..."
-nohup run_routine_butler_process > /dev/null 2>&1 &
+if ! run_routine_butler; then
+    echo "Error: RoutineButler failed to start. Attempting to install dependencies..."
+    pip3 install -r requirements.txt
+    echo "Re-attempting to start RoutineButler in single-user mode..."
+    if ! run_routine_butler; then
+        echo "Error: Failed to start RoutineButler even after installing dependencies."
+        exit 1
+    fi
+fi
