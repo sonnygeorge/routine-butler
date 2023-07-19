@@ -41,6 +41,10 @@ if ! set_system_volume; then
   echo "Error: Failed to set the volume with 'amixer set PCM -- 60%' command."
 fi
 
+## Start Chromium in kiosk mode
+echo "Opening Chromium in kiosk mode..."
+nohup chromium-browser --kiosk http://127.0.0.1:8080 &
+
 ## Start RoutineButler
 # Function to execute run.py
 start_routine_butler() {
@@ -57,7 +61,3 @@ if ! start_routine_butler; then
     exit 1
   fi
 fi
-
-## Open Chromium in kiosk mode
-echo "Opening Chromium in kiosk mode..."
-chromium-browser --kiosk http://127.0.0.1:8080
