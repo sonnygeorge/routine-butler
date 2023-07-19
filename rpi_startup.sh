@@ -44,17 +44,17 @@ if ! set_system_volume; then
 fi
 
 ## Start RoutineButler
-start_routine_butler_process() {
-    start_routine_butler() {
+run_routine_butler_processs() {
+    run_routine_butler() {
     echo "Attempting to start RoutineButler in single-user mode..."
     python3 run.py --single-user
     }
 
-    if ! start_routine_butler; then
+    if ! run_routine_butler; then
         echo "Error: RoutineButler failed to start. Attempting to install dependencies..."
         pip3 install -r requirements.txt
         echo "Re-attempting to start RoutineButler in single-user mode..."
-        if ! start_routine_butler; then
+        if ! run_routine_butler; then
             echo "Error: Failed to start RoutineButler even after installing dependencies."
             exit 1
         fi
@@ -62,9 +62,4 @@ start_routine_butler_process() {
 }
 
 echo "Spawning RoutineButler process..."
-nohup start_routine_butler_process > start_routine_butler_process.log 2>&1 &
-
-## Start Chromium in kiosk mode
-echo "Spawning Chromium process..."
-nohup chromium-browser --kiosk http://127.0.0.1:8080 > chromium.log 2>&1 &
-
+nohup run_routine_butler_process > /dev/null 2>&1 &
