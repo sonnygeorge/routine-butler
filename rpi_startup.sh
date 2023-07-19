@@ -21,7 +21,7 @@ if [ ! -d "$VENV_DIR_PATH" ]; then
 fi
 
 echo "Activating virtual environment..."
-source "$venv_dir/bin/activate"
+source "$VENV_DIR_PATH/bin/activate"
 
 
 ## Attempt to git pull latest version
