@@ -25,14 +25,14 @@ echo "Activating virtual environment..."
 source "$VENV_DIR_PATH/bin/activate"
 
 
-## Attempt to git pull latest version
-echo "Updating with the latest version..."
-git_status=$(git status --porcelain)
+## Attempt to git pull latest version of RoutineButler
+echo "Updating with the latest version of RoutineButler..."
+git_status=$(git -C "$REPO_DIR_PATH" status --porcelain)
 if [ -n "$git_status" ]; then
   echo "Warning: Local changes exist. Please commit or discard changes before running 'git pull'."
 fi
 
-git pull
+git -C "$REPO_DIR_PATH" pull
 
 ## Set RPi volume
 set_system_volume() {
