@@ -5,6 +5,8 @@ repo_dir_path="/home/raspberry/routine-butler"
 venv_dir_path="/home/raspberry/routine-butler/venv"
 run_python_script_path="python3 run.py --single-user"
 
+## Wait 7 seconds
+sleep 7
 
 ## Check and activate the virtual environment
 if [ ! -d "$venv_dir_path" ]; then
