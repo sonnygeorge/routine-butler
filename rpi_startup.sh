@@ -43,7 +43,7 @@ fi
 
 ## Start Chromium in kiosk mode
 echo "Opening Chromium in kiosk mode..."
-nohup chromium-browser --kiosk http://127.0.0.1:8080 &
+nohup chromium-browser --kiosk http://127.0.0.1:8080 >/dev/null 2>&1 &
 
 ## Start RoutineButler
 # Function to execute run.py
