@@ -1,31 +1,28 @@
 #!/bin/bash
 # chains the necessary commands for running RoutineButler on a Raspberry Pi
 
-repo_dir_path="/home/raspberry/routine-butler"
-venv_dir_path="/home/raspberry/routine-butler/venv"
-run_python_script_path="python3 run.py --single-user"
+REPO_DIR_PATH="/home/raspberry/routine-butler"
+VENV_DIR_PATH="/home/raspberry/routine-butler/venv"
 
-## Wait 7 seconds
-sleep 7
+## Change directory to the routine-butler repository
+navigate_to_routine_butler_repository() {
+  cd "$REPO_DIR_PATH"
+}
+
+if not navigate_to_routine_butler_repository; then
+  echo "Error: Failed to navigate to '$REPO_DIR_PATH'"
+  exit 1
+fi
 
 ## Check and activate the virtual environment
-if [ ! -d "$venv_dir_path" ]; then
-  echo "Error: Virtual environment directory '$venv_dir_path' not found."
+if [ ! -d "$VENV_DIR_PATH" ]; then
+  echo "Error: Virtual environment directory '$VENV_DIR_PATH' not found."
   exit 1
 fi
 
 echo "Activating virtual environment..."
 source "$venv_dir/bin/activate"
 
-## Change directory to the routine-butler repository
-navigate_to_routine_butler_repository() {
-  cd "$repo_dir_path"
-}
-
-if not navigate_to_routine_butler_repository; then
-  echo "Error: Failed to navigate to '$repo_dir_path'"
-  exit 1
-fi
 
 ## Attempt to git pull latest version
 echo "Updating with the latest version..."
@@ -49,7 +46,7 @@ fi
 ## Start RoutineButler
 run_routine_butler() {
   echo "Attempting to run RoutineButler in single-user mode..."
-  python3 "$run_python_script_path" --single-user
+  python3 run.py --single-user
 }
 
 if ! run_routine_butler; then
