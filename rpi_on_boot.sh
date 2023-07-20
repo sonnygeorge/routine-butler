@@ -5,14 +5,14 @@ REPO_DIR_PATH="/home/raspberry/routine-butler"
 VENV_DIR_PATH="/home/raspberry/routine-butler/venv"
 PYTHON_SCRIPT_PATH="/home/raspberry/routine-butler/run.py"
 
-# Set up environment variables
-export DISPLAY=:0
-export PULSE_SERVER=/run/user/1000/pulse/native
+# # Set up environment variables
+# export DISPLAY=:0
+# export PULSE_SERVER=/run/user/1000/pulse/native
 
-## Change directory to the routine-butler repository
-navigate_to_routine_butler_repository() {
-  cd "$REPO_DIR_PATH"
-}
+# ## Change directory to the routine-butler repository
+# navigate_to_routine_butler_repository() {
+#   cd "$REPO_DIR_PATH"
+# }
 
 if not navigate_to_routine_butler_repository; then  # FIXME: remove
   echo "Error: Failed to navigate to '$REPO_DIR_PATH'"
