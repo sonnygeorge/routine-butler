@@ -32,3 +32,22 @@ Hints:
 
 - The `> /dev/null 2>&1 &` part is to make sure that the script runs in the background and does not block the boot process.
 - Always use absolute file names in the invoked bash script.
+
+## Experimental
+
+```bash
+[Unit]
+Description=Routine Butler Python App
+After=network.target
+
+[Service]
+User=raspberry
+WorkingDirectory=/home/raspberry/routine_butler
+Environment=DISPLAY=:0
+Environment=PULSE_SERVER=/run/user/1000/pulse/native
+ExecStart=/usr/bin/python3 run.py --single-user
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
