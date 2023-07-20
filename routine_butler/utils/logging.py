@@ -2,6 +2,8 @@ import sys
 
 from loguru import logger
 
+from routine_butler.configs import LOG_FILE_PATH
+
 DB_LOG_LVL = "DATABASE"
 BOX_LOG_LVL = "BOX"
 STATE_LOG_LVL = "STATE"
@@ -17,7 +19,9 @@ FORMAT = (
 logger.configure(
     handlers=[
         dict(sink=sys.stderr, format=FORMAT, level=20),
-        dict(sink="app.log", rotation="3 days", retention="12 days", level=0),
+        dict(
+            sink=LOG_FILE_PATH, rotation="3 days", retention="12 days", level=0
+        ),
     ],
     levels=[
         dict(name=DB_LOG_LVL, no=10, color="<magenta><bold>", icon="💾"),

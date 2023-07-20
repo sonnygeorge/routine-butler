@@ -1,14 +1,12 @@
 import os
 from enum import StrEnum
 
-TEST_DB_URL = "sqlite:///test_db.sqlite"
-DB_URL = "sqlite:///db.sqlite"
-TEST_USER_USERNAME = "test"
-SINGLE_USER_MODE_USERNAME = "CVxaUwC0Lkg7znaOMtwQP"
-
-BINDING_REFRESH_INTERVAL_SECONDS = 0.3  # higher is more cpu friendly
-
 CURRENT_DIR_PATH: str = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR_PATH: str = os.path.dirname(CURRENT_DIR_PATH)
+
+TEST_DB_PATH = os.path.join(PROJECT_DIR_PATH, "test_db.sqlite")
+DB_PATH = os.path.join(PROJECT_DIR_PATH, "db.sqlite")
+LOG_FILE_PATH = os.path.join(PROJECT_DIR_PATH, "app.log")
 ROUTINE_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/routine-icon.svg")
 PROGRAM_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/program-icon.svg")
 REWARD_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/reward-icon.svg")
@@ -23,12 +21,18 @@ GDRIVE_CREDENTIALS_PATH = os.path.join(
     CURRENT_DIR_PATH, "gdrive_credentials.json"
 )
 
-CONSTANT_RING_INTERVAL = 1
-PERIODIC_RING_INTERVAL = 60
+TEST_DB_URL = f"sqlite:///{TEST_DB_PATH}"
+DB_URL = f"sqlite:///{DB_PATH}"
+TEST_USER_USERNAME = "test"
+SINGLE_USER_MODE_USERNAME = "CVxaUwC0Lkg7znaOMtwQP"
 
-N_SECONDS_BW_RING_CHECKS = 1
+CONSTANT_RING_INTERVAL = 1  # Time between noises for "constant" ringing
+PERIODIC_RING_INTERVAL = 60  # Time between noises for "periodic" ringing
 
-THROTTLE_SECONDS = 0.5  # for event handlers that would otherwise be spammed
+N_SECONDS_BW_RING_CHECKS = 1  # Check every n secs for alarm that should ring
+
+BINDING_REFRESH_INTERVAL_SECONDS = 0.3  # Higher is more cpu friendly
+THROTTLE_SECONDS = 0.7  # For event handlers that would otherwise be spammed
 
 
 class PagePath(StrEnum):
