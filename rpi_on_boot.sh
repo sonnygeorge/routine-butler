@@ -14,10 +14,10 @@ PYTHON_SCRIPT_PATH="/home/raspberry/routine-butler/run.py"
 #   cd "$REPO_DIR_PATH"
 # }
 
-if not navigate_to_routine_butler_repository; then  # FIXME: remove
-  echo "Error: Failed to navigate to '$REPO_DIR_PATH'"
-  exit 1
-fi
+# if not navigate_to_routine_butler_repository; then  # FIXME: remove
+#   echo "Error: Failed to navigate to '$REPO_DIR_PATH'"
+#   exit 1
+# fi
 
 ## Check and activate the virtual environment
 if [ ! -d "$VENV_DIR_PATH" ]; then
