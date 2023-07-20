@@ -1,5 +1,5 @@
 #!/bin/bash
-# chains the necessary commands for running RoutineButler on a Raspberry Pi
+# Commands for running RoutineButler on a Raspberry Pi
 
 echo "Adjusting system volume to 60%..."
 amixer set PCM -- 60%
@@ -14,17 +14,15 @@ echo "Attempting to run RoutineButler in single-user mode..."
 python3 run.py --single-user &
 
 echo "Waiting for RoutineButler to start..."
-sleep 8
+sleep 15
 
 echo "Starting Chromium in kiosk mode..."
 
+# Stop the screensaver function & desktop environment from interfering w/ display
 xset s noblank
 xset s off
 xset -dpms
-
+# Remove the mouse cursor from the display
 unclutter -idle 0.5 -root &
-
-sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/pi/.config/chromium/Default/Preferences
-sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/' /home/pi/.config/chromium/Default/Preferences
 
 chromium-browser --noerrdialogs --disable-infobars --kiosk http://127.0.0.1:8080

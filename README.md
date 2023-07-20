@@ -15,39 +15,39 @@ Here is a picture of my current setup which I am actively using as my morning an
 
 What is currently working for me is the following:
 
-1. Creating a `/etc/xdg/autostart/routine_butler.desktop` file with the following contents:
+1. Adding the following systemd service file (`/etc/systemd/system/routine-butler.service`):
 
     ```bash
-    [Desktop Entry]
-    Exec=chromium-browser --kiosk http://127.0.0.1:8080
+    [Unit]
+    Description=Routine Butler Python App
+    After=network.target
+
+    [Service]
+    User=raspberry
+    WorkingDirectory=/home/raspberry/routine-butler  # path to the repo
+    Environment=DISPLAY=:0
+    Environment=PULSE_SERVER=/run/user/1000/pulse/native
+    ExecStart=bash startup.sh
+    Restart=on-failure
+
+    [Install]
+    WantedBy=multi-user.target
     ```
 
-2. Adding the following line to `/etc/rc.local` before the `exit 0` line:
+2. Enabling it with:
 
     ```bash
-    sudo /bin/bash /home/raspberry/routine_butler/rpi_on_boot.sh > /dev/null 2>&1 &
+    sudo systemctl enable routine-butler.service
     ```
 
-Hints:
-
-- The `> /dev/null 2>&1 &` part is to make sure that the script runs in the background and does not block the boot process.
-- Always use absolute file names in the invoked bash script.
-
-## Experimental
+Hint: Check the status and logs of the service with:
 
 ```bash
-[Unit]
-Description=Routine Butler Python App
-After=network.target
+sudo systemctl status routine-butler.service
+```
 
-[Service]
-User=raspberry
-WorkingDirectory=/home/raspberry/routine-butler
-Environment=DISPLAY=:0
-Environment=PULSE_SERVER=/run/user/1000/pulse/native
-ExecStart=bash rpi_on_boot.sh
-Restart=on-failure
+and
 
-[Install]
-WantedBy=multi-user.target
+```bash
+sudo journalctl -u routine-butler.service
 ```
