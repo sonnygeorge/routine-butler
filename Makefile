@@ -20,3 +20,11 @@ cleanse:
 	find . -name '*.DS_Store' -delete
 	find . -name '.pytest_cache' -exec rm -rf {} +
 	@echo "Cleanup complete."
+
+# Show status of systemd routine_butler.service
+status:
+	sudo systemctl status routine_butler.service
+
+# Show journal of systemd routine_butler.service
+journal:
+	sudo journalctl -u routine_butler.service
