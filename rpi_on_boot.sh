@@ -17,4 +17,7 @@ echo "Waiting for RoutineButler to start..."
 sleep 8
 
 echo "Starting Chromium in kiosk mode..."
-chromium-browser --noerrdialogs --disable-infobars --kiosk --start-fullscreen http://127.0.0.1:8080
+chromium-browser http://127.0.0.1:8080
+
+# Use xdotool to send F11 key to Chromium, which will trigger full-screen mode
+DISPLAY=:0 xdotool key F11
