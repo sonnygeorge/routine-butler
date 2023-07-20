@@ -45,7 +45,7 @@ User=raspberry
 WorkingDirectory=/home/raspberry/routine-butler
 Environment=DISPLAY=:0
 Environment=PULSE_SERVER=/run/user/1000/pulse/native
-ExecStart=/usr/bin/python3 run.py --single-user
+ExecStart=bash rpi_on_boot.sh
 Restart=on-failure
 
 [Install]

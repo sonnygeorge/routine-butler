@@ -17,4 +17,4 @@ echo "Waiting for RoutineButler to start..."
 sleep 8
 
 echo "Starting Chromium in kiosk mode..."
-chromium-browser --kiosk http://127.0.0.1:8080
+chromium-browser --noerrdialogs --disable-infobars --kiosk --start-fullscreen http://127.0.0.1:8080
