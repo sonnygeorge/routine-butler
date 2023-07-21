@@ -10,9 +10,9 @@ APP_NAME = "RoutineButler"
 APP_NAME_SIZE = "1.7rem"
 TEXT_BLOCK_WIDTH = "width: 4.5rem;"
 ICON_BLOCK_WIDTH = "width: 2.7rem;"
-APP_LOGO_SVG_SIZE: int = 22
-RTN_SVG_SIZE: int = 28
-PRGRM_SVG_SIZE: int = 22
+APP_LOGO_SVG_SIZE: float = 22.0
+RTN_SVG_SIZE: float = 27.0
+PRGRM_SVG_SIZE: float = 20.75
 LARGE_TEXT_SIZE = "1.1rem"
 SMALL_TEXT_SIZE = ".6rem"
 
@@ -65,11 +65,10 @@ class Header(ui.header):
             right_row = ui.row().style("align-items: center").classes("pr-3")
 
             with left_row:
-                # app logo
+                # app logo / home button
                 vertical_separator()
-                with ui.row().classes("justify-center").style(
-                    ICON_BLOCK_WIDTH
-                ):
+                home_button = header_button()
+                with home_button:
                     micro.app_logo_svg(APP_LOGO_SVG_SIZE, color="white")
                 # app name
                 vertical_separator()
@@ -110,5 +109,6 @@ class Header(ui.header):
                 vertical_separator()
 
         if not hide_navigation_buttons:  # add handlers for nav buttons
+            home_button.on("click", lambda: ui.open(PagePath.HOME))
             routine_button.on("click", lambda: ui.open(PagePath.SET_ROUTINES))
             program_button.on("click", lambda: ui.open(PagePath.SET_PROGRAMS))
