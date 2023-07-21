@@ -4,9 +4,6 @@
 echo "Adjusting system volume to 60%..."
 amixer set PCM -- 60%
 
-echo "Attempting git pull..."
-git pull
-
 echo "Activating virtual environment..."
 source venv/bin/activate
 
