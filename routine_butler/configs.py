@@ -53,7 +53,7 @@ PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW = [
 
 class ICON_STRS:  # Quasar material icons
     add = "add"
-    delete = "cancel"
+    delete = "delete"
     play = "play_arrow"
     save = "save"
     down_arrow = "arrow_downward"
@@ -74,6 +74,7 @@ class ICON_STRS:  # Quasar material icons
     # person = "accessibility_new"
     # panels = "dashboard"
     # check = "done"
+    # cancel = "cancel"
 
 
 class CLR_CODES:
