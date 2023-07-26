@@ -7,11 +7,9 @@ import shutil
 from typing import List
 
 from routine_butler.configs import GDRIVE_CREDENTIALS_PATH
-from routine_butler.utils.cloud_storage_bucket.base import (
+from routine_butler.utils.cloud_storage_bucket import (
     CloudStorageBucket,
     CloudStorageBucketItem,
-)
-from routine_butler.utils.cloud_storage_bucket.google_drive_folder import (
     GoogleDriveFolder,
 )
 

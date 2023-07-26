@@ -2,6 +2,7 @@ import os.path
 from os import PathLike
 from typing import List, Optional, Protocol
 
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -78,17 +79,26 @@ class GoogleDriveFolder(CloudStorageBucket):
             )
         # If there are no (valid) credentials available, let the user log in.
         if not self._credentials or not self._credentials.valid:
-            if (
+            run_auth_flow = False
+
+            if (  # If token.json exists but is expired, try to refresh it
                 self._credentials
                 and self._credentials.expired
                 and self._credentials.refresh_token
             ):
-                self._credentials.refresh(Request())
+                try:
+                    self._credentials.refresh(Request())
+                except RefreshError:
+                    run_auth_flow = True
             else:
+                run_auth_flow = True
+
+            if run_auth_flow:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     self.credentials_file_path, self.SCOPES
                 )
                 self._credentials = flow.run_local_server(port=0)
+
             # Save the credentials for the next run
             with open("token.json", "w") as token:
                 token.write(self._credentials.to_json())
@@ -187,7 +197,8 @@ class GoogleDriveFolder(CloudStorageBucket):
             folder_id = self._get_folder_id_from_path(
                 service, remote_path, False
             )
-        resp = service.files().list(q=f"'{folder_id}' in parents").execute()
+        q = f"'{folder_id}' in parents and trashed = false"
+        resp = service.files().list(q=q).execute()
         return resp["files"]
 
     def list(
@@ -198,6 +209,9 @@ class GoogleDriveFolder(CloudStorageBucket):
         for file in files:
             name = file["name"]
             is_dir = file["mimeType"] == "application/vnd.google-apps.folder"
+            # exclude deleted files
+            if name == "test_sheet_3_40_12":
+                print("here")
             items.append(CloudStorageBucketItem(name=name, is_dir=is_dir))
         return items
 

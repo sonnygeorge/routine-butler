@@ -1,6 +1,9 @@
 import os
 from enum import StrEnum
 
+from routine_butler.utils.cloud_storage_bucket import GoogleDriveFolder
+
+# Paths
 CURRENT_DIR_PATH: str = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR_PATH: str = os.path.dirname(CURRENT_DIR_PATH)
 
@@ -16,16 +19,24 @@ ALARM_WAV_PATH = os.path.join(CURRENT_DIR_PATH, "assets/alarm_sound.wav")
 PLUGINS_DIR_PATH = os.path.join(CURRENT_DIR_PATH, "plugins")
 PLUGINS_IMPORT_STR = "routine_butler.plugins.{module}"
 
+# Cloud Storage Bucket
 GDRIVE_FOLDER_NAME = "Routine Butler"
 GDRIVE_CREDENTIALS_PATH = os.path.join(
-    CURRENT_DIR_PATH, "gdrive_credentials.json"
+    PROJECT_DIR_PATH, "google_credentials.json"
+)
+CLOUD_STORAGE_BUCKET = GoogleDriveFolder(
+    GDRIVE_FOLDER_NAME, GDRIVE_CREDENTIALS_PATH
 )
 
+FLASHCARDS_FOLDER_NAME = "flashcards"
+
+# Database
 TEST_DB_URL = f"sqlite:///{TEST_DB_PATH}"
 DB_URL = f"sqlite:///{DB_PATH}"
 TEST_USER_USERNAME = "test"
 SINGLE_USER_MODE_USERNAME = "CVxaUwC0Lkg7znaOMtwQP"
 
+# Time Constants
 CONSTANT_RING_INTERVAL = 1  # Time between noises for "constant" ringing
 PERIODIC_RING_INTERVAL = 60  # Time between noises for "periodic" ringing
 

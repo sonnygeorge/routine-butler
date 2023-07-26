@@ -35,8 +35,8 @@ def configure_programs():
         idx = state.program_titles.index(program_title)
         program = state.programs[idx]
         program.delete_self_from_db(state.engine)  # remove from db
-        state.programs.pop(idx)  # remove from state
-        state.program_titles.pop(idx)
+        # FIXME: state attrs should not be modified directly
+        state._programs.pop(idx)  # remove from state
         _update_program_select_options()
 
     initialize_page(page=PagePath.SET_PROGRAMS, state=state)
