@@ -1,7 +1,16 @@
 import os
 from enum import StrEnum
+from functools import partial
+from typing import Type
 
-from routine_butler.utils.cloud_storage_bucket import GoogleDriveFolder
+from routine_butler.utils.cloud_storage_bucket import (
+    CloudStorageBucket,
+    GoogleDriveFolder,
+)
+from routine_butler.utils.dataframe_like import DataframeLike, GoogleSheet
+from routine_butler.utils.google.g_suite_credentials_manager import (
+    G_Suite_Credentials_Manager,
+)
 
 # Paths
 CURRENT_DIR_PATH: str = os.path.dirname(os.path.abspath(__file__))
@@ -19,16 +28,32 @@ ALARM_WAV_PATH = os.path.join(CURRENT_DIR_PATH, "assets/alarm_sound.wav")
 PLUGINS_DIR_PATH = os.path.join(CURRENT_DIR_PATH, "plugins")
 PLUGINS_IMPORT_STR = "routine_butler.plugins.{module}"
 
-# Cloud Storage Bucket
-GDRIVE_FOLDER_NAME = "Routine Butler"
-GDRIVE_CREDENTIALS_PATH = os.path.join(
+# G Suite credentials manager
+G_SUITE_CREDENTIALS_PATH = os.path.join(
     PROJECT_DIR_PATH, "google_credentials.json"
 )
-CLOUD_STORAGE_BUCKET = GoogleDriveFolder(
-    GDRIVE_FOLDER_NAME, GDRIVE_CREDENTIALS_PATH
+G_SUITE_CREDENTIALS_MANAGER = G_Suite_Credentials_Manager(
+    G_SUITE_CREDENTIALS_PATH
 )
 
+G_DRIVE_STORAGE_FOLDER_NAME = "Routine Butler"
+
+# Globally-used CloudStorageBucket object
+STORAGE_BUCKET: CloudStorageBucket = GoogleDriveFolder(
+    G_DRIVE_STORAGE_FOLDER_NAME, G_SUITE_CREDENTIALS_MANAGER
+)
+
+# Folder within the root of storage bucket where flashcard sheets are stored
 FLASHCARDS_FOLDER_NAME = "flashcards"
+
+# Gloablly-used DataframeLike type
+# NOTE: partial is used here to maintain the consistency of the constructor interface
+# since GoogleSheet uniquely requires root_folder_name and credentials_manager args
+DATAFRAME_LIKE: Type[DataframeLike] = partial(
+    GoogleSheet,
+    root_folder_name=G_DRIVE_STORAGE_FOLDER_NAME,
+    credentials_manager=G_SUITE_CREDENTIALS_MANAGER,
+)
 
 # Database
 TEST_DB_URL = f"sqlite:///{TEST_DB_PATH}"

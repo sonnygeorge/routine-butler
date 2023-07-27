@@ -8,7 +8,38 @@ from nicegui import ui
 from pydantic import BaseModel
 
 from routine_butler.components import micro
-from routine_butler.configs import CLOUD_STORAGE_BUCKET, FLASHCARDS_FOLDER_NAME
+from routine_butler.configs import (
+    DATAFRAME_LIKE,
+    FLASHCARDS_FOLDER_NAME,
+    STORAGE_BUCKET,
+)
+
+# TODO: Use async to add a loading message while flashcard queue is generating...
+# TODO: Error handling for when more than two columns detected
+# TODO: Figure out how to get google auth flow seamlessly into app
+# TODO: Make height automatically size
+# TODO: Possible speedups:
+#   * 1.
+#     - change n_minutes to n_cards in cache_n_minutes_of_cards
+#     - move the math of how many cards to cache to _get_flashcards_queue
+#     - make it reflect the 70% quantile for how many cards would be selected
+#     - make the selection probabilities of cards in cache diminish after selections
+#   * 2.
+#     - change the dataframe-like interface to get consecutive rows idxs in one call
+#     - modify the cache function to: pre-select the idxs it will retrieve, sort them
+#       into ranges of consecutive idxs, and retrieve ranges instead of individual rows
+#     - make sure this pre-selection is done without replacement to avoid
+#       redundant calls
+# TODO: Change state/button strategy to have a flip button & a next button that
+#       appears or becomes active after the flip button is clicked...
+#       No need for "final" button / state hoo-hah
+# TODO: Move "state" to configs and call it STATE
+# TODO: Consider naming of dataframe-like, g_suite, cloud_storage_bucket, etc.
+#   * cloud_storage_bucket -> storage_bucket?
+#   * g_suite -> google?
+#   * dataframe-like -> data-client? data-interface? data-source?
+#   * configs.py -> globals.py?
+#   * sheet vs. workbook vs. collection etc.
 
 WIDTH = 700
 HEIGHT = 370
@@ -25,11 +56,11 @@ class FlashcardCollection:
     def __init__(self, path_to_collection: str):
         # "{name}-{random_choice_weight}-{avg_seconds_per_card}"
         fname: str = path_to_collection.split("/")[-1]
-        self.path_to_sheet: str = path_to_collection
         self.avg_seconds_per_card: int = int(fname.split("-")[-1])
         self.random_choice_weight: int = int(fname.split("-")[-2])
         self.name: str = "-".join(fname.split("-")[:-2])
         self.cached_cards: List[Flashcard] = []
+        self.dataframe_like = DATAFRAME_LIKE(path_to_collection)
 
     def __str__(self):
         return (
@@ -38,8 +69,27 @@ class FlashcardCollection:
         )
 
     def cache_n_minutes_of_cards(self, n_minutes: int) -> None:
-        # FIXME: implement
-        self.cached_cards = [Flashcard("front", "back", self)]
+        n_to_cache = int(n_minutes * 60 / self.avg_seconds_per_card)
+        n_rows, n_columns = self.dataframe_like.shape()
+        logger.info(
+            f"Attempting retrieval and cache of {n_to_cache} flashcards for "
+            f"collection '{self.name}' of shape: {n_rows, n_columns}"
+        )
+        choosable_idxs = list(range(n_rows))
+
+        for _ in range(n_to_cache):
+            if len(choosable_idxs) == 0:
+                break
+            idx = random.choice(choosable_idxs)
+            row = self.dataframe_like.get_row_at_idx(idx)
+            try:
+                self.cached_cards.append(Flashcard(row[0], row[1], self))
+            except IndexError:
+                logger.warning(
+                    f"Couldn't parse flashcard at idx: {idx} -- "
+                    f"Expected 2 columns in sheet but got: {row}"
+                )
+            choosable_idxs.remove(idx)
 
     def get_random_card(self) -> Flashcard:
         return random.choice(self.cached_cards)
@@ -52,7 +102,7 @@ def get_collections_to_read(
     of sheets that should be read"""
     path_arg = None if path == "" else path
     try:
-        items = CLOUD_STORAGE_BUCKET.list(path_arg)
+        items = STORAGE_BUCKET.list(path_arg)
     except ValueError:  # if list() raises ValueError...
         # ...the path is not a folder. We therefore assume it is a sheet.
         return [path]
@@ -113,7 +163,6 @@ class FlashcardsGui:
     def _get_flashcards_queue(self, target_minutes: int) -> List[Flashcard]:
         _denom = sum([c.random_choice_weight for c in self.collections])
         PROBS = [c.random_choice_weight / _denom for c in self.collections]
-        assert sum(PROBS) == 1
 
         _target_secs = target_minutes * 60
         _avg_secs = [c.avg_seconds_per_card for c in self.collections]

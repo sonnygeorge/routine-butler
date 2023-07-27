@@ -6,7 +6,7 @@ import os
 import shutil
 from typing import List
 
-from routine_butler.configs import GDRIVE_CREDENTIALS_PATH
+from routine_butler.configs import G_SUITE_CREDENTIALS_MANAGER
 from routine_butler.utils.cloud_storage_bucket import (
     CloudStorageBucket,
     CloudStorageBucketItem,
@@ -133,8 +133,8 @@ def cloud_storage_bucket_integration_test(
 
 if __name__ == "__main__":
     google_drive_folder = GoogleDriveFolder(
-        folder_name="ROUTINE-BUTLER-TEST-FOLDER",
-        credentials_file_path=GDRIVE_CREDENTIALS_PATH,
+        folder_name="ROUTINE-BUTLER-TEST-FOLDER-2",
+        credentials_manager=G_SUITE_CREDENTIALS_MANAGER,
     )
 
     cloud_storage_bucket_integration_test(
