@@ -1,10 +1,15 @@
 from datetime import datetime
 from typing import Optional
 
+from loguru import logger
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.configs import ICON_STRS, PagePath
+from routine_butler.configs import (
+    G_SUITE_CREDENTIALS_MANAGER,
+    ICON_STRS,
+    PagePath,
+)
 
 APP_NAME = "RoutineButler"
 APP_NAME_SIZE = "1.7rem"
@@ -78,6 +83,12 @@ class Header(ui.header):
             if not hide_navigation_buttons:
                 with right_row:
                     vertical_separator()
+                    # g suite button
+                    header_button(
+                        icon=ICON_STRS.g_suite,
+                        on_click=self._hdl_g_suite_button_click,
+                    ).props("text-color=white")
+                    vertical_separator()
                     # configure-routines nav button
                     routine_button = header_button()
                     with routine_button:
@@ -112,3 +123,8 @@ class Header(ui.header):
             home_button.on("click", lambda: ui.open(PagePath.HOME))
             routine_button.on("click", lambda: ui.open(PagePath.SET_ROUTINES))
             program_button.on("click", lambda: ui.open(PagePath.SET_PROGRAMS))
+
+    async def _hdl_g_suite_button_click(self):
+        logger.info("Manually asserting G Suite credentials...")
+        await G_SUITE_CREDENTIALS_MANAGER.get_credentials()
+        ui.notify("G Suite access is valid!")

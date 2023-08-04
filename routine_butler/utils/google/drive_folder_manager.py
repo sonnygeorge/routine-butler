@@ -1,6 +1,14 @@
+import time
+
+from googleapiclient.errors import HttpError
+from loguru import logger
+
 from routine_butler.utils.google.arbitrary_types import (
     GoogleDriveServiceObject,
 )
+
+N_RETRIES = 20
+SECONDS_BETWEEN_RETRIES = 3
 
 
 class DriveFolderManager:
@@ -30,8 +38,18 @@ class DriveFolderManager:
             "mimeType": "application/vnd.google-apps.folder",
             "parents": [parent_folder_id],
         }
-        r = service.files().create(body=folder_metadata, fields="id").execute()
-        return r["id"]
+        for _ in range(N_RETRIES):
+            try:
+                resp = (
+                    service.files()
+                    .create(body=folder_metadata, fields="id")
+                    .execute()
+                )
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
+        return resp["id"]
 
     def get_root_folder_id(self, service: GoogleDriveServiceObject) -> str:
         if self._root_folder_id is not None:
@@ -42,7 +60,13 @@ class DriveFolderManager:
             f"name='{self.root_folder_name}' "
             f"and mimeType='application/vnd.google-apps.folder'"
         )
-        resp = service.files().list(q=query, spaces="drive").execute()
+        for _ in range(N_RETRIES):
+            try:
+                resp = service.files().list(q=query, spaces="drive").execute()
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
         if len(resp["files"]) == 0:
             # If not, create it
             root_id = self._create_folder(service, self.root_folder_name, None)
@@ -63,7 +87,13 @@ class DriveFolderManager:
             f"name='{folder_name}' and '{parent_folder_id}' in parents "
             f"and mimeType='application/vnd.google-apps.folder'"
         )
-        resp = service.files().list(q=query, spaces="drive").execute()
+        for _ in range(N_RETRIES):
+            try:
+                resp = service.files().list(q=query, spaces="drive").execute()
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
 
         if len(resp["files"]) == 0 and create_if_non_existant:
             return self._create_folder(service, folder_name, parent_folder_id)

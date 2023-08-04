@@ -1,8 +1,10 @@
 import os.path
+import time
 from os import PathLike
 from typing import List, Optional
 
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from loguru import logger
 
@@ -18,6 +20,9 @@ from routine_butler.utils.google.g_suite_credentials_manager import (
     G_Suite_Credentials_Manager,
 )
 
+N_RETRIES = 20
+SECONDS_BETWEEN_RETRIES = 3
+
 
 class GoogleDriveFolder(CloudStorageBucket):
     def __init__(
@@ -30,17 +35,17 @@ class GoogleDriveFolder(CloudStorageBucket):
             root_folder_name=folder_name,
         )
 
-    def _get_service_object(self) -> GoogleDriveServiceObject:
+    async def _get_service_object(self) -> GoogleDriveServiceObject:
         """Builds and returns a Google Drive service object."""
         service = build(
             "drive",
             "v3",
-            credentials=self.credentials_manager.get_credentials(),
+            credentials=await self.credentials_manager.get_credentials(),
         )
         return service
 
-    def _list(self, remote_path: Optional[str] = None):
-        service = self._get_service_object()
+    async def _list(self, remote_path: Optional[str] = None):
+        service = await self._get_service_object()
         if remote_path is None:
             folder_id = self.drive_folder_manager.get_root_folder_id(service)
         else:
@@ -48,13 +53,19 @@ class GoogleDriveFolder(CloudStorageBucket):
                 service, remote_path, False
             )
         q = f"'{folder_id}' in parents and trashed = false"
-        resp = service.files().list(q=q).execute()
+        for _ in range(N_RETRIES):
+            try:
+                resp = service.files().list(q=q).execute()
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
         return resp["files"]
 
-    def list(
+    async def list(
         self, remote_path: Optional[str] = None
     ) -> List[CloudStorageBucketItem]:
-        files = self._list(remote_path=remote_path)
+        files = await self._list(remote_path=remote_path)
         items = []
         for file in files:
             name = file["name"]
@@ -65,10 +76,10 @@ class GoogleDriveFolder(CloudStorageBucket):
             items.append(CloudStorageBucketItem(name=name, is_dir=is_dir))
         return items
 
-    def upload(
+    async def upload(
         self, local_path: PathLike, remote_dir_path: Optional[str]
     ) -> None:
-        service = self._get_service_object()
+        service = await self._get_service_object()
 
         if remote_dir_path is None:
             folder_id = self.drive_folder_manager.get_root_folder_id(service)
@@ -82,12 +93,18 @@ class GoogleDriveFolder(CloudStorageBucket):
             "parents": [folder_id],
         }
         media = MediaFileUpload(local_path)
-        service.files().create(
-            body=file_metadata, media_body=media, fields="id"
-        ).execute()
+        for _ in range(N_RETRIES):
+            try:
+                service.files().create(
+                    body=file_metadata, media_body=media, fields="id"
+                ).execute()
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
 
-    def download(self, local_path: PathLike, remote_path: str) -> None:
-        service = self._get_service_object()
+    async def download(self, local_path: PathLike, remote_path: str) -> None:
+        service = await self._get_service_object()
         remote_path_trail = remote_path.split("/")
 
         if len(remote_path_trail) == 1:
@@ -103,11 +120,17 @@ class GoogleDriveFolder(CloudStorageBucket):
             f"and mimeType!='application/vnd.google-apps.folder'"
             f"and '{folder_id}' in parents"
         )
-        resp = (
-            service.files()
-            .list(q=file_query, spaces="drive", fields="files(id)")
-            .execute()
-        )
+        for _ in range(N_RETRIES):
+            try:
+                resp = (
+                    service.files()
+                    .list(q=file_query, spaces="drive", fields="files(id)")
+                    .execute()
+                )
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
         file_id = resp["files"][0]["id"]
 
         # Download file
@@ -122,8 +145,8 @@ class GoogleDriveFolder(CloudStorageBucket):
                 )
         return file_id
 
-    def delete(self, remote_path: str) -> bool:
-        service = self._get_service_object()
+    async def delete(self, remote_path: str) -> bool:
+        service = await self._get_service_object()
 
         if "/" not in remote_path:
             folder_id = self.drive_folder_manager.get_root_folder_id(service)
@@ -137,22 +160,40 @@ class GoogleDriveFolder(CloudStorageBucket):
 
         # Get item id
         query = f"name='{item_name}' and '{folder_id}' in parents"
-        resp = (
-            service.files()
-            .list(q=query, spaces="drive", fields="files(id)")
-            .execute()
-        )
+        for _ in range(N_RETRIES):
+            try:
+                resp = (
+                    service.files()
+                    .list(q=query, spaces="drive", fields="files(id)")
+                    .execute()
+                )
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
         item_id = resp["files"][0]["id"]
 
         # Check if item has children and raise error if so
         query = f"'{item_id}' in parents"
-        resp = (
-            service.files()
-            .list(q=query, spaces="drive", fields="files(id)")
-            .execute()
-        )
+        for _ in range(N_RETRIES):
+            try:
+                resp = (
+                    service.files()
+                    .list(q=query, spaces="drive", fields="files(id)")
+                    .execute()
+                )
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
         if len(resp["files"]) > 0:
             raise ValueError("Cannot delete a folder that has children.")
 
         # Delete item
-        service.files().delete(fileId=item_id).execute()
+        for _ in range(N_RETRIES):
+            try:
+                service.files().delete(fileId=item_id).execute()
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)

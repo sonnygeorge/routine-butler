@@ -1,4 +1,6 @@
+import asyncio
 import random
+import time
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import List, Optional
@@ -14,7 +16,7 @@ from routine_butler.configs import (
     STORAGE_BUCKET,
 )
 
-# TODO: Use async to add a loading message while flashcard queue is generating...
+# TODO: Augment progress label to include X/Y cards
 # TODO: Error handling for when more than two columns detected
 # TODO: Figure out how to get google auth flow seamlessly into app
 # TODO: Make height automatically size
@@ -40,6 +42,8 @@ from routine_butler.configs import (
 #   * dataframe-like -> data-client? data-interface? data-source?
 #   * configs.py -> globals.py?
 #   * sheet vs. workbook vs. collection etc.
+# TODO: seperate this code into different files in _flashcards folder
+# TODO: Remove repeated retry code in google api calls
 
 WIDTH = 700
 HEIGHT = 370
@@ -68,9 +72,9 @@ class FlashcardCollection:
             f"- ⏱️: {self.avg_seconds_per_card}"
         )
 
-    def cache_n_minutes_of_cards(self, n_minutes: int) -> None:
+    async def cache_n_minutes_of_cards(self, n_minutes: int) -> None:
         n_to_cache = int(n_minutes * 60 / self.avg_seconds_per_card)
-        n_rows, n_columns = self.dataframe_like.shape()
+        n_rows, n_columns = await self.dataframe_like.shape()
         logger.info(
             f"Attempting retrieval and cache of {n_to_cache} flashcards for "
             f"collection '{self.name}' of shape: {n_rows, n_columns}"
@@ -81,7 +85,7 @@ class FlashcardCollection:
             if len(choosable_idxs) == 0:
                 break
             idx = random.choice(choosable_idxs)
-            row = self.dataframe_like.get_row_at_idx(idx)
+            row = await self.dataframe_like.get_row_at_idx(idx)
             try:
                 self.cached_cards.append(Flashcard(row[0], row[1], self))
             except IndexError:
@@ -95,14 +99,14 @@ class FlashcardCollection:
         return random.choice(self.cached_cards)
 
 
-def get_collections_to_read(
+async def get_collections_to_read(
     path: Optional[str] = None,
 ) -> List[str]:
     """Given the the path attribute of a flashcards program, return a list of the paths
     of sheets that should be read"""
     path_arg = None if path == "" else path
     try:
-        items = STORAGE_BUCKET.list(path_arg)
+        items = await STORAGE_BUCKET.list(path_arg)
     except ValueError:  # if list() raises ValueError...
         # ...the path is not a folder. We therefore assume it is a sheet.
         return [path]
@@ -111,7 +115,7 @@ def get_collections_to_read(
     for item in items:
         item_path = f"{path}/{item.name}" if path else item.name
         if item.is_dir:
-            sheets_to_read.extend(get_collections_to_read(item_path))
+            sheets_to_read.extend(await get_collections_to_read(item_path))
         else:
             sheets_to_read.append(item_path)
     return sheets_to_read
@@ -125,18 +129,25 @@ class FlashcardsGui:
 
     def __init__(self, data: "Flashcards", on_complete: callable):
         self.on_complete = on_complete
-        self.collections = self._get_collections(
-            data.path, data.target_minutes
+        self.collections: List[FlashcardCollection] = []
+        self.flashcards_queue: List[Flashcard] = []
+        self.n_collections_found = 0
+        self.retrieval_has_completed = False
+        ui.timer(
+            0.1,
+            lambda: self._get_collections(data.path, data.target_minutes),
+            once=True,
         )
-        self.flashcards_queue: List[Flashcard] = self._get_flashcards_queue(
-            data.target_minutes
-        )
+        self.recurring_update = ui.timer(0.1, self._update_ui)
+        self.start_time = time.time()
         self.current_card_idx = 0
         self.state = self.State.FRONT
         self.frame = micro.card().classes("flex flex-col items-center")
-        self._update_ui()
+        with self.frame:
+            ui.label("🐛🐜🐢...")
+        self.progress_label = ui.label("").classes("text-xs text-gray-500")
 
-    def _get_collections(
+    async def _get_collections(
         self, path: str, target_minutes: int
     ) -> List[FlashcardCollection]:
         # Get paths of collections
@@ -144,7 +155,7 @@ class FlashcardsGui:
             path = FLASHCARDS_FOLDER_NAME
         else:
             path = f"{FLASHCARDS_FOLDER_NAME}/{path}"
-        collection_paths = get_collections_to_read(path)
+        collection_paths = await get_collections_to_read(path)
         # Parse collections
         collections: List[FlashcardCollection] = []
         for path in collection_paths:
@@ -154,13 +165,20 @@ class FlashcardsGui:
                 logger.warning(
                     f"Couldn't parse flashcard collection: {path} - {e}"
                 )
-        logger.info(f"Found {len(collections)} flashcard collections")
+        self.n_collections_found = len(collections)
+        logger.info(f"Found {self.n_collections_found} flashcard collections")
+        await asyncio.sleep(0.1)
         # Retrieve & cache cards for each collection
         for collection in collections:
-            collection.cache_n_minutes_of_cards(target_minutes)
-        return collections
+            await collection.cache_n_minutes_of_cards(target_minutes)
+            self.collections.append(collection)
+            await asyncio.sleep(0.1)
+        await self._get_flashcards_queue(target_minutes)
+        self.retrieval_has_completed = True
 
-    def _get_flashcards_queue(self, target_minutes: int) -> List[Flashcard]:
+    async def _get_flashcards_queue(
+        self, target_minutes: int
+    ) -> List[Flashcard]:
         _denom = sum([c.random_choice_weight for c in self.collections])
         PROBS = [c.random_choice_weight / _denom for c in self.collections]
 
@@ -169,28 +187,35 @@ class FlashcardsGui:
         _overall_avg_secs = sum([s * p for s, p in zip(_avg_secs, PROBS)])
         SECONDS_CAP = _target_secs - _overall_avg_secs
 
-        queue: List[Flashcard] = []
         seconds_elapsed = 0
         while seconds_elapsed < SECONDS_CAP:
             collection = random.choices(self.collections, PROBS)[0]
             card = collection.get_random_card()
-            queue.append(card)
+            self.flashcards_queue.append(card)
+            await asyncio.sleep(0.1)
             seconds_elapsed += int(collection.avg_seconds_per_card)
-        return queue
 
     def _update_ui(self):
+        if not self.retrieval_has_completed:
+            progress_str = f"{len(self.collections)}/"
+            progress_str += f"{self.n_collections_found} collections loaded | "
+            progress_str += f"{len(self.flashcards_queue)} flashcards queued"
+            progress_str += f" | {int(time.time() - self.start_time)}s elapsed"
+            self.progress_label.set_text(progress_str)
+            return
+        self.recurring_update.deactivate()
         fcard = self.flashcards_queue[self.current_card_idx]
         text = fcard.front if self.state == self.State.FRONT else fcard.back
         collection = str(fcard.collection)
         prog = f"Card {self.current_card_idx + 1}/{len(self.flashcards_queue)}"
         self.frame.clear()
         with self.frame:
-            ui.label(prog).classes("font-xs")
+            ui.label(prog)
             card = micro.card().style(f"width: {WIDTH}px; height: {HEIGHT}px")
             with card.classes("flex flex-col items-center justify-center"):
                 ui.markdown(text)
             proceed_button = ui.button(self.state)
-            ui.label(collection).classes("font-xs")
+            ui.label(collection)
         proceed_button.on("click", self._hdl_button_click)
 
     def _hdl_button_click(self):
