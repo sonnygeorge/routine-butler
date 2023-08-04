@@ -2,7 +2,7 @@ from typing import List, Optional, Tuple
 
 from nicegui import ui
 
-from routine_butler.configs import PagePath
+from routine_butler.configs import G_SUITE_CREDENTIALS_MANAGER, PagePath
 from routine_butler.models import Program, Routine
 from routine_butler.state import state
 from routine_butler.utils.misc import redirect_to_page
@@ -23,11 +23,15 @@ class RoutineAdministrator(ui.column):
     def __init__(self, routine: Routine):
         super().__init__()
         self.classes("absolute-center items-center justify-center")
-
         self.routine = routine
         queues = get_programs_queues(routine)
         self.element_programs_queue, self.reward_programs_queue = queues
-        self._administer_next_program()
+
+    async def begin_administration(self):
+        if G_SUITE_CREDENTIALS_MANAGER.validate_credentials():
+            self._administer_next_program()
+        else:
+            await G_SUITE_CREDENTIALS_MANAGER.get_credentials()
 
     @property
     def has_only_rewards_left_to_administer(self) -> bool:

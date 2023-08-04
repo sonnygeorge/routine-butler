@@ -83,39 +83,30 @@ class G_Suite_Credentials_Manager:
         with open(TOKEN_FILE_PATH, "w") as f:
             f.write(self._credentials.to_json())
 
-    async def _authorize(self):
-        """Performs Google API authorization by using by either asserting that token.json
-        exists and is valid, or opening the Google's auth screen in the  browser and
-        either creating or overwriting token.json with valid credentials.
-        """
-
-        # token.json stores the access and refresh tokens, and is auto-generated
+    def validate_credentials(self) -> bool:
+        # if no credentials & token.json exists, try to load them
         if self._credentials is None and os.path.exists(TOKEN_FILE_PATH):
             self._credentials = Credentials.from_authorized_user_file(
                 TOKEN_FILE_PATH, self.SCOPES
             )
-        # If there are no (valid) credentials available, let the user log in.
-        if not self._credentials or not self._credentials.valid:
-            run_auth_flow = False
-
-            if (  # If token.json exists but is expired, try to refresh it
-                self._credentials
-                and self._credentials.expired
-                and self._credentials.refresh_token
-            ):
-                try:
-                    self._credentials.refresh(Request())
-                    with open(TOKEN_FILE_PATH, "w") as f:
-                        f.write(self._credentials.to_json())
-                except RefreshError:
-                    run_auth_flow = True
-            else:
-                run_auth_flow = True
-
-            if run_auth_flow:
-                await self.run_auth_flow()
+        # if still no credentials, return false
+        if self._credentials is None:
+            return False
+        # if valid, return true
+        if self._credentials.valid:
+            return True
+        # If credentials are expired, try to refresh them
+        elif self._credentials.expired and self._credentials.refresh_token:
+            try:
+                self._credentials.refresh(Request())
+                with open(TOKEN_FILE_PATH, "w") as f:
+                    f.write(self._credentials.to_json())
+            except RefreshError:
+                return False  # unable to refresh credentials, return false
+        else:
+            return False
 
     async def get_credentials(self):
-        if not self._credentials or not self._credentials.valid:
-            await self._authorize()
+        if not self.validate_credentials():
+            await self.run_auth_flow()
         return self._credentials
