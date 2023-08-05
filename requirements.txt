@@ -1,5 +1,7 @@
 beautifulsoup4
 chromedriver-autoinstaller
+google-api-python-client
+google-auth-oauthlib
 loguru
 Mock.GPIO
 nicegui
