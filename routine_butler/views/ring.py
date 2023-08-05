@@ -3,7 +3,7 @@ import functools
 
 from nicegui import ui
 
-from routine_butler.configs import (
+from routine_butler.globals import (
     ALARM_WAV_PATH,
     CONSTANT_RING_INTERVAL,
     PERIODIC_RING_INTERVAL,

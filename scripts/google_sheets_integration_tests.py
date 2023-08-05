@@ -2,7 +2,7 @@
 
 NOTE: It is assumed that this file exists and has the expected data and nothing else."""
 
-from routine_butler.configs import G_SUITE_CREDENTIALS_MANAGER
+from routine_butler.globals import G_SUITE_CREDENTIALS_MANAGER
 from routine_butler.utils.dataframe_like import GoogleSheet
 
 ROOT_FOLDER_NAME = "ROUTINE-BUTLER-TEST-FOLDER"

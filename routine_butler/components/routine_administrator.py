@@ -2,7 +2,7 @@ from typing import List, Optional, Tuple
 
 from nicegui import ui
 
-from routine_butler.configs import G_SUITE_CREDENTIALS_MANAGER, PagePath
+from routine_butler.globals import G_SUITE_CREDENTIALS_MANAGER, PagePath
 from routine_butler.models import Program, Routine
 from routine_butler.state import state
 from routine_butler.utils.misc import redirect_to_page

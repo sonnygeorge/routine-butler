@@ -1,9 +1,10 @@
 from nicegui import ui
 from sqlalchemy import create_engine
 
-from routine_butler.configs import (
+from routine_butler.globals import (
     BINDING_REFRESH_INTERVAL_SECONDS,
     DB_URL,
+    MAIN_SERVER_PORT,
     SINGLE_USER_MODE_USERNAME,
     TEST_DB_URL,
     TEST_USER_USERNAME,
@@ -62,4 +63,5 @@ def main(
         fullscreen=fullscreen,
         binding_refresh_interval=BINDING_REFRESH_INTERVAL_SECONDS,
         show=open_browser,
+        port=MAIN_SERVER_PORT,
     )

@@ -3,7 +3,7 @@ import datetime
 import json
 import os
 
-from routine_butler.configs import CURRENT_DIR_PATH
+from routine_butler.globals import CURRENT_DIR_PATH
 from routine_butler.plugins._youtube.schema import (
     ChannelScoringData,
     QueueParams,

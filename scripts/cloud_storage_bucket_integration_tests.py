@@ -6,7 +6,7 @@ import os
 import shutil
 from typing import List
 
-from routine_butler.configs import G_SUITE_CREDENTIALS_MANAGER
+from routine_butler.globals import G_SUITE_CREDENTIALS_MANAGER
 from routine_butler.utils.cloud_storage_bucket import (
     CloudStorageBucket,
     CloudStorageBucketItem,

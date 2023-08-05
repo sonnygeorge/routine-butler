@@ -5,7 +5,7 @@ from loguru import logger
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.configs import (
+from routine_butler.globals import (
     G_SUITE_CREDENTIALS_MANAGER,
     ICON_STRS,
     PagePath,

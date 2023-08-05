@@ -1,7 +1,9 @@
 import asyncio
 import multiprocessing
 import os
+from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlparse
 
 import google_auth_oauthlib.flow
@@ -10,12 +12,26 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from nicegui import ui
 
+if TYPE_CHECKING:
+    from routine_butler.globals import PagePath
+
 CODE_TEMP_FILE_PATH = "code.txt"
 TOKEN_FILE_PATH = "token.json"
 
 
 class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
-    """HTTP server class to capture the authorization response"""
+    """HTTP server class to capture & process the authorization response"""
+
+    def __init__(
+        self,
+        redirect_server_port: int,
+        redirect_page_path: str,
+        *args,
+        **kwargs,
+    ):
+        self.redirect_server_port = redirect_server_port
+        self.redirect_page_path = redirect_page_path
+        super().__init__(*args, **kwargs)
 
     def do_GET(self):
         parsed_url = urlparse(self.path)
@@ -26,14 +42,29 @@ class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
                 f.write(code)
             # redirect back to Routine Butler
             self.send_response(302)
-            self.send_header("Location", "http://localhost:8080/do-routine")
+            redirect_url = f"http://localhost:{self.redirect_server_port}"
+            redirect_url += self.redirect_page_path
+            self.send_header("Location", redirect_url)
             self.end_headers()
 
 
-# Start the HTTP server in a separate process
-def start_server_to_listen_for_auth_redirect():
-    server_address = ("", 8081)  # Change the port to 8081
-    httpd = HTTPServer(server_address, AuthRedirectRequestHandler)
+def start_temp_extra_server_to_listen_for_auth_redirect(
+    main_app_server_port: int,
+    temp_extra_server_port: int,
+    redirect_page_path: str,
+):
+    """Starts a temporary server to listen for the google authorization redirect"""
+
+    server_address = ("", temp_extra_server_port)
+    RequestHandlerClass = partial(
+        AuthRedirectRequestHandler,
+        main_app_server_port,  # NOTE: These cannot be kwargs since this is later...
+        redirect_page_path,  # ...called with positional args only
+    )
+    httpd = HTTPServer(
+        server_address=server_address,
+        RequestHandlerClass=RequestHandlerClass,
+    )
     httpd.serve_forever()
 
 
@@ -43,56 +74,86 @@ class G_Suite_Credentials_Manager:
         "https://www.googleapis.com/auth/drive",
     ]
 
-    def __init__(self, credentials_file_path: str):
+    def __init__(
+        self,
+        credentials_file_path: str,
+        main_app_server_port: int,
+        temp_extra_server_port: int,
+        redirect_server_page_path: "PagePath",
+    ):
         self.credentials_file_path = credentials_file_path
         self._credentials = None
+        self.main_app_server_port = main_app_server_port
+        self.temp_extra_server_port = temp_extra_server_port
+        self.redirect_server_page_path = redirect_server_page_path
 
     async def run_auth_flow(self):
+        """Runs the authorization flow and gets credentials:
+
+        1. starts a temporary server to listen for the google auth flows redirect request
+        2. builds the flow and gets the authorization url
+        3. redirects to the authorization url
+        4. waits for the necessary code that is embedded in the redirect request url to
+           be written to a file by the temp server subprocess
+        5. stops the temp server
+        6. reads the code from the file
+        7. exchanges the code for credentials
+        8. saves the credentials to a file
+
+        """
         if os.path.exists(CODE_TEMP_FILE_PATH):
             os.remove(CODE_TEMP_FILE_PATH)
-        # start a temporary server to listen for the redirect
-        server_process = multiprocessing.Process(
-            target=start_server_to_listen_for_auth_redirect
+        # 1. start a temporary server to listen for the redirect
+        start_server_callable = partial(
+            start_temp_extra_server_to_listen_for_auth_redirect,
+            main_app_server_port=self.main_app_server_port,
+            temp_extra_server_port=self.temp_extra_server_port,
+            redirect_page_path=self.redirect_server_page_path,
         )
+        server_process = multiprocessing.Process(target=start_server_callable)
         server_process.start()
-        # build the flow and get the authorization url
+        # 2. build the flow and get the authorization url
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
             self.credentials_file_path,
             scopes=self.SCOPES,
-            redirect_uri="http://localhost:8081",
+            redirect_uri=f"http://localhost:{self.temp_extra_server_port}",
         )
         authorization_url, _ = flow.authorization_url(
             access_type="offline",
             include_granted_scopes="true",
         )
-        # redirect to given authorization url
+        # 3. redirect to given authorization url
         ui.timer(0.1, lambda: ui.open(authorization_url), once=True)
-        # wait for the code to be written to the file once auth is complete
+        # 4. wait for the code to be written to the file once auth is complete
         while not os.path.exists(CODE_TEMP_FILE_PATH):
             await asyncio.sleep(0.2)
-        # stop the server
+        # 5. stop the server
         server_process.terminate()
-        # read the code from the file & delete it
+        # 6. read the code from the file & deletes the file
         with open(CODE_TEMP_FILE_PATH, "r") as f:
             code = f.read()
         os.remove(CODE_TEMP_FILE_PATH)
-        # ascertain credentials
+        # 7. ascertain credentials
         flow.fetch_token(code=code)
         self._credentials = flow.credentials
-        # save the credentials
+        # 8. save the credentials
         with open(TOKEN_FILE_PATH, "w") as f:
             f.write(self._credentials.to_json())
 
     def validate_credentials(self) -> bool:
-        # if no credentials & token.json exists, try to load them
+        """Validates the credentials, and refreshes them if necessary.
+
+        The implication of returning False is that user will need to re-authenticate
+        """
+        # If no credentials & token.json exists, try to load them
         if self._credentials is None and os.path.exists(TOKEN_FILE_PATH):
             self._credentials = Credentials.from_authorized_user_file(
                 TOKEN_FILE_PATH, self.SCOPES
             )
-        # if still no credentials, return false
+        # If still no credentials, return false
         if self._credentials is None:
             return False
-        # if valid, return true
+        # If valid, return true
         if self._credentials.valid:
             return True
         # If credentials are expired, try to refresh them
@@ -102,11 +163,11 @@ class G_Suite_Credentials_Manager:
                 with open(TOKEN_FILE_PATH, "w") as f:
                     f.write(self._credentials.to_json())
             except RefreshError:
-                return False  # unable to refresh credentials, return false
+                return False  # Return false since refresh failed
         else:
             return False
 
-    async def get_credentials(self):
+    async def get_credentials(self) -> Credentials:
         if not self.validate_credentials():
             await self.run_auth_flow()
         return self._credentials

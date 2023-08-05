@@ -2,7 +2,7 @@ import sys
 
 from loguru import logger
 
-from routine_butler.configs import LOG_FILE_PATH
+from routine_butler.globals import LOG_FILE_PATH
 
 DB_LOG_LVL = "DATABASE"
 BOX_LOG_LVL = "BOX"

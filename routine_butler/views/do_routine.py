@@ -3,7 +3,7 @@ from nicegui import ui
 from routine_butler.components.routine_administrator import (
     RoutineAdministrator,
 )
-from routine_butler.configs import PagePath
+from routine_butler.globals import PagePath
 from routine_butler.state import state
 from routine_butler.utils.misc import initialize_page, redirect_to_page
 

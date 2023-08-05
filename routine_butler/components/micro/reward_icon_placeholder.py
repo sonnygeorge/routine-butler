@@ -1,7 +1,7 @@
 from nicegui import ui
 
 from routine_butler.components.micro.svg import svg
-from routine_butler.configs import REWARD_SVG_PATH
+from routine_butler.globals import REWARD_SVG_PATH
 
 
 def reward_icon_placeholder() -> ui.element:

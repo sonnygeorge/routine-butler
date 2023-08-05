@@ -1,7 +1,7 @@
 from nicegui import ui
 
 from routine_butler.components import micro
-from routine_butler.configs import ICON_STRS, THROTTLE_SECONDS
+from routine_butler.globals import ICON_STRS, THROTTLE_SECONDS
 from routine_butler.models import Alarm, RingFrequency, Routine
 from routine_butler.state import state
 

@@ -3,7 +3,7 @@ from typing import Tuple
 from nicegui import ui
 
 from routine_butler.components.micro.svg import svg
-from routine_butler.configs import ICON_STRS, REWARD_SVG_PATH
+from routine_butler.globals import ICON_STRS, REWARD_SVG_PATH
 
 
 def add_button() -> ui.button:

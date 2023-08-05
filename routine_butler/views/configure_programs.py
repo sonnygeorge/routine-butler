@@ -2,7 +2,7 @@ from nicegui import ui
 
 from routine_butler.components import micro
 from routine_butler.components.program_configurer import ProgramConfigurer
-from routine_butler.configs import PagePath
+from routine_butler.globals import PagePath
 from routine_butler.models import Program
 from routine_butler.state import state
 from routine_butler.utils.misc import initialize_page

@@ -12,7 +12,11 @@ from routine_butler.utils.google.g_suite_credentials_manager import (
     G_Suite_Credentials_Manager,
 )
 
+MAIN_SERVER_PORT: int = 8080
+TEMP_EXTRA_SERVER_PORT: int = 8081
+
 # Paths
+
 CURRENT_DIR_PATH: str = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR_PATH: str = os.path.dirname(CURRENT_DIR_PATH)
 
@@ -28,47 +32,7 @@ ALARM_WAV_PATH = os.path.join(CURRENT_DIR_PATH, "assets/alarm_sound.wav")
 PLUGINS_DIR_PATH = os.path.join(CURRENT_DIR_PATH, "plugins")
 PLUGINS_IMPORT_STR = "routine_butler.plugins.{module}"
 
-# G Suite credentials manager
-G_SUITE_CREDENTIALS_PATH = os.path.join(
-    PROJECT_DIR_PATH, "google_credentials.json"
-)
-G_SUITE_CREDENTIALS_MANAGER = G_Suite_Credentials_Manager(
-    G_SUITE_CREDENTIALS_PATH
-)
-
-G_DRIVE_STORAGE_FOLDER_NAME = "Routine Butler"
-
-# Globally-used CloudStorageBucket object
-STORAGE_BUCKET: CloudStorageBucket = GoogleDriveFolder(
-    G_DRIVE_STORAGE_FOLDER_NAME, G_SUITE_CREDENTIALS_MANAGER
-)
-
-# Folder within the root of storage bucket where flashcard sheets are stored
-FLASHCARDS_FOLDER_NAME = "flashcards"
-
-# Gloablly-used DataframeLike type
-# NOTE: partial is used here to maintain the consistency of the constructor interface
-# since GoogleSheet uniquely requires root_folder_name and credentials_manager args
-DATAFRAME_LIKE: Type[DataframeLike] = partial(
-    GoogleSheet,
-    root_folder_name=G_DRIVE_STORAGE_FOLDER_NAME,
-    credentials_manager=G_SUITE_CREDENTIALS_MANAGER,
-)
-
-# Database
-TEST_DB_URL = f"sqlite:///{TEST_DB_PATH}"
-DB_URL = f"sqlite:///{DB_PATH}"
-TEST_USER_USERNAME = "test"
-SINGLE_USER_MODE_USERNAME = "CVxaUwC0Lkg7znaOMtwQP"
-
-# Time Constants
-CONSTANT_RING_INTERVAL = 1  # Time between noises for "constant" ringing
-PERIODIC_RING_INTERVAL = 60  # Time between noises for "periodic" ringing
-
-N_SECONDS_BW_RING_CHECKS = 1  # Check every n secs for alarm that should ring
-
-BINDING_REFRESH_INTERVAL_SECONDS = 0.3  # Higher is more cpu friendly
-THROTTLE_SECONDS = 0.7  # For event handlers that would otherwise be spammed
+# Page paths
 
 
 class PagePath(StrEnum):
@@ -78,6 +42,58 @@ class PagePath(StrEnum):
     SET_PROGRAMS = "/configure-programs"
     LOGIN = "/login"
     RING = "/ring"
+
+
+# G Suite credentials manager
+
+G_SUITE_CREDENTIALS_PATH = os.path.join(
+    PROJECT_DIR_PATH, "google_credentials.json"
+)
+G_SUITE_CREDENTIALS_MANAGER = G_Suite_Credentials_Manager(
+    G_SUITE_CREDENTIALS_PATH,
+    MAIN_SERVER_PORT,
+    TEMP_EXTRA_SERVER_PORT,
+    PagePath.SET_PROGRAMS,
+)
+
+G_DRIVE_STORAGE_FOLDER_NAME = "Routine Butler"
+
+# Globally-used CloudStorageBucket object
+
+STORAGE_BUCKET: CloudStorageBucket = GoogleDriveFolder(
+    G_DRIVE_STORAGE_FOLDER_NAME, G_SUITE_CREDENTIALS_MANAGER
+)
+
+# Folder within the root of storage bucket where flashcard sheets are stored
+
+FLASHCARDS_FOLDER_NAME = "flashcards"
+
+# Gloablly-used DataframeLike type
+# NOTE: partial is used here to maintain the consistency of the constructor interface
+# since GoogleSheet uniquely requires root_folder_name and credentials_manager args
+
+DATAFRAME_LIKE: Type[DataframeLike] = partial(
+    GoogleSheet,
+    root_folder_name=G_DRIVE_STORAGE_FOLDER_NAME,
+    credentials_manager=G_SUITE_CREDENTIALS_MANAGER,
+)
+
+# Database
+
+TEST_DB_URL = f"sqlite:///{TEST_DB_PATH}"
+DB_URL = f"sqlite:///{DB_PATH}"
+TEST_USER_USERNAME = "test"
+SINGLE_USER_MODE_USERNAME = "CVxaUwC0Lkg7znaOMtwQP"
+
+# Time Constants
+
+CONSTANT_RING_INTERVAL = 1  # Time between noises for "constant" ringing
+PERIODIC_RING_INTERVAL = 60  # Time between noises for "periodic" ringing
+
+N_SECONDS_BW_RING_CHECKS = 1  # Check every n secs for alarm that should ring
+
+BINDING_REFRESH_INTERVAL_SECONDS = 0.3  # Higher is more cpu friendly
+THROTTLE_SECONDS = 0.7  # For event handlers that would otherwise be spammed
 
 
 PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW = [
@@ -98,19 +114,6 @@ class ICON_STRS:  # Quasar material icons
     dark_mode = "dark_mode"
     light_mode = "light_mode"
     g_suite = "add_to_drive"
-    # Maybe use some of these later?
-    # app = "token"
-    # settings = "settings"
-    # config = "settings_input_component"
-    # sidebar = "menu"
-    # add_alarm = "alarm_add"
-    # lock = "lock_outline"
-    # unlock = "lock_open"
-    # start = "not_started"
-    # person = "accessibility_new"
-    # panels = "dashboard"
-    # check = "done"
-    # cancel = "cancel"
 
 
 class CLR_CODES:

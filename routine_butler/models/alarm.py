@@ -3,7 +3,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel
 
-from routine_butler.configs import N_SECONDS_BW_RING_CHECKS
+from routine_butler.globals import N_SECONDS_BW_RING_CHECKS
 
 
 class RingFrequency(StrEnum):

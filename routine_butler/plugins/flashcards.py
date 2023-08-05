@@ -10,7 +10,7 @@ from nicegui import ui
 from pydantic import BaseModel
 
 from routine_butler.components import micro
-from routine_butler.configs import (
+from routine_butler.globals import (
     DATAFRAME_LIKE,
     FLASHCARDS_FOLDER_NAME,
     STORAGE_BUCKET,

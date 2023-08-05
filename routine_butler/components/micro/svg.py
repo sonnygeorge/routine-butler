@@ -5,7 +5,7 @@ from typing import Optional, Union
 
 from nicegui import ui
 
-from routine_butler.configs import (
+from routine_butler.globals import (
     APP_LOGO_SVG_PATH,
     PROGRAM_SVG_PATH,
     REWARD_SVG_PATH,

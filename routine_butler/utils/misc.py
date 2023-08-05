@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, Protocol, Type
 from loguru import logger
 from nicegui import ui
 
-from routine_butler.configs import (
+from routine_butler.globals import (
     CLR_CODES,
     N_SECONDS_BW_RING_CHECKS,
     PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW,
