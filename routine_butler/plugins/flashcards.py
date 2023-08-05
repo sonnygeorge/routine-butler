@@ -15,23 +15,23 @@ from routine_butler.globals import (
     FLASHCARDS_FOLDER_NAME,
     STORAGE_BUCKET,
 )
+from routine_butler.plugins._flashcards.calculations import (
+    get_n_to_cache,
+    get_threshold_probability,
+)
 
-# TODO: Augment progress label to include X/Y cards
-# TODO: Error handling for when more than two columns detected
-# TODO: Figure out how to get google auth flow seamlessly into app
-# TODO: Make height automatically size
 # TODO: Possible speedups:
-#   * 1.
-#     - change n_minutes to n_cards in cache_n_minutes_of_cards
-#     - move the math of how many cards to cache to _get_flashcards_queue
-#     - make it reflect the 70% quantile for how many cards would be selected
-#     - make the selection probabilities of cards in cache diminish after selections
+#   * 1. Make shape() more efficient
 #   * 2.
 #     - change the dataframe-like interface to get consecutive rows idxs in one call
 #     - modify the cache function to: pre-select the idxs it will retrieve, sort them
 #       into ranges of consecutive idxs, and retrieve ranges instead of individual rows
 #     - make sure this pre-selection is done without replacement to avoid
 #       redundant calls
+
+# TODO: Error handling for when more than two columns detected
+# TODO: Figure out how to get google auth flow seamlessly into app
+# TODO: Make height automatically size
 # TODO: Change state/button strategy to have a flip button & a next button that
 #       appears or becomes active after the flip button is clicked...
 #       No need for "final" button / state hoo-hah
@@ -72,15 +72,9 @@ class FlashcardCollection:
             f"- ⏱️: {self.avg_seconds_per_card}"
         )
 
-    async def cache_n_minutes_of_cards(self, n_minutes: int) -> None:
-        n_to_cache = int(n_minutes * 60 / self.avg_seconds_per_card)
-        n_rows, n_columns = await self.dataframe_like.shape()
-        logger.info(
-            f"Attempting retrieval and cache of {n_to_cache} flashcards for "
-            f"collection '{self.name}' of shape: {n_rows, n_columns}"
-        )
-        choosable_idxs = list(range(n_rows))
-
+    async def cache_n_cards(self, n_to_cache: int, n_possible: int) -> None:
+        n_to_cache = min(n_to_cache, n_possible)
+        choosable_idxs = list(range(n_possible))
         for _ in range(n_to_cache):
             if len(choosable_idxs) == 0:
                 break
@@ -93,13 +87,13 @@ class FlashcardCollection:
                     f"Couldn't parse flashcard at idx: {idx} -- "
                     f"Expected 2 columns in sheet but got: {row}"
                 )
-            choosable_idxs.remove(idx)
+            choosable_idxs.remove(idx)  # without replacement
 
     def get_random_card(self) -> Flashcard:
         return random.choice(self.cached_cards)
 
 
-async def get_collections_to_read(
+async def get_paths_of_collections_to_load(
     path: Optional[str] = None,
 ) -> List[str]:
     """Given the the path attribute of a flashcards program, return a list of the paths
@@ -115,7 +109,8 @@ async def get_collections_to_read(
     for item in items:
         item_path = f"{path}/{item.name}" if path else item.name
         if item.is_dir:
-            sheets_to_read.extend(await get_collections_to_read(item_path))
+            collections = await get_paths_of_collections_to_load(item_path)
+            sheets_to_read.extend(collections)
         else:
             sheets_to_read.append(item_path)
     return sheets_to_read
@@ -132,10 +127,12 @@ class FlashcardsGui:
         self.collections: List[FlashcardCollection] = []
         self.flashcards_queue: List[Flashcard] = []
         self.n_collections_found = 0
+        self.n_collections_inspected = 0
+        self.n_collections_loaded = 0
         self.retrieval_has_completed = False
         ui.timer(
             0.1,
-            lambda: self._get_collections(data.path, data.target_minutes),
+            lambda: self._get_flashcards_queue(data.path, data.target_minutes),
             once=True,
         )
         self.recurring_update = ui.timer(0.1, self._update_ui)
@@ -145,63 +142,19 @@ class FlashcardsGui:
         self.frame = micro.card().classes("flex flex-col items-center")
         with self.frame:
             ui.label("🐛🐜🐢...")
-        self.progress_label = ui.label("").classes("text-xs text-gray-500")
+        self.progress_label = ui.label("").classes("text-xs text-gray-400")
 
-    async def _get_collections(
-        self, path: str, target_minutes: int
-    ) -> List[FlashcardCollection]:
-        # Get paths of collections
-        if path == "":
-            path = FLASHCARDS_FOLDER_NAME
-        else:
-            path = f"{FLASHCARDS_FOLDER_NAME}/{path}"
-        collection_paths = await get_collections_to_read(path)
-        # Parse collections
-        collections: List[FlashcardCollection] = []
-        for path in collection_paths:
-            try:
-                collections.append(FlashcardCollection(path))
-            except Exception as e:
-                logger.warning(
-                    f"Couldn't parse flashcard collection: {path} - {e}"
-                )
-        self.n_collections_found = len(collections)
-        logger.info(f"Found {self.n_collections_found} flashcard collections")
-        await asyncio.sleep(0.1)
-        # Retrieve & cache cards for each collection
-        for collection in collections:
-            await collection.cache_n_minutes_of_cards(target_minutes)
-            self.collections.append(collection)
-            await asyncio.sleep(0.1)
-        await self._get_flashcards_queue(target_minutes)
-        self.retrieval_has_completed = True
-
-    async def _get_flashcards_queue(
-        self, target_minutes: int
-    ) -> List[Flashcard]:
-        _denom = sum([c.random_choice_weight for c in self.collections])
-        PROBS = [c.random_choice_weight / _denom for c in self.collections]
-
-        _target_secs = target_minutes * 60
-        _avg_secs = [c.avg_seconds_per_card for c in self.collections]
-        _overall_avg_secs = sum([s * p for s, p in zip(_avg_secs, PROBS)])
-        SECONDS_CAP = _target_secs - _overall_avg_secs
-
-        seconds_elapsed = 0
-        while seconds_elapsed < SECONDS_CAP:
-            collection = random.choices(self.collections, PROBS)[0]
-            card = collection.get_random_card()
-            self.flashcards_queue.append(card)
-            await asyncio.sleep(0.1)
-            seconds_elapsed += int(collection.avg_seconds_per_card)
+    def _generate_progress_str(self) -> str:
+        progress_str = f"{self.n_collections_inspected}/"
+        progress_str += f"{self.n_collections_found} collections inspected"
+        progress_str += f" | {self.n_collections_loaded}/"
+        progress_str += f"{self.n_collections_found} collections loaded | "
+        progress_str += f"{int(time.time() - self.start_time)}s elapsed"
+        return progress_str
 
     def _update_ui(self):
         if not self.retrieval_has_completed:
-            progress_str = f"{len(self.collections)}/"
-            progress_str += f"{self.n_collections_found} collections loaded | "
-            progress_str += f"{len(self.flashcards_queue)} flashcards queued"
-            progress_str += f" | {int(time.time() - self.start_time)}s elapsed"
-            self.progress_label.set_text(progress_str)
+            self.progress_label.set_text(self._generate_progress_str())
             return
         self.recurring_update.deactivate()
         fcard = self.flashcards_queue[self.current_card_idx]
@@ -217,6 +170,77 @@ class FlashcardsGui:
             proceed_button = ui.button(self.state)
             ui.label(collection)
         proceed_button.on("click", self._hdl_button_click)
+
+    async def _get_flashcards_queue(
+        self, path: str, target_minutes: int
+    ) -> List[FlashcardCollection]:
+        ## Get paths of collections
+        if path == "":
+            path = FLASHCARDS_FOLDER_NAME
+        else:
+            path = f"{FLASHCARDS_FOLDER_NAME}/{path}"
+        collection_paths = await get_paths_of_collections_to_load(path)
+
+        ## Parse paths and create collections
+        uninspected_collections: List[FlashcardCollection] = []
+        for path in collection_paths:
+            try:
+                uninspected_collections.append(FlashcardCollection(path))
+            except Exception as e:
+                logger.warning(
+                    f"Couldn't parse flashcard collection: {path} - {e}"
+                )
+        self.n_collections_found = len(uninspected_collections)
+        await asyncio.sleep(0.1)
+
+        ## Inspect the shape of the dataframe of each collection and add to
+        #  collections if it has a valid shape
+        self.n_collections_inspected = 0
+        N_CARDS_IN_COLLECTIONS = []
+        for collection in uninspected_collections:
+            n_rows, n_cols = await collection.dataframe_like.shape()
+            if n_cols != 2:
+                warning = f"Skipping collection '{collection.name}' because it"
+                warning += f" has {n_cols} columns. Expected 2."
+                logger.warning(warning)
+                ui.notify(warning, icon="warning")
+            else:
+                self.collections.append(collection)
+                N_CARDS_IN_COLLECTIONS.append(n_rows)
+            self.n_collections_inspected += 1
+            await asyncio.sleep(0.1)
+        self.n_collections_found = len(self.collections)  # Update accordingly
+
+        ## Load (retrieve & cache cards for) each collection
+        _denom = sum([c.random_choice_weight for c in self.collections])
+        PROBS = [c.random_choice_weight / _denom for c in self.collections]
+        THRESHOLD_PROB = get_threshold_probability(self.n_collections_found)
+        TARGET_SECONDS = target_minutes * 60
+        self.n_collections_loaded = 0
+        zipped = zip(self.collections, PROBS, N_CARDS_IN_COLLECTIONS)
+        for collection, selection_prob, n_possible_cards in zipped:
+            n_to_cache = get_n_to_cache(
+                collection=collection,
+                selection_probability=selection_prob,
+                threshold_probability=THRESHOLD_PROB,
+                target_seconds=TARGET_SECONDS,
+            )
+            await collection.cache_n_cards(n_to_cache, n_possible_cards)
+            self.n_collections_loaded += 1
+            await asyncio.sleep(0.1)
+
+        ## Queue up cards
+        _avg_secs = [c.avg_seconds_per_card for c in self.collections]
+        _overall_avg_secs = sum([s * p for s, p in zip(_avg_secs, PROBS)])
+        SECONDS_CAP = TARGET_SECONDS - _overall_avg_secs
+        seconds_elapsed = 0
+        while seconds_elapsed < SECONDS_CAP:
+            collection = random.choices(self.collections, PROBS)[0]
+            card = collection.get_random_card()
+            self.flashcards_queue.append(card)
+            await asyncio.sleep(0.1)
+            seconds_elapsed += int(collection.avg_seconds_per_card)
+        self.retrieval_has_completed = True
 
     def _hdl_button_click(self):
         if self.state == self.State.FRONT:
