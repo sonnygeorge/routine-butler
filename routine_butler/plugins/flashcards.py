@@ -19,9 +19,11 @@ from routine_butler.plugins._flashcards.calculations import (
     get_n_to_cache,
     get_threshold_probability,
 )
+from routine_butler.utils.cloud_storage_bucket.base import (
+    CloudStorageBucketItem,
+)
 
 # TODO: Possible speedups:
-#   * 1. Make shape() more efficient
 #   * 2.
 #     - change the dataframe-like interface to get consecutive rows idxs in one call
 #     - modify the cache function to: pre-select the idxs it will retrieve, sort them
@@ -29,9 +31,6 @@ from routine_butler.plugins._flashcards.calculations import (
 #     - make sure this pre-selection is done without replacement to avoid
 #       redundant calls
 
-# TODO: Error handling for when more than two columns detected
-# TODO: Figure out how to get google auth flow seamlessly into app
-# TODO: Make height automatically size
 # TODO: Change state/button strategy to have a flip button & a next button that
 #       appears or becomes active after the flip button is clicked...
 #       No need for "final" button / state hoo-hah
@@ -42,11 +41,13 @@ from routine_butler.plugins._flashcards.calculations import (
 #   * dataframe-like -> data-client? data-interface? data-source?
 #   * configs.py -> globals.py?
 #   * sheet vs. workbook vs. collection etc.
-# TODO: seperate this code into different files in _flashcards folder
+# TODO: Seperate this code into different files in _flashcards folder
 # TODO: Remove repeated retry code in google api calls
 
 WIDTH = 700
 HEIGHT = 370
+
+MAX_ROWS_TO_CACHE_ALL = 300
 
 
 @dataclass
@@ -80,14 +81,12 @@ class FlashcardCollection:
                 break
             idx = random.choice(choosable_idxs)
             row = await self.dataframe_like.get_row_at_idx(idx)
-            try:
-                self.cached_cards.append(Flashcard(row[0], row[1], self))
-            except IndexError:
-                logger.warning(
-                    f"Couldn't parse flashcard at idx: {idx} -- "
-                    f"Expected 2 columns in sheet but got: {row}"
-                )
+            self.cached_cards.append(Flashcard(row[0], row[1], self))
             choosable_idxs.remove(idx)  # without replacement
+
+    async def cache_all_cards(self) -> None:
+        for row in await self.dataframe_like.get_all_rows():
+            self.cached_cards.append(Flashcard(row[0], row[1], self))
 
     def get_random_card(self) -> Flashcard:
         return random.choice(self.cached_cards)
@@ -100,7 +99,9 @@ async def get_paths_of_collections_to_load(
     of sheets that should be read"""
     path_arg = None if path == "" else path
     try:
-        items = await STORAGE_BUCKET.list(path_arg)
+        items: List[CloudStorageBucketItem] = await STORAGE_BUCKET.list(
+            path_arg
+        )
     except ValueError:  # if list() raises ValueError...
         # ...the path is not a folder. We therefore assume it is a sheet.
         return [path]
@@ -126,7 +127,7 @@ class FlashcardsGui:
         self.on_complete = on_complete
         self.collections: List[FlashcardCollection] = []
         self.flashcards_queue: List[Flashcard] = []
-        self.n_collections_found = 0
+        self.n_collections = 0
         self.n_collections_inspected = 0
         self.n_collections_loaded = 0
         self.retrieval_has_completed = False
@@ -146,9 +147,9 @@ class FlashcardsGui:
 
     def _generate_progress_str(self) -> str:
         progress_str = f"{self.n_collections_inspected}/"
-        progress_str += f"{self.n_collections_found} collections inspected"
+        progress_str += f"{self.n_collections} collections inspected"
         progress_str += f" | {self.n_collections_loaded}/"
-        progress_str += f"{self.n_collections_found} collections loaded | "
+        progress_str += f"{self.n_collections} collections loaded | "
         progress_str += f"{int(time.time() - self.start_time)}s elapsed"
         return progress_str
 
@@ -164,7 +165,7 @@ class FlashcardsGui:
         self.frame.clear()
         with self.frame:
             ui.label(prog)
-            card = micro.card().style(f"width: {WIDTH}px; height: {HEIGHT}px")
+            card = micro.card().style(f"width: {WIDTH}px;")
             with card.classes("flex flex-col items-center justify-center"):
                 ui.markdown(text)
             proceed_button = ui.button(self.state)
@@ -190,7 +191,7 @@ class FlashcardsGui:
                 logger.warning(
                     f"Couldn't parse flashcard collection: {path} - {e}"
                 )
-        self.n_collections_found = len(uninspected_collections)
+        self.n_collections = len(uninspected_collections)
         await asyncio.sleep(0.1)
 
         ## Inspect the shape of the dataframe of each collection and add to
@@ -209,23 +210,28 @@ class FlashcardsGui:
                 N_CARDS_IN_COLLECTIONS.append(n_rows)
             self.n_collections_inspected += 1
             await asyncio.sleep(0.1)
-        self.n_collections_found = len(self.collections)  # Update accordingly
+        self.n_collections = len(self.collections)  # Update accordingly
 
         ## Load (retrieve & cache cards for) each collection
         _denom = sum([c.random_choice_weight for c in self.collections])
         PROBS = [c.random_choice_weight / _denom for c in self.collections]
-        THRESHOLD_PROB = get_threshold_probability(self.n_collections_found)
+        THRESHOLD_PROB = get_threshold_probability(self.n_collections)
         TARGET_SECONDS = target_minutes * 60
         self.n_collections_loaded = 0
         zipped = zip(self.collections, PROBS, N_CARDS_IN_COLLECTIONS)
-        for collection, selection_prob, n_possible_cards in zipped:
-            n_to_cache = get_n_to_cache(
-                collection=collection,
-                selection_probability=selection_prob,
-                threshold_probability=THRESHOLD_PROB,
-                target_seconds=TARGET_SECONDS,
-            )
-            await collection.cache_n_cards(n_to_cache, n_possible_cards)
+        for collection, selection_prob, n_cards_in_collection in zipped:
+            if n_cards_in_collection <= MAX_ROWS_TO_CACHE_ALL:
+                await collection.cache_all_cards()
+            else:
+                n_to_cache = get_n_to_cache(
+                    collection=collection,
+                    selection_probability=selection_prob,
+                    threshold_probability=THRESHOLD_PROB,
+                    target_seconds=TARGET_SECONDS,
+                )
+                await collection.cache_n_cards(
+                    n_to_cache, n_cards_in_collection
+                )
             self.n_collections_loaded += 1
             await asyncio.sleep(0.1)
 

@@ -83,12 +83,6 @@ class Header(ui.header):
             if not hide_navigation_buttons:
                 with right_row:
                     vertical_separator()
-                    # g suite button
-                    header_button(
-                        icon=ICON_STRS.g_suite,
-                        on_click=self._hdl_g_suite_button_click,
-                    ).props("text-color=white")
-                    vertical_separator()
                     # configure-routines nav button
                     routine_button = header_button()
                     with routine_button:
@@ -110,6 +104,12 @@ class Header(ui.header):
                 # light mode button
                 header_button(
                     icon=ICON_STRS.light_mode, on_click=dark.disable
+                ).props("text-color=white")
+                vertical_separator()
+                # g suite button
+                header_button(
+                    icon=ICON_STRS.g_suite,
+                    on_click=self._hdl_g_suite_button_click,
                 ).props("text-color=white")
                 vertical_separator()
                 # next alarm display

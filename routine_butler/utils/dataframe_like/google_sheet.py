@@ -38,6 +38,8 @@ class GoogleSheet(DataframeLike):
         self.credentials_manager = credentials_manager
         self._file_id: str = None
         self._sheet_name: str = None
+        self.num_rows = None
+        self.num_cols = None
 
     async def _get_drive_service_object(self) -> GoogleDriveServiceObject:
         """Builds and returns a Google Drive service object."""
@@ -124,7 +126,7 @@ class GoogleSheet(DataframeLike):
         service = await self._get_sheets_service_object()
         await self._ascertain_sheet_name(service)
 
-        sheet_range = f"{self._sheet_name}!{idx+1}:{idx+1}"
+        sheet_range = f"Sheet1!{idx+1}:{idx+1}"
         for _ in range(N_RETRIES):
             try:
                 resp = (
@@ -139,12 +141,12 @@ class GoogleSheet(DataframeLike):
                 time.sleep(SECONDS_BETWEEN_RETRIES)
         return resp["values"][0]
 
-    async def shape(self) -> Tuple[int, int]:
-        """Returns the number of populated rows and columns in the sheet."""
+    async def get_all_rows(self) -> List[List[Any]]:
+        """Returns all rows in the sheet as a two-dimensional list of values."""
         service = await self._get_sheets_service_object()
         await self._ascertain_sheet_name(service)
 
-        sheet_range = f"{self._sheet_name}!A1:ZZ"
+        sheet_range = f"Sheet1!1:{self.num_rows}"
         for _ in range(N_RETRIES):
             try:
                 resp = (
@@ -157,8 +159,36 @@ class GoogleSheet(DataframeLike):
             except HttpError as e:
                 logger.warning(e)
                 time.sleep(SECONDS_BETWEEN_RETRIES)
-        if "values" not in resp:
-            return 0, 0
-        rows = len(resp["values"])
-        cols = max([len(row) for row in resp["values"]])
-        return rows, cols
+        return resp["values"]
+
+    async def _ascertain_spreadsheet_metadata(
+        self, service: GoogleSheetsServiceObject
+    ) -> None:
+        if self._file_id is None:
+            await self._ascertain_file_id()
+
+        for _ in range(N_RETRIES):
+            try:
+                resp = (
+                    service.spreadsheets()
+                    .get(spreadsheetId=self._file_id)
+                    .execute()
+                )
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
+
+        self._sheet_name = resp["properties"]["title"]
+        properties = resp["sheets"][0]["properties"]
+        self.num_rows = properties["gridProperties"]["rowCount"]
+        self.num_cols = properties["gridProperties"]["columnCount"]
+
+    async def shape(self) -> Tuple[int, int]:
+        """Returns the number of populated rows and columns in the sheet."""
+        service = await self._get_sheets_service_object()
+
+        if self.num_rows is None or self.num_cols is None:
+            await self._ascertain_spreadsheet_metadata(service)
+
+        return self.num_rows, self.num_cols
