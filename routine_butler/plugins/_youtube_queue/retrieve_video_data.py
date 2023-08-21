@@ -17,8 +17,8 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from routine_butler.plugins._youtube.schema import Video
-from routine_butler.plugins._youtube.utils import QUEUE_PARAMS
+from routine_butler.plugins._youtube_queue.schema import Video
+from routine_butler.plugins._youtube_queue.utils import QUEUE_PARAMS
 
 if platform == "darwin":
     try:

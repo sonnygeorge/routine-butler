@@ -15,7 +15,7 @@ from routine_butler.utils.google.g_suite_credentials_manager import (
     G_Suite_Credentials_Manager,
 )
 
-N_RETRIES = 20
+N_RETRIES = 13
 SECONDS_BETWEEN_RETRIES = 3
 
 
@@ -141,12 +141,12 @@ class GoogleSheet(DataframeLike):
                 time.sleep(SECONDS_BETWEEN_RETRIES)
         return resp["values"][0]
 
-    async def get_all_rows(self) -> List[List[Any]]:
+    async def get_all_data(self) -> List[List[Any]]:
         """Returns all rows in the sheet as a two-dimensional list of values."""
         service = await self._get_sheets_service_object()
         await self._ascertain_sheet_name(service)
 
-        sheet_range = f"Sheet1!1:{self.num_rows}"
+        sheet_range = "Sheet1"
         for _ in range(N_RETRIES):
             try:
                 resp = (

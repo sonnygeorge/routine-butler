@@ -52,7 +52,7 @@ class User(BaseDBPydanticModel):
     ) -> Union[List[Routine], List[Program]]:
         """Queries the database for all children of the given type"""
         is_child_filter_expr = child_type.Config.orm_model.user_uid == self.uid
-        return child_type.query(engine, filter_=is_child_filter_expr)
+        return child_type.query(engine, filter_expr=is_child_filter_expr)
 
     def add_routine(self, engine: Engine, routine: Routine) -> None:
         """Adds the given routine to the database"""

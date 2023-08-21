@@ -4,7 +4,7 @@ import json
 import os
 
 from routine_butler.globals import CURRENT_DIR_PATH
-from routine_butler.plugins._youtube.schema import (
+from routine_butler.plugins._youtube_queue.schema import (
     ChannelScoringData,
     QueueParams,
 )
@@ -12,10 +12,10 @@ from routine_butler.plugins._youtube.schema import (
 N_DAYS_RETAINED_WATCH_HISTORY: int = 90
 
 _ABS_WATCHED_VIDEOS_CSV_FILE_PATH = os.path.join(
-    CURRENT_DIR_PATH, "plugins/_youtube/watched_videos.csv"
+    CURRENT_DIR_PATH, "plugins/_youtube_queue/watched_videos.csv"
 )
 _ABS_QUEUE_GENERATION_PREFERENCES_PATH = os.path.join(
-    CURRENT_DIR_PATH, "plugins/_youtube/queue_params.json"
+    CURRENT_DIR_PATH, "plugins/_youtube_queue/queue_params.json"
 )
 
 

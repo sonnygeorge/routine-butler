@@ -4,11 +4,13 @@ from nicegui import ui
 from pydantic import BaseModel
 
 from routine_butler.components import micro
-from routine_butler.plugins._youtube.calculate_queue import calculate_queue
-from routine_butler.plugins._youtube.retrieve_video_data import (
+from routine_butler.plugins._youtube_queue.calculate_queue import (
+    calculate_queue,
+)
+from routine_butler.plugins._youtube_queue.retrieve_video_data import (
     retrieve_video_data,
 )
-from routine_butler.plugins._youtube.utils import (
+from routine_butler.plugins._youtube_queue.utils import (
     add_to_watched_video_history,
     get_watched_video_history,
 )

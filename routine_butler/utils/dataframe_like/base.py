@@ -12,6 +12,10 @@ class DataframeLike(Protocol):
         values."""
         ...
 
+    def get_all_data() -> List[List[Any]]:
+        """Returns all data as a list of lists."""
+        ...
+
     def shape(self) -> Tuple[int, int]:
         """Returns the number of rows and columns."""
         ...

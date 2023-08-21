@@ -12,7 +12,7 @@ def login():
     def hdl_login_attempt(username: str):
         # query db for user
         is_user_filter_expr = User.Config.orm_model.username == username
-        user = User.query_one(state.engine, filter_=is_user_filter_expr)
+        user = User.query_one(state.engine, filter_expr=is_user_filter_expr)
 
         if user is None:
             # create new user w/ the given username

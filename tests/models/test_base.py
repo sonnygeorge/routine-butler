@@ -113,7 +113,7 @@ def test_basic_update_self_in_db(engine: Engine):
     assert (hero.updated_at - hero.created_at).total_seconds() > 0.1
     # make sure database returns the same data
     same_id_filter_exp = Hero.Config.orm_model.uid == hero.uid
-    assert hero.query_one(engine, filter_=same_id_filter_exp) == hero
+    assert hero.query_one(engine, filter_expr=same_id_filter_exp) == hero
 
 
 @pytest.mark.xfail(raises=DatabaseUpdateFailedError)
@@ -129,13 +129,15 @@ def test_basic_query_one(engine: Engine):
     hero = Hero()
     hero.add_self_to_db(engine)
     same_id_filter_exp = Hero.Config.orm_model.uid == hero.uid
-    assert hero.query_one(engine, filter_=same_id_filter_exp) == hero
+    assert hero.query_one(engine, filter_expr=same_id_filter_exp) == hero
 
 
 def test_query_one_non_existent(engine: Engine):
     impossible_uid = -1
     impossible_uid_filter_exp = Hero.Config.orm_model.uid == impossible_uid
-    assert Hero.query_one(engine, filter_=impossible_uid_filter_exp) is None
+    assert (
+        Hero.query_one(engine, filter_expr=impossible_uid_filter_exp) is None
+    )
 
 
 def test_query_one_multiple_matches(engine: Engine):
@@ -145,7 +147,7 @@ def test_query_one_multiple_matches(engine: Engine):
     hero2.add_self_to_db(engine)
     same_ids_filter_exp = Hero.Config.orm_model.uid.in_([hero1.uid, hero2.uid])
     with pytest.warns():
-        Hero.query_one(engine, filter_=same_ids_filter_exp)
+        Hero.query_one(engine, filter_expr=same_ids_filter_exp)
 
 
 # BaseDBPydanticModel.query_many()
@@ -157,7 +159,7 @@ def test_basic_query_many(engine: Engine):
     hero2 = Hero()
     hero2.add_self_to_db(engine)
     same_ids_filter_exp = Hero.Config.orm_model.uid.in_([hero1.uid, hero2.uid])
-    qry_result = Hero.query(engine, filter_=same_ids_filter_exp)
+    qry_result = Hero.query(engine, filter_expr=same_ids_filter_exp)
     assert qry_result == [hero1, hero2]
 
 
@@ -171,7 +173,7 @@ def test_basic_query_many_no_filter(engine: Engine):
 def test_query_many_no_matches(engine: Engine):
     impossible_uid = -1
     impossible_uid_filter_exp = Hero.Config.orm_model.uid == impossible_uid
-    assert Hero.query(engine, filter_=impossible_uid_filter_exp) == []
+    assert Hero.query(engine, filter_expr=impossible_uid_filter_exp) == []
 
 
 def test_query_many_order_by(engine: Engine):
@@ -184,7 +186,7 @@ def test_query_many_order_by(engine: Engine):
     same_ids_filter_exp = Hero.Config.orm_model.uid.in_(uids)
     name_asc_order_by_exp = Hero.Config.orm_model.name.asc()
     qry_result = Hero.query(
-        engine, filter_=same_ids_filter_exp, order_by=name_asc_order_by_exp
+        engine, filter_expr=same_ids_filter_exp, order_by=name_asc_order_by_exp
     )
     assert [hero.name for hero in qry_result] == sorted(names)
 
@@ -198,7 +200,7 @@ def test_basic_delete_self_from_db(engine: Engine):
     id_before_delete = hero.uid
     hero.delete_self_from_db(engine)
     same_id_filter_exp = Hero.Config.orm_model.uid == id_before_delete
-    assert hero.query_one(engine, filter_=same_id_filter_exp) is None
+    assert hero.query_one(engine, filter_expr=same_id_filter_exp) is None
     assert hero.uid is None
     assert hero.created_at is None and hero.updated_at is None
 

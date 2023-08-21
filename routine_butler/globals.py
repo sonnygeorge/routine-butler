@@ -68,6 +68,10 @@ STORAGE_BUCKET: CloudStorageBucket = GoogleDriveFolder(
 
 FLASHCARDS_FOLDER_NAME = "flashcards"
 
+# Folder within the root of storage bucket where YouTubeVideo sheets are stored
+
+YOUTUBE_VIDEO_FOLDER_NAME = "youtube_video"
+
 # Gloablly-used DataframeLike type
 # NOTE: partial is used here to maintain the consistency of the constructor interface
 # since GoogleSheet uniquely requires root_folder_name and credentials_manager args

@@ -198,7 +198,7 @@ class BaseDBPydanticModel(BaseModel):
 
     @classmethod
     def query_one(
-        cls, engine: Engine, filter_: Optional[BinaryExpression] = None
+        cls, engine: Engine, filter_expr: Optional[BinaryExpression] = None
     ) -> Optional[Self]:
         """Queries the database for a single instance of the model.
 
@@ -210,7 +210,7 @@ class BaseDBPydanticModel(BaseModel):
             Optional[Self]: The first result of the query, or None if no results.
         """
         cls._validate_orm_model()
-        results = cls.query(engine, filter_=filter_, limit=2)
+        results = cls.query(engine, filter_expr=filter_expr, limit=2)
         if len(results) > 1:
             warnings.warn(
                 "query_one() called with a `filter_` argument that returned multiple "
@@ -222,7 +222,7 @@ class BaseDBPydanticModel(BaseModel):
     def query(
         cls,
         engine: Engine,
-        filter_: Optional[BinaryExpression] = None,
+        filter_expr: Optional[BinaryExpression] = None,
         order_by: Optional[UnaryExpression] = None,
         limit: int = 10_000,
     ) -> List[Self]:
@@ -244,8 +244,8 @@ class BaseDBPydanticModel(BaseModel):
             order_by = cls.Config.orm_model.created_at.asc()
         with Session(engine) as session:
             query = session.query(cls.Config.orm_model)
-            if filter_ is not None:
-                query = query.filter(filter_)
+            if filter_expr is not None:
+                query = query.filter(filter_expr)
             results = query.order_by(order_by).limit(limit).all()
             return [cls.from_orm(obj) for obj in results] if results else []
 

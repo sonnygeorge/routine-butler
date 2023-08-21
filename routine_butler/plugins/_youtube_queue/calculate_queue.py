@@ -1,7 +1,10 @@
 from typing import List, Tuple
 
-from routine_butler.plugins._youtube.schema import Video
-from routine_butler.plugins._youtube.utils import QUEUE_PARAMS, QueueParams
+from routine_butler.plugins._youtube_queue.schema import Video
+from routine_butler.plugins._youtube_queue.utils import (
+    QUEUE_PARAMS,
+    QueueParams,
+)
 
 N_QUEUE_VIDEOS_SAFETY_LIMIT = 100
 
