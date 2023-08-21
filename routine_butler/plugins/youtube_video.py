@@ -40,7 +40,7 @@ class YoutubeVideoMode(StrEnum):
     RANDOM = "random"
 
 
-def get_last_watched_video_id(path_or_id: str) -> Optional[str]:
+def get_last_watched_video(path_or_id: str) -> Optional[str]:
     """Returns the video ID of the most recent successfully watched YouTube video in the
     series.
     """
@@ -62,6 +62,20 @@ def get_last_watched_video_id(path_or_id: str) -> Optional[str]:
     return None
 
 
+def convert_list_from_links_to_ids_as_needed(videos: List[str]) -> List[str]:
+    """Converts a list of YouTube video IDs or links to a list of YouTube video IDs.
+
+    Also performs validation."""
+    converted = []
+    for vid in videos:
+        if is_valid_youtube_link(vid):
+            vid = vid.split("=")[1]
+        if not is_valid_youtube_id(vid):
+            raise ValueError(f"Invalid video ID/link: {vid}")
+        converted.append(vid)
+    return converted
+
+
 class YoutubeVideoGui:
     def __init__(self, data: "YoutubeVideo", on_complete: callable):
         self.data = data
@@ -77,10 +91,11 @@ class YoutubeVideoGui:
         invalid_msg = None
         # single mode
         if self.data.mode == YoutubeVideoMode.SINGLE:
-            self.video_id = self.data.path_or_id
+            if is_valid_youtube_id(self.data.path_or_id):
+                self.video_id = self.data.path_or_id
         # series or random mode
         else:
-            try:  # get the video IDs from the dataframe-like at path_or_id
+            try:
                 path = f"{YOUTUBE_VIDEO_FOLDER_NAME}/{self.data.path_or_id}"
                 df_like = DATAFRAME_LIKE(path)
                 videos: List[str] = sum(await df_like.get_all_data(), [])
@@ -90,36 +105,31 @@ class YoutubeVideoGui:
                 if videos == []:
                     invalid_msg = "Dataframe-like is empty."
 
-                # convert to ids if necessary
-                if all([is_valid_youtube_id(vid) for vid in videos]):
-                    video_ids = videos
-                elif all([is_valid_youtube_link(vid) for vid in videos]):
-                    video_ids = [vid.split("=")[-1] for vid in videos]
+                try:
+                    videos = convert_list_from_links_to_ids_as_needed(videos)
+                except ValueError as e:
+                    invalid_msg = str(e)
                 else:
-                    invalid_msg = (
-                        "Dataframe-like contains invalid video IDs/links."
-                    )
-
-                # series mode (plays the next video in the series)
-                if self.data.mode == YoutubeVideoMode.SERIES:
-                    last_vid = get_last_watched_video_id(self.data.path_or_id)
-                    if last_vid is None:
-                        ui.notify(
-                            "No previously watched video found in recent past "
-                            "for this series. Playing first video."
-                        )
-                        self.video_id: str = video_ids[0]
-                    else:
-                        self.video_id: str = video_ids[
-                            video_ids.index(last_vid) + 1
-                        ]
-                # random mode (plays a random video from the series)
-                elif self.data.mode == YoutubeVideoMode.RANDOM:
-                    self.video_id: str = random.choice(video_ids)
-
-        # check if video ID is valid
-        if invalid_msg is None and not is_valid_youtube_id(self.video_id):
-            invalid_msg = f"Invalid video ID: {self.video_id}"
+                    if self.data.mode == YoutubeVideoMode.SERIES:
+                        last_vid = get_last_watched_video(self.data.path_or_id)
+                        if last_vid is None:
+                            ui.notify(
+                                "No previously watched video found in recent "
+                                "past for this series. Playing first video."
+                            )
+                            self.video_id: str = videos[0]
+                        else:
+                            last_vid_idx = videos.index(last_vid)
+                            if last_vid_idx == len(videos) - 1:
+                                ui.notify(
+                                    "Last watched video is the last video in "
+                                    "the series. Playing first video."
+                                )
+                                self.video_id: str = videos[0]
+                            else:
+                                self.video_id: str = videos[last_vid_idx + 1]
+                    elif self.data.mode == YoutubeVideoMode.RANDOM:
+                        self.video_id: str = random.choice(videos)
 
         if invalid_msg is None:  # if no validity issues, add player to the UI
             self.add_player_to_ui()
