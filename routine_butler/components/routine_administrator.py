@@ -8,6 +8,8 @@ from routine_butler.models import Program, ProgramRun, Routine
 from routine_butler.state import state
 from routine_butler.utils.misc import redirect_to_page
 
+# TODO: display name of program being administered somewhere on screen
+
 
 def get_programs_queues(
     routine: Routine,
@@ -73,7 +75,7 @@ class RoutineAdministrator(ui.column):
         if self.has_only_rewards_left_to_administer:
             with self:
                 skip_button = ui.button("Skip Reward")
-                skip_button.on("click", self.on_program_completion)
+                skip_button.on("click", self.on_program_skip)
 
     def _pop_current_program_from_queue(self):
         if len(self.element_programs_queue) > 0:
@@ -82,10 +84,10 @@ class RoutineAdministrator(ui.column):
             self.reward_programs_queue.pop(0)
 
     def _add_program_run_for_current_program_to_db(
-        self, run_date: Optional[dict] = None
+        self, run_data: Optional[dict] = None
     ):
         current_program = self.current_program
-        run_data = run_date or {}
+        run_data = run_data or {}
 
         program_run = ProgramRun(
             program_title=current_program.title,
@@ -102,6 +104,12 @@ class RoutineAdministrator(ui.column):
     def on_program_completion(self, run_data: Optional[dict] = None):
         self.clear()  # clear current program ui
         self._add_program_run_for_current_program_to_db(run_data)  # record run
+        self._pop_current_program_from_queue()  # remove program from queue
+        self._administer_next_program()  # administer next program
+        self.current_program_start_time = datetime.datetime.now()
+
+    def on_program_skip(self):
+        self.clear()  # clear current program ui
         self._pop_current_program_from_queue()  # remove program from queue
         self._administer_next_program()  # administer next program
         self.current_program_start_time = datetime.datetime.now()
