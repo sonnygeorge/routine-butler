@@ -13,6 +13,8 @@ from routine_butler.globals import DATAFRAME_LIKE, YOUTUBE_VIDEO_FOLDER_NAME
 from routine_butler.models import ProgramRun
 from routine_butler.state import state
 
+DB_QUERY_LIMIT = 120
+
 
 def is_valid_youtube_id(to_check):
     if re.match(r"^[A-Za-z0-9_-]{11}$", to_check):
@@ -47,7 +49,7 @@ def get_last_watched_video(path_or_id: str) -> Optional[str]:
     # Get 1000 topmost ProgramRuns of plugin type YoutubeVideo
     filter_expr = ProgramRun.Config.orm_model.plugin_type == "YoutubeVideo"
     res: List[ProgramRun] = ProgramRun.query(
-        engine=state.engine, filter_expr=filter_expr, limit=1000
+        engine=state.engine, filter_expr=filter_expr, limit=DB_QUERY_LIMIT
     )
     # Find most recent successful watch with the given path
     for run in reversed(res):
