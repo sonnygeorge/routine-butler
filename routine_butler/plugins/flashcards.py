@@ -45,7 +45,8 @@ from routine_butler.utils.cloud_storage_bucket.base import (
 # TODO: Remove repeated retry code in google api calls
 
 WIDTH = 700
-HEIGHT = 370
+
+MAX_N_COLLECTIONS = 30
 
 MAX_ROWS_TO_CACHE_ALL = 300
 
@@ -181,6 +182,11 @@ class FlashcardsGui:
         else:
             path = f"{FLASHCARDS_FOLDER_NAME}/{path}"
         collection_paths = await get_paths_of_collections_to_load(path)
+        collection_paths = sorted(
+            collection_paths,
+            key=lambda path: int(path.split("-")[-2]),
+            reverse=True,
+        )[:MAX_N_COLLECTIONS]
 
         ## Parse paths and create collections
         uninspected_collections: List[FlashcardCollection] = []

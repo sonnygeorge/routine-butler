@@ -16,8 +16,8 @@ from routine_butler.plugins._youtube.utils import (
 # FIXME: add listener to video finish to prevent navigation to suggested videos
 
 
-class YoutubeGui:
-    def __init__(self, data: "Youtube", on_complete: callable):
+class YoutubeQueueGui:
+    def __init__(self, data: "YoutubeQueue", on_complete: callable):
         self.data = data
         self.on_complete = on_complete
         self.cur_video_idx = 0
@@ -85,8 +85,8 @@ class YoutubeGui:
         self._update_ui()
 
 
-class Youtube(BaseModel):
+class YoutubeQueue(BaseModel):
     target_duration_minutes: int = 25
 
     def administer(self, on_complete: callable):
-        YoutubeGui(self, on_complete=on_complete)
+        YoutubeQueueGui(self, on_complete=on_complete)

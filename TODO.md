@@ -12,7 +12,7 @@
 ## Trivial UI Improvements
 
 - [ ] 🗑️ Trashcan .png instead of "cancel" icon for delete buttons
-- [ ] 🚥 Add "next-routine: {alarm time}" information to header... IN FACT: **create a reusable component that takes a displays a routine's: name, next active alarm, num elements, & target duration info in a condensed wat and use that in header & routine_configurer icon_expansion headerss**
+- [ ] 🚥 Add "next-routine: {alarm time}" information to header... IN FACT: **create a reusable component that takes a displays a routine's: name, next active alarm, num elements, & target duration info in a condensed way and use that in header & routine_configurer icon_expansion headers**
 - [ ] 🔲🔲 Navigation in header could be more intuitive -- I.E. look more like navigation tabs than icon buttons 🚧
 - [ ] 🔵➡️⚫ When disabling switches, toggle the associated element colors to gray to visualize what is getting disabled
 

@@ -32,6 +32,6 @@ class Program(BaseDBPydanticModel):
     class Config:
         orm_model = ProgramORM
 
-    def administer(self, on_complete: callable):
+    def administer(self, on_complete: callable) -> dict:
         plugin = state.plugins[self.plugin_type](**self.plugin_dict)
         plugin.administer(on_complete=on_complete)

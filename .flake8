@@ -5,3 +5,4 @@ per-file-ignores =
     database.py:F401
     header.py:E731
     elements_expansion.py:E731
+    flashcards.py:E266
