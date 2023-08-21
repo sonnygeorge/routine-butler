@@ -3,7 +3,7 @@ import random
 import time
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from loguru import logger
 from nicegui import ui
@@ -15,26 +15,20 @@ from routine_butler.globals import (
     FLASHCARDS_FOLDER_NAME,
     STORAGE_BUCKET,
 )
-from routine_butler.plugins._flashcards.calculations import (
-    get_n_to_cache,
-    get_threshold_probability,
-)
+
+# from routine_butler.plugins._flashcards.calculations import (
+#     get_n_to_cache,
+#     get_threshold_probability,
+# )
 from routine_butler.utils.cloud_storage_bucket.base import (
     CloudStorageBucketItem,
 )
 
-# TODO: Possible speedups:
-#   * 2.
-#     - change the dataframe-like interface to get consecutive rows idxs in one call
-#     - modify the cache function to: pre-select the idxs it will retrieve, sort them
-#       into ranges of consecutive idxs, and retrieve ranges instead of individual rows
-#     - make sure this pre-selection is done without replacement to avoid
-#       redundant calls
+# FIXME: Have mastery inversely correlate to probability of being chosen
+# FIXME: Have appetite correlate to probability of being chosen
+# FIXME: Have bad formatting make probability of being chosen 0
 
-# TODO: Change state/button strategy to have a flip button & a next button that
-#       appears or becomes active after the flip button is clicked...
-#       No need for "final" button / state hoo-hah
-# TODO: Move "state" to configs and call it STATE
+
 # TODO: Consider naming of dataframe-like, g_suite, cloud_storage_bucket, etc.
 #   * cloud_storage_bucket -> storage_bucket?
 #   * g_suite -> google?
@@ -44,11 +38,19 @@ from routine_butler.utils.cloud_storage_bucket.base import (
 # TODO: Seperate this code into different files in _flashcards folder
 # TODO: Remove repeated retry code in google api calls
 
+## TODO: Move "state" to configs and call it STATE
+
 WIDTH = 700
+MAX_N_COLLECTIONS = 36
+DEFAULT_MASTERY = 2
+DEFAULT_APPETITE = 3
 
-MAX_N_COLLECTIONS = 30
 
-MAX_ROWS_TO_CACHE_ALL = 300
+@dataclass
+class FlashcardMetadata:
+    mastery: Optional[int] = None  # 0-10
+    appetite: Optional[int] = None  # 0-10 ("appetite" to review again soon)
+    has_bad_formatting: Optional[bool] = None
 
 
 @dataclass
@@ -56,11 +58,28 @@ class Flashcard:
     front: str
     back: str
     collection: "FlashcardCollection"
+    collection_idx: int
+    metadata: Optional[FlashcardMetadata] = None
+
+    @property
+    def row(self) -> List[str]:
+        return [
+            self.front,
+            self.back,
+            self.metadata.mastery,
+            self.metadata.appetite,
+            int(self.metadata.has_bad_formatting),
+        ]
+
+    async def update_source(self):
+        await self.collection.dataframe_like.update_row_at_idx(
+            self.collection_idx, self.row
+        )
 
 
 class FlashcardCollection:
     def __init__(self, path_to_collection: str):
-        # "{name}-{random_choice_weight}-{avg_seconds_per_card}"
+        # title format: "{name}-{random_choice_weight}-{avg_seconds_per_card}"
         fname: str = path_to_collection.split("/")[-1]
         self.avg_seconds_per_card: int = int(fname.split("-")[-1])
         self.random_choice_weight: int = int(fname.split("-")[-2])
@@ -74,20 +93,24 @@ class FlashcardCollection:
             f"- ⏱️: {self.avg_seconds_per_card}"
         )
 
-    async def cache_n_cards(self, n_to_cache: int, n_possible: int) -> None:
-        n_to_cache = min(n_to_cache, n_possible)
-        choosable_idxs = list(range(n_possible))
-        for _ in range(n_to_cache):
-            if len(choosable_idxs) == 0:
-                break
-            idx = random.choice(choosable_idxs)
-            row = await self.dataframe_like.get_row_at_idx(idx)
-            self.cached_cards.append(Flashcard(row[0], row[1], self))
-            choosable_idxs.remove(idx)  # without replacement
-
     async def cache_all_cards(self) -> None:
-        for row in await self.dataframe_like.get_all_rows():
-            self.cached_cards.append(Flashcard(row[0], row[1], self))
+        for idx, row in enumerate(await self.dataframe_like.get_all_data()):
+            if len(row) == 5:
+                metadata = FlashcardMetadata(
+                    mastery=int(row[2]),
+                    appetite=int(row[3]),
+                    has_bad_formatting=bool(int(row[4])),
+                )
+            else:
+                metadata = FlashcardMetadata()
+            if len(row) == 2:
+                self.cached_cards.append(
+                    Flashcard(row[0], row[1], self, idx, metadata=metadata)
+                )
+            else:
+                msg = f"Row {idx} of {self.name} has {len(row)} columns"
+                logger.warning(msg)
+                ui.notify(msg, level="warning")
 
     def get_random_card(self) -> Flashcard:
         return random.choice(self.cached_cards)
@@ -118,6 +141,19 @@ async def get_paths_of_collections_to_load(
     return sheets_to_read
 
 
+def ctrl_panel_slider(value) -> ui.slider:
+    slider = ui.slider(min=0, max=10, value=value).props("dense")
+    return slider.classes("w-32")
+
+
+def ctrl_panel_label(text) -> ui.label:
+    return ui.label(text).classes("text-xs text-gray-600").props("dense")
+
+
+def ctrl_panel_switch(value) -> ui.switch:
+    return ui.switch(value=value).props("dense")
+
+
 class FlashcardsGui:
     class State(StrEnum):
         FRONT = "Show Answer"
@@ -143,7 +179,7 @@ class FlashcardsGui:
         self.state = self.State.FRONT
         self.frame = micro.card().classes("flex flex-col items-center")
         with self.frame:
-            ui.label("🐛🐜🐢...")
+            ui.label("...")
         self.progress_label = ui.label("").classes("text-xs text-gray-400")
 
     def _generate_progress_str(self) -> str:
@@ -153,6 +189,21 @@ class FlashcardsGui:
         progress_str += f"{self.n_collections} collections loaded | "
         progress_str += f"{int(time.time() - self.start_time)}s elapsed"
         return progress_str
+
+    def add_controls_frame(self, data: FlashcardMetadata) -> Tuple[ui.element]:
+        with ui.row().classes("justify-center justify-center"):
+            ctrl_panel_label("Mastery:")
+            self.mastery_sldr = ctrl_panel_slider(
+                data.mastery or DEFAULT_MASTERY
+            )
+            ctrl_panel_label("Appetite:")
+            self.appetite_sldr = ctrl_panel_slider(
+                data.appetite or DEFAULT_APPETITE
+            )
+            ctrl_panel_label("Has bad formatting?")
+            self.has_bad_formatting_switch = ctrl_panel_switch(
+                data.has_bad_formatting or False
+            )
 
     def _update_ui(self):
         if not self.retrieval_has_completed:
@@ -165,13 +216,15 @@ class FlashcardsGui:
         prog = f"Card {self.current_card_idx + 1}/{len(self.flashcards_queue)}"
         self.frame.clear()
         with self.frame:
-            ui.label(prog)
+            ui.label(prog).classes("font-bold text-gray-700")
             card = micro.card().style(f"width: {WIDTH}px;")
             with card.classes("flex flex-col items-center justify-center"):
                 ui.markdown(text)
+            if self.state != self.State.FRONT:
+                self.add_controls_frame(fcard.metadata)
             proceed_button = ui.button(self.state)
+            proceed_button.on("click", self._hdl_proceed_button_click)
             ui.label(collection)
-        proceed_button.on("click", self._hdl_button_click)
 
     async def _get_flashcards_queue(
         self, path: str, target_minutes: int
@@ -200,48 +253,17 @@ class FlashcardsGui:
         self.n_collections = len(uninspected_collections)
         await asyncio.sleep(0.1)
 
-        ## Inspect the shape of the dataframe of each collection and add to
-        #  collections if it has a valid shape
-        self.n_collections_inspected = 0
-        N_CARDS_IN_COLLECTIONS = []
-        for collection in uninspected_collections:
-            n_rows, n_cols = await collection.dataframe_like.shape()
-            if n_cols != 2:
-                warning = f"Skipping collection '{collection.name}' because it"
-                warning += f" has {n_cols} columns. Expected 2."
-                logger.warning(warning)
-                ui.notify(warning, icon="warning")
-            else:
-                self.collections.append(collection)
-                N_CARDS_IN_COLLECTIONS.append(n_rows)
-            self.n_collections_inspected += 1
-            await asyncio.sleep(0.1)
-        self.n_collections = len(self.collections)  # Update accordingly
-
         ## Load (retrieve & cache cards for) each collection
-        _denom = sum([c.random_choice_weight for c in self.collections])
-        PROBS = [c.random_choice_weight / _denom for c in self.collections]
-        THRESHOLD_PROB = get_threshold_probability(self.n_collections)
-        TARGET_SECONDS = target_minutes * 60
-        self.n_collections_loaded = 0
-        zipped = zip(self.collections, PROBS, N_CARDS_IN_COLLECTIONS)
-        for collection, selection_prob, n_cards_in_collection in zipped:
-            if n_cards_in_collection <= MAX_ROWS_TO_CACHE_ALL:
-                await collection.cache_all_cards()
-            else:
-                n_to_cache = get_n_to_cache(
-                    collection=collection,
-                    selection_probability=selection_prob,
-                    threshold_probability=THRESHOLD_PROB,
-                    target_seconds=TARGET_SECONDS,
-                )
-                await collection.cache_n_cards(
-                    n_to_cache, n_cards_in_collection
-                )
-            self.n_collections_loaded += 1
+        for collection_path in collection_paths:
+            collection = FlashcardCollection(collection_path)
+            await collection.cache_all_cards()
+            self.collections.append(collection)
             await asyncio.sleep(0.1)
 
         ## Queue up cards
+        _denom = sum([c.random_choice_weight for c in self.collections])
+        PROBS = [c.random_choice_weight / _denom for c in self.collections]
+        TARGET_SECONDS = target_minutes * 60
         _avg_secs = [c.avg_seconds_per_card for c in self.collections]
         _overall_avg_secs = sum([s * p for s, p in zip(_avg_secs, PROBS)])
         SECONDS_CAP = TARGET_SECONDS - _overall_avg_secs
@@ -254,7 +276,32 @@ class FlashcardsGui:
             seconds_elapsed += int(collection.avg_seconds_per_card)
         self.retrieval_has_completed = True
 
-    def _hdl_button_click(self):
+    def _ctrl_panel_values_differ(self) -> bool:
+        old_metadata = self.flashcards_queue[self.current_card_idx].metadata
+        mastery = old_metadata.mastery
+        appetite = old_metadata.appetite
+        has_bad_formatting = old_metadata.has_bad_formatting
+        return (
+            mastery != self.mastery_sldr.value
+            or appetite != self.appetite_sldr.value
+            or has_bad_formatting != self.has_bad_formatting_switch.value
+        )
+
+    async def _hdl_proceed_button_click(self):
+        # Update flashcard metadata in dataframe-like as necessary
+        if self.state != self.State.FRONT:
+            if self._ctrl_panel_values_differ():
+                flashcard = self.flashcards_queue[self.current_card_idx]
+                flashcard.metadata.mastery = self.mastery_sldr.value
+                flashcard.metadata.appetite = self.appetite_sldr.value
+                flashcard.metadata.has_bad_formatting = (
+                    self.has_bad_formatting_switch.value
+                )
+                try:
+                    await flashcard.update_source()
+                except Exception as e:
+                    logger.warning(f"Couldn't update flashcard in source: {e}")
+        # Advance state
         if self.state == self.State.FRONT:
             if self.current_card_idx == len(self.flashcards_queue) - 1:
                 self.state = self.State.FINAL
@@ -263,6 +310,7 @@ class FlashcardsGui:
         elif self.state == self.State.BACK:
             self.current_card_idx += 1
             self.state = self.State.FRONT
+        # Act on state
         elif self.state == self.State.FINAL:
             self.on_complete()
             return

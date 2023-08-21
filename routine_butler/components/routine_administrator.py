@@ -60,6 +60,7 @@ class RoutineAdministrator(ui.row):
 
         with self:
             self.program_frame = ui.column()
+            self.program_frame.classes("items-center justify-center")
         self.add_sidebar()
 
         ui.timer(0.1, self.begin_administration, once=True)

@@ -19,3 +19,7 @@ class DataframeLike(Protocol):
     def shape(self) -> Tuple[int, int]:
         """Returns the number of rows and columns."""
         ...
+
+    def update_row_at_idx(self, idx: int, data: List[Any]) -> None:
+        """Updates the row at the given index with the given data."""
+        ...

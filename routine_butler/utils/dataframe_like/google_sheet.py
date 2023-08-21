@@ -192,3 +192,29 @@ class GoogleSheet(DataframeLike):
             await self._ascertain_spreadsheet_metadata(service)
 
         return self.num_rows, self.num_cols
+
+    async def update_row_at_idx(self, idx: int, data: List[Any]) -> None:
+        """Updates the row at the given index with the given data."""
+        service = await self._get_sheets_service_object()
+        await self._ascertain_sheet_name(service)
+
+        sheet_range = f"Sheet1!{idx+1}:{idx+1}"
+        body = {"values": [data]}
+        for _ in range(N_RETRIES):
+            try:
+                resp = (
+                    service.spreadsheets()
+                    .values()
+                    .update(
+                        spreadsheetId=self._file_id,
+                        range=sheet_range,
+                        valueInputOption="RAW",
+                        body=body,
+                    )
+                    .execute()
+                )  # FIXME: type hints
+                print(resp)
+                break
+            except HttpError as e:
+                logger.warning(e)
+                time.sleep(SECONDS_BETWEEN_RETRIES)
