@@ -56,6 +56,15 @@ class GoogleSheetsValuesObject(Protocol):
     ) -> GoogleDrivePendingOperation:
         ...
 
+    def update(
+        self,
+        spreadsheetId: str,
+        range: str,
+        body: dict,
+        valueInputOption: str,
+    ) -> GoogleDrivePendingOperation:
+        ...
+
 
 class GoogleSheetsSpreadsheetsObject(Protocol):
     """Arbitrary protocol for type-hinting the Google Sheets spreadsheets object"""

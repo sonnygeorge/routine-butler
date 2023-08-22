@@ -23,19 +23,12 @@ from routine_butler.plugins._flashcards.utils import (
     get_paths_of_collections_to_load,
 )
 
-# FIXME: Have mastery inversely correlate to probability of being chosen
-# FIXME: Have appetite correlate to probability of being chosen
-# FIXME: Have bad formatting make probability of being chosen 0
-
-
 # TODO: Consider naming of dataframe-like, g_suite, cloud_storage_bucket, etc.
 #   * cloud_storage_bucket -> storage_bucket?
 #   * g_suite -> google?
 #   * dataframe-like -> data-client? data-interface? data-source?
 #   * configs.py -> globals.py?
 #   * sheet vs. workbook vs. collection etc.
-# TODO: Seperate this code into different files in _flashcards folder
-# TODO: Remove repeated retry code in google api calls
 
 ## TODO: Move "state" to configs and call it STATE
 

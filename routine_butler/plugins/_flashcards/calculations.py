@@ -14,7 +14,7 @@ THRESHOLD_PROB_MIN_ASYMPTOTE = 0.1
 THRESHOLD_PROB_MAX_ASYMPTOTE = 0.9
 
 
-def calculate_flashcard_selection_weight(
+def calculate_flashcard_pick_weight(
     mastery: int, appetite: int, has_bad_formatting: bool
 ) -> float:
     assert 0 <= mastery <= 10, "mastery must be between 0 and 10"
@@ -46,7 +46,7 @@ def get_threshold_probability(n_collections: int) -> float:
 
     1   |
         |__                  ... (THRESHOLD_PROB_MAX_ASYMPTOTE)
-    .75 |  `\   
+    .75 |  `\
         |    |
     .5  |    |
         |    |
