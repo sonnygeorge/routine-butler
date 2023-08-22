@@ -6,6 +6,12 @@ from loguru import logger
 from nicegui import ui
 
 from routine_butler.globals import DATAFRAME_LIKE
+from routine_butler.plugins._flashcards.calculations import (
+    calculate_flashcard_selection_weight,
+)
+
+DEFAULT_MASTERY = 2
+DEFAULT_APPETITE = 3
 
 
 @dataclass
@@ -46,8 +52,9 @@ class FlashcardCollection:
         self.avg_seconds_per_card: int = int(fname.split("-")[-1])
         self.random_choice_weight: int = int(fname.split("-")[-2])
         self.name: str = "-".join(fname.split("-")[:-2])
-        self.cached_cards: List[Flashcard] = []
         self.dataframe_like = DATAFRAME_LIKE(path_to_collection)
+        self.cached_cards: List[Flashcard] = []
+        self._cached_probabilities: Optional[List[float]] = None
 
     def __str__(self):
         return (
@@ -73,6 +80,29 @@ class FlashcardCollection:
             self.cached_cards.append(
                 Flashcard(row[0], row[1], self, idx, metadata)
             )
+        self._calculate_and_cache_probabilities()
+
+    def _calculate_and_cache_probabilities(self) -> None:
+        weights = []
+        for flashcard in self.cached_cards:
+            if flashcard.metadata.mastery is None:
+                mastery = DEFAULT_MASTERY
+            else:
+                mastery = flashcard.metadata.mastery
+            if flashcard.metadata.appetite is None:
+                appetite = DEFAULT_APPETITE
+            else:
+                appetite = flashcard.metadata.appetite
+            if flashcard.metadata.has_bad_formatting is None:
+                has_bad_formatting = False
+            else:
+                has_bad_formatting = flashcard.metadata.has_bad_formatting
+            weight = calculate_flashcard_selection_weight(
+                mastery, appetite, has_bad_formatting
+            )
+            weights.append(weight)
+        self._cached_probabilities = [w / sum(weights) for w in weights]
+        print(self._cached_probabilities)
 
     def pick_a_card(self) -> Flashcard:
-        return random.choice(self.cached_cards)
+        return random.choices(self.cached_cards, self._cached_probabilities)[0]

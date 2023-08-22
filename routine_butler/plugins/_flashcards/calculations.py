@@ -3,6 +3,8 @@
 from math import factorial
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from routine_butler.plugins.flashcards import FlashcardCollection
 
@@ -10,6 +12,29 @@ if TYPE_CHECKING:
 # NOTE: Lower these for improved loading performance
 THRESHOLD_PROB_MIN_ASYMPTOTE = 0.1
 THRESHOLD_PROB_MAX_ASYMPTOTE = 0.9
+
+
+def calculate_flashcard_selection_weight(
+    mastery: int, appetite: int, has_bad_formatting: bool
+) -> float:
+    assert 0 <= mastery <= 10, "mastery must be between 0 and 10"
+    assert 0 <= appetite <= 10, "appetite must be between 0 and 10"
+    assert isinstance(
+        has_bad_formatting, bool
+    ), "has_bad_formatting must be a bool"
+
+    m, a = mastery / 10, appetite / 10  # normalize to 0-1
+    mastery_multiplier = np.arctan(-10 * m + 2.2) / (np.pi * m ** (-m))
+    mastery_multiplier += 0.7 - 1.05 * m**10
+    mastery_multiplier = max(mastery_multiplier, 0.25)
+    appetite_multiplier = (2 * a) ** 2.8 + a + 0.5
+    has_bad_formatting_multiplier = 0.05 if has_bad_formatting else 1
+    weight = (
+        mastery_multiplier
+        * appetite_multiplier
+        * has_bad_formatting_multiplier
+    )
+    return weight
 
 
 def get_threshold_probability(n_collections: int) -> float:

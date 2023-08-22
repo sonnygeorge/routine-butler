@@ -11,6 +11,8 @@ from pydantic import BaseModel
 from routine_butler.components import micro
 from routine_butler.globals import FLASHCARDS_FOLDER_NAME
 from routine_butler.plugins._flashcards.schema import (
+    DEFAULT_APPETITE,
+    DEFAULT_MASTERY,
     Flashcard,
     FlashcardCollection,
 )
@@ -39,8 +41,6 @@ from routine_butler.plugins._flashcards.utils import (
 
 WIDTH = 700
 MAX_N_COLLECTIONS = 36
-DEFAULT_MASTERY = 2
-DEFAULT_APPETITE = 3
 
 
 class FlashcardsGui:
