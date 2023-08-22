@@ -213,7 +213,8 @@ class GoogleSheet(DataframeLike):
                     )
                     .execute()
                 )  # FIXME: type hints
-                print(resp)
+                msg = f"Updated {resp['updatedCells']} cells in {self.path}"
+                logger.info(msg)
                 break
             except HttpError as e:
                 logger.warning(e)
