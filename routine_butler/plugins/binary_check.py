@@ -1,17 +1,12 @@
-from typing import TypedDict
-
 from nicegui import ui
 from pydantic import BaseModel
 
 from routine_butler.components import micro
+from routine_butler.plugins._check import CheckRunData
 
 
-class TimedBinaryCheckRunData(TypedDict):
-    reported_success: bool
-
-
-class TimedBinaryCheckGui:
-    def __init__(self, data: "TimedBinaryCheck", on_complete: callable):
+class BinaryCheckGui:
+    def __init__(self, data: "BinaryCheck", on_complete: callable):
         self.on_complete = on_complete
 
         with micro.card().classes("flex flex-col items-center"):
@@ -31,15 +26,15 @@ class TimedBinaryCheckGui:
             )
 
     def hdl_success(self):
-        self.on_complete(TimedBinaryCheckRunData(reported_success=True))
+        self.on_complete(CheckRunData(reported_value=True))
 
     def hdl_failure(self):
-        self.on_complete(TimedBinaryCheckRunData(reported_success=False))
+        self.on_complete(CheckRunData(reported_value=False))
 
 
-class TimedBinaryCheck(BaseModel):
+class BinaryCheck(BaseModel):
     checkable_prompt: str = "Do the thing!"
-    wait_seconds: int = 5
+    wait_seconds: int = 0
 
     def administer(self, on_complete: callable):
-        TimedBinaryCheckGui(self, on_complete=on_complete)
+        BinaryCheckGui(self, on_complete=on_complete)

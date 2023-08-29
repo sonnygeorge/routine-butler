@@ -23,11 +23,15 @@ PROJECT_DIR_PATH: str = os.path.dirname(CURRENT_DIR_PATH)
 TEST_DB_PATH = os.path.join(PROJECT_DIR_PATH, "test_db.sqlite")
 DB_PATH = os.path.join(PROJECT_DIR_PATH, "db.sqlite")
 LOG_FILE_PATH = os.path.join(PROJECT_DIR_PATH, "app.log")
-ROUTINE_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/routine-icon.svg")
-PROGRAM_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/program-icon.svg")
-REWARD_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/reward-icon.svg")
-APP_LOGO_SVG_PATH = os.path.join(CURRENT_DIR_PATH, "assets/app-logo.svg")
-ALARM_WAV_PATH = os.path.join(CURRENT_DIR_PATH, "assets/alarm_sound.wav")
+
+PATH_TO_ASSETS = os.path.join(CURRENT_DIR_PATH, "assets")
+
+ROUTINE_SVG_PATH = os.path.join(PATH_TO_ASSETS, "routine-icon.svg")
+PROGRAM_SVG_PATH = os.path.join(PATH_TO_ASSETS, "program-icon.svg")
+REWARD_SVG_PATH = os.path.join(PATH_TO_ASSETS, "reward-icon.svg")
+APP_LOGO_SVG_PATH = os.path.join(PATH_TO_ASSETS, "app-logo.svg")
+CURLY_BRACKET_SVG_PATH = os.path.join(PATH_TO_ASSETS, "curly-bracket.svg")
+ALARM_WAV_PATH = os.path.join(PATH_TO_ASSETS, "alarm_sound.wav")
 
 PLUGINS_DIR_PATH = os.path.join(CURRENT_DIR_PATH, "plugins")
 PLUGINS_IMPORT_STR = "routine_butler.plugins.{module}"

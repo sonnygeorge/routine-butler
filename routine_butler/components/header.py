@@ -22,10 +22,6 @@ LARGE_TEXT_SIZE = "1.1rem"
 SMALL_TEXT_SIZE = ".6rem"
 
 
-def vertical_separator():
-    return ui.separator().props("vertical").classes("mx-0")
-
-
 def header_button(*args, **kwargs) -> ui.button:
     return ui.button(*args, **kwargs).props("flat").style(ICON_BLOCK_WIDTH)
 
@@ -71,53 +67,53 @@ class Header(ui.header):
 
             with left_row:
                 # app logo / home button
-                vertical_separator()
+                micro.vertical_separator()
                 home_button = header_button()
                 with home_button:
                     micro.app_logo_svg(APP_LOGO_SVG_SIZE, color="white")
                 # app name
-                vertical_separator()
+                micro.vertical_separator()
                 ui.label(APP_NAME).style(f"font-size: {APP_NAME_SIZE}")
-                vertical_separator()
+                micro.vertical_separator()
 
             if not hide_navigation_buttons:
                 with right_row:
-                    vertical_separator()
+                    micro.vertical_separator()
                     # configure-routines nav button
                     routine_button = header_button()
                     with routine_button:
                         micro.routine_svg(RTN_SVG_SIZE, color="white")
-                    vertical_separator()
+                    micro.vertical_separator()
                     # configure-programs nav button
                     program_button = header_button()
                     with program_button:
                         micro.program_svg(PRGRM_SVG_SIZE, color="white")
 
             with right_row:
-                vertical_separator()
+                micro.vertical_separator()
                 dark = ui.dark_mode()
                 # dark mode button
                 header_button(
                     icon=ICON_STRS.dark_mode, on_click=dark.enable
                 ).props("text-color=white")
-                vertical_separator()
+                micro.vertical_separator()
                 # light mode button
                 header_button(
                     icon=ICON_STRS.light_mode, on_click=dark.disable
                 ).props("text-color=white")
-                vertical_separator()
+                micro.vertical_separator()
                 # g suite button
                 header_button(
                     icon=ICON_STRS.g_suite,
                     on_click=self._hdl_g_suite_button_click,
                 ).props("text-color=white")
-                vertical_separator()
+                micro.vertical_separator()
                 # next alarm display
                 self.next_alarm_display = NextAlarmDisplay()
-                vertical_separator()
+                micro.vertical_separator()
                 # clock
                 header_clock()
-                vertical_separator()
+                micro.vertical_separator()
 
         if not hide_navigation_buttons:  # add handlers for nav buttons
             home_button.on("click", lambda: ui.open(PagePath.HOME))
