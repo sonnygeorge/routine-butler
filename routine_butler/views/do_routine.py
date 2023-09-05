@@ -14,6 +14,6 @@ def do_routine():
 
     if state.current_routine is None:
         ui.label("No routine to run...").classes("absolute-center")
-        redirect_to_page(PagePath.HOME, n_seconds_before_redirect=2.5)
+        redirect_to_page(PagePath.HOME, n_seconds_before_redirect=1.7)
     else:
         RoutineAdministrator(routine=state.current_routine)

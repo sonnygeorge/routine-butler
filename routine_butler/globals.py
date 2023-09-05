@@ -46,6 +46,18 @@ class PagePath(StrEnum):
     SET_PROGRAMS = "/configure-programs"
     LOGIN = "/login"
     RING = "/ring"
+    YOUTUBE = "/youtube"
+
+
+# Playback rates for YouTube videos
+
+
+class PlaybackRate(StrEnum):
+    PLAYBACK_RATE_NORMAL = "1.0"
+    PLAYBACK_RATE_125_PERCENT = "1.25"
+    PLAYBACK_RATE_150_PERCENT = "1.5"
+    PLAYBACK_RATE_175_PERCENT = "1.75"
+    PLAYBACK_RATE_200_PERCENT = "2.0"
 
 
 # G Suite credentials manager

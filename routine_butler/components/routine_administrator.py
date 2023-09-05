@@ -51,7 +51,6 @@ class RoutineAdministrator(ui.row):
         self.routine = routine
         queues = get_programs_queues(routine)
         self.element_programs_queue, self.reward_programs_queue = queues
-        self.n_programs_traversed = 0
         self.n_programs_total = sum((len(q) for q in queues))
 
         super().__init__()
@@ -63,7 +62,10 @@ class RoutineAdministrator(ui.row):
             self.program_frame.classes("items-center justify-center")
         self.add_sidebar()
 
-        ui.timer(0.1, self.begin_administration, once=True)
+        if state.n_programs_traversed == 0:
+            ui.timer(0.1, self.begin_administration, once=True)
+        else:  # resuming mid-routine, presumably after a program completion
+            self.on_program_completion()
 
     def add_sidebar(self):
         with self:
@@ -92,7 +94,9 @@ class RoutineAdministrator(ui.row):
 
     def update_sidebar(self):
         self.program_label.set_text(self.current_program.title)
-        prog_str = f"({self.n_programs_traversed + 1}/{self.n_programs_total})"
+        prog_str = (
+            f"({state.n_programs_traversed + 1}/{self.n_programs_total})"
+        )
         self.routine_label.set_text(f"{self.routine.title} {prog_str}")
         if self.has_only_rewards_left_to_administer:
             self.skip_button.enable()
@@ -110,45 +114,41 @@ class RoutineAdministrator(ui.row):
 
     @property
     def has_only_rewards_left_to_administer(self) -> bool:
-        return (
-            len(self.element_programs_queue) == 0
-            and len(self.reward_programs_queue) > 0
-        )
+        return state.n_programs_traversed >= len(self.element_programs_queue)
 
     @property
     def has_nothing_left_to_administer(self) -> bool:
-        return (
-            len(self.element_programs_queue) == 0
-            and len(self.reward_programs_queue) == 0
-        )
+        return state.n_programs_traversed == len(
+            self.reward_programs_queue
+        ) + len(self.element_programs_queue)
 
     @property
     def current_program(self) -> Optional[Program]:
         if self.has_nothing_left_to_administer:
             return None
         elif self.has_only_rewards_left_to_administer:
-            return self.reward_programs_queue[0]
+            idx = state.n_programs_traversed - len(self.element_programs_queue)
+            return self.reward_programs_queue[idx]
         else:
-            return self.element_programs_queue[0]
-
-    def _pop_current_program_from_queue(self):
-        if len(self.element_programs_queue) > 0:
-            self.element_programs_queue.pop(0)
-        elif len(self.reward_programs_queue) > 0:
-            self.reward_programs_queue.pop(0)
+            return self.element_programs_queue[state.n_programs_traversed]
 
     def _add_program_run_for_current_program_to_db(
         self, run_data: Optional[dict] = None
     ):
         current_program = self.current_program
-        run_data = run_data or {}
+
+        if state.pending_run_data_to_be_added_to_db is not None:
+            run_data = state.pending_run_data_to_be_added_to_db
+            state.set_pending_run_data_to_be_added_to_db(None)
+        else:
+            run_data = run_data or {}
 
         program_run = ProgramRun(
             program_title=current_program.title,
             plugin_type=current_program.plugin_type,
             plugin_dict=current_program.plugin_dict,
             routine_title=self.routine.title,
-            start_time=self.current_program_start_time,
+            start_time=state.current_program_start_time,
             end_time=datetime.datetime.now(),
             run_data=run_data,
             user_uid=state.user.uid,
@@ -157,9 +157,10 @@ class RoutineAdministrator(ui.row):
 
     def _administer_next_program(self):
         if self.has_nothing_left_to_administer:
+            state.set_n_programs_traversed(0)
             redirect_to_page(PagePath.HOME)
             return
-        self.current_program_start_time = datetime.datetime.now()
+        state.set_current_program_start_time(datetime.datetime.now())
         with self.program_frame:
             self.current_program.administer(
                 on_complete=self.on_program_completion
@@ -168,8 +169,7 @@ class RoutineAdministrator(ui.row):
 
     def _transition_to_next_program(self):
         self.program_frame.clear()  # clear current program frame ui
-        self._pop_current_program_from_queue()  # remove program from queue
-        self.n_programs_traversed += 1
+        state.set_n_programs_traversed(state.n_programs_traversed + 1)
         self._administer_next_program()  # administer next program
 
     def on_program_completion(self, run_data: Optional[dict] = None):

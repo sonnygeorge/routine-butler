@@ -1,3 +1,4 @@
+import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Type
 
 from loguru import logger
@@ -6,6 +7,7 @@ from sqlalchemy.engine import Engine
 from routine_butler.components.header import Header
 from routine_butler.utils.logging import STATE_LOG_LVL
 from routine_butler.utils.misc import (
+    PendingYoutubeVideo,
     Plugin,
     dynamically_get_plugins_from_directory,
 )
@@ -25,6 +27,10 @@ class State:
     _next_routine: Optional["Routine"] = None
     _current_routine: Optional["Routine"] = None
     _header: Optional[Header] = None
+    _pending_youtube_video: Optional[PendingYoutubeVideo] = None
+    _n_programs_traversed: int = 0
+    _pending_run_data_to_be_added_to_db: Optional[dict] = None
+    _current_program_start_time: Optional[datetime.datetime] = None
 
     def __new__(cls):
         """Custom __new__ method to make this a singleton class."""
@@ -76,6 +82,22 @@ class State:
     def program_titles(self):
         return [p.title for p in self._programs]
 
+    @property
+    def pending_youtube_video(self):
+        return self._pending_youtube_video
+
+    @property
+    def n_programs_traversed(self):
+        return self._n_programs_traversed
+
+    @property
+    def pending_run_data_to_be_added_to_db(self):
+        return self._pending_run_data_to_be_added_to_db
+
+    @property
+    def current_program_start_time(self):
+        return self._current_program_start_time
+
     # Set and update methods
 
     def set_engine(self, engine: Engine):
@@ -123,6 +145,18 @@ class State:
     def build_header(self, hide_navigation_buttons: bool = False):
         self._header = Header(hide_navigation_buttons)
         self.update_header()
+
+    def set_pending_youtube_video(self, video_id: str):
+        self._pending_youtube_video = video_id
+
+    def set_n_programs_traversed(self, n: int):
+        self._n_programs_traversed = n
+
+    def set_pending_run_data_to_be_added_to_db(self, run_data: dict):
+        self._pending_run_data_to_be_added_to_db = run_data
+
+    def set_current_program_start_time(self, dt: datetime.datetime):
+        self._current_program_start_time = dt
 
 
 state = State()  # Instantiate singleton for the rest of the app to use

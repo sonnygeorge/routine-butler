@@ -1,3 +1,5 @@
+from typing import Optional
+
 from nicegui import ui
 
 # A note regarding embedding Youtube Videos:
@@ -12,23 +14,21 @@ from nicegui import ui
 # Users should remove channels where this occurs often from their queue parameters in
 # order to have a better experience.
 
-
-class YoutubeEmbed(ui.element):
-    def __init__(self, video_id: str) -> None:
-        super().__init__("iframe")
-        self.default_style()
-        self.set_video_id(video_id)
-
-    def set_video_id(self, video_id: str) -> None:
-        self.props(f"src=https://www.youtube-nocookie.com/embed/{video_id}")
-
-    def default_style(self) -> None:
-        self.props("width=560 height=315 frameborder=0 allowfullscreen")
-        self.props(
-            "allow=accelerometer; autoplay; clipboard-write; encrypted-media; "
-            "gyroscope; picture-in-picture; web-share"
-        )
+HEIGHT = 315
+WIDTH = 560
 
 
-def youtube_embed(video_id: str) -> YoutubeEmbed:
-    return YoutubeEmbed(video_id=video_id)
+def youtube_embed(
+    video_id: str, autoplay: bool = True, start_seconds: Optional[int] = None
+) -> ui.element:
+    """Plays a youtube video at 2x speed."""
+
+    # Add player with using iframe html
+    html = f'<iframe width="{WIDTH}" height="{HEIGHT}" '
+    html += f'src="http://www.youtube.com/embed/{video_id}'
+    if autoplay is True:
+        html += "?autoplay=1"
+    if start_seconds is not None:
+        html += f"&start={start_seconds}"
+    html += '" frameborder="0" allow="autoplay"></iframe>'
+    return ui.html(html)

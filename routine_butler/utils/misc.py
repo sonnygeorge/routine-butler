@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Dict, Protocol, Type
 
 from loguru import logger
 from nicegui import ui
+from pydantic import BaseModel
 
 from routine_butler.globals import (
     CLR_CODES,
@@ -12,6 +13,7 @@ from routine_butler.globals import (
     PLUGINS_DIR_PATH,
     PLUGINS_IMPORT_STR,
     PagePath,
+    PlaybackRate,
 )
 
 if TYPE_CHECKING:
@@ -109,3 +111,10 @@ def initialize_page(page: PagePath, state: "State") -> None:
             N_SECONDS_BW_RING_CHECKS,
             lambda: redirect_to_ring_page_if_next_alarms_time_reached(state),
         )
+
+
+class PendingYoutubeVideo(BaseModel):
+    video_id: str
+    start_seconds: int = 0
+    playback_rate: PlaybackRate = PlaybackRate.PLAYBACK_RATE_NORMAL
+    autoplay: bool = False

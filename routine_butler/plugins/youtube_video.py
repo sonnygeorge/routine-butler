@@ -9,9 +9,18 @@ from nicegui import ui
 from pydantic import BaseModel, constr
 
 from routine_butler.components import micro
-from routine_butler.globals import DATAFRAME_LIKE, YOUTUBE_VIDEO_FOLDER_NAME
+from routine_butler.globals import (
+    DATAFRAME_LIKE,
+    YOUTUBE_VIDEO_FOLDER_NAME,
+    PlaybackRate,
+)
 from routine_butler.models import ProgramRun
 from routine_butler.state import state
+from routine_butler.utils.misc import (
+    PagePath,
+    PendingYoutubeVideo,
+    redirect_to_page,
+)
 
 DB_QUERY_LIMIT = 120
 
@@ -40,6 +49,27 @@ class YoutubeVideoMode(StrEnum):
     SINGLE = "single"
     SERIES = "series"
     RANDOM = "random"
+
+
+GET_PLAYER_JAVASCRIPT = "var player = YT.get('player');"
+
+
+async def add_video_to_global_player(
+    video_id: str,
+    autoplay: bool = True,
+    start_seconds: Optional[int] = None,
+    playback_rate: float = 1.0,
+):
+    """Adds a YouTube video in the global player."""
+    state.player.set_visibility(True)
+    # js = GET_PLAYER_JAVASCRIPT + f"\nplayer.loadVideoById('{video_id}');"
+    # if autoplay:
+    #     js += "\nplayer.playVideo();"
+    # if start_seconds is not None:
+    #     js += f"\nplayer.seekTo({start_seconds});"
+    # js += f"\nplayer.setPlaybackRate({playback_rate});"
+    # print(js)
+    await ui.run_javascript(GET_PLAYER_JAVASCRIPT)
 
 
 def get_last_watched_video(path_or_id: str) -> Optional[str]:
@@ -133,39 +163,31 @@ class YoutubeVideoGui:
                     elif self.data.mode == YoutubeVideoMode.RANDOM:
                         self.video_id: str = random.choice(videos)
 
-        if invalid_msg is None:  # if no validity issues, add player to the UI
-            self.add_player_to_ui()
+        if invalid_msg is None:  # if no validity issues, video is playable
+            self.navigate_to_youtube_view()
         else:  # otherwise, display the error msg & complete after brief wait
             ui.notify(invalid_msg)
             logger.warning(invalid_msg)
             await asyncio.sleep(3.4)
             self.on_complete()
 
-    def add_player_to_ui(self):
-        self.card.clear()
-        with self.card:
-            self.video_player = micro.youtube_embed(self.video_id)
-            ui.separator().classes("my-1")
-            with ui.row():
-                ui.button("Success", on_click=self.hdl_success)
-                ui.button("Failure", on_click=self.hdl_failure)
-
-    def hdl_success(self):
-        run_data = YoutubeVideoRunData(
-            video_id=self.video_id, reported_success=True
+    def navigate_to_youtube_view(self):
+        pending_video = PendingYoutubeVideo(
+            video_id=self.video_id,
+            start_seconds=self.data.start_seconds,
+            playback_rate=self.data.playback_rate,
+            autoplay=self.data.autoplay,
         )
-        self.on_complete(run_data)
-
-    def hdl_failure(self):
-        run_data = YoutubeVideoRunData(
-            video_id=self.video_id, reported_success=False
-        )
-        self.on_complete(run_data)
+        state.set_pending_youtube_video(pending_video)
+        redirect_to_page(PagePath.YOUTUBE, n_seconds_before_redirect=0.1)
 
 
 class YoutubeVideo(BaseModel):
     mode: YoutubeVideoMode = YoutubeVideoMode.SINGLE
     path_or_id: constr(min_length=1) = "QWlCcfSqfKY"
+    start_seconds: int = 0
+    playback_rate: PlaybackRate = PlaybackRate.PLAYBACK_RATE_NORMAL
+    autoplay: bool = False
 
     def administer(self, on_complete: callable):
         YoutubeVideoGui(self, on_complete=on_complete)

@@ -38,7 +38,4 @@ from routine_butler.components.micro.vertical_separator import (
     vertical_separator,
 )
 from routine_butler.components.micro.volume_knob import volume_knob
-from routine_butler.components.micro.youtube_embed import (
-    YoutubeEmbed,
-    youtube_embed,
-)
+from routine_butler.components.micro.youtube_embed import youtube_embed
