@@ -5,7 +5,6 @@ import re
 from sys import platform
 from typing import List
 
-import chromedriver_autoinstaller
 from bs4 import BeautifulSoup
 from loguru import logger
 from nicegui import ui
@@ -22,6 +21,8 @@ from routine_butler.plugins._youtube_queue.utils import QUEUE_PARAMS
 
 if platform == "darwin":
     try:
+        import chromedriver_autoinstaller
+
         chromedriver_autoinstaller.install()
     except Exception as e:
         logger.warning(f"Could not auto-update chromedriver: {e}")

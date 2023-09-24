@@ -32,7 +32,7 @@ class YoutubeQueueGui:
 
     def add_player_to_ui(self):
         with self.card:
-            self.video_player = micro.youtube_embed("")
+            self.video_player_frame = ui.element("div")
             ui.separator().classes("my-1")
             with ui.row().classes("w-5/6 flex items-center justify-between"):
                 left_btn = ui.button("<", on_click=self.hdl_previous_video)
@@ -48,7 +48,9 @@ class YoutubeQueueGui:
             return
         cur_id = self.video_uids[self.cur_video_idx]
         self.id_label.set_text(cur_id)
-        self.video_player.set_video_id(cur_id)
+        self.video_player_frame.clear()
+        with self.video_player_frame:
+            self.video_player = micro.youtube_embed(cur_id)
         label_text = f"Video {self.cur_video_idx + 1}/{len(self.video_uids)}"
         self.idx_label.set_text(label_text)
 
