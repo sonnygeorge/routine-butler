@@ -10,6 +10,7 @@ activate:
 
 # Install requirements
 install:
+	python -m spacy download en_core_web_sm
 	pip install -r requirements.txt
 
 # Clean up repo junk files
@@ -27,4 +28,4 @@ status:
 
 # Show journal of systemd routine_butler.service
 journal:
-	sudo journalctl -u routine_butler.service
+	sudo journalctl --pager-end -u routine_butler.service

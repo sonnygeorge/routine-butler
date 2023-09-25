@@ -1,8 +1,8 @@
 #!/bin/bash
 # Commands for running RoutineButler on a Raspberry Pi
 
-echo "Adjusting system volume to 60%..."
-amixer set PCM -- 60%
+echo "Adjusting system volume to 55%..."
+amixer set Master -- 70%
 
 echo "Activating virtual environment..."
 source venv/bin/activate
