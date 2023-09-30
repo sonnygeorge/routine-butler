@@ -2,19 +2,9 @@ import time
 
 from loguru import logger
 
+from routine_butler.hardware.gpio import GPIO, GPIO_IS_MOCK
 from routine_butler.hardware.hx711 import HX711
 from routine_butler.utils.logging import BOX_LOG_LVL
-
-try:
-    import RPi.GPIO as GPIO
-
-    MOCK = False
-except Exception as e:
-    import Mock.GPIO as GPIO
-
-    logger.warning(f"Failed to import RPi.GPIO: {e} - using Mock.GPIO instead")
-    MOCK = True
-
 
 # HOW TO CALCULATE THE REFFERENCE UNIT
 # To set the reference unit to 1.
@@ -71,12 +61,12 @@ class Box:
 
     def zero_scale(self):
         logger.log(BOX_LOG_LVL, "Zeroing scale...")
-        if not MOCK:
+        if not GPIO_IS_MOCK:
             self.hx711.reset()
             self.hx711.tare()
 
     def passes_weight_check(self) -> bool:
-        if MOCK:
+        if GPIO_IS_MOCK:
             self.last_weight_measurement = self._target_grams
         else:
             self.last_weight_measurement = self.hx711.getWeight()
@@ -91,7 +81,7 @@ class Box:
         )
 
     def is_closed(self) -> bool:
-        if MOCK:
+        if GPIO_IS_MOCK:
             return True
         GPIO.setup(IS_CLOSED_CIRCUIT_PIN, GPIO.IN)
         is_closed = GPIO.input(IS_CLOSED_CIRCUIT_PIN) == 1

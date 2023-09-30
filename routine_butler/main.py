@@ -40,6 +40,7 @@ def main(
     native: bool,
     fullscreen: bool,
     open_browser: bool,
+    reload: bool,
 ):
     """Main entrypoint for the app."""
 
@@ -64,4 +65,5 @@ def main(
         binding_refresh_interval=BINDING_REFRESH_INTERVAL_SECONDS,
         show=open_browser,
         port=MAIN_SERVER_PORT,
+        reload=reload,
     )

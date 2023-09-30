@@ -2,6 +2,7 @@ import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Type
 
 from loguru import logger
+from nicegui import ui
 from sqlalchemy.engine import Engine
 
 from routine_butler.components.header import Header
@@ -27,6 +28,8 @@ class State:
     _next_routine: Optional["Routine"] = None
     _current_routine: Optional["Routine"] = None
     _header: Optional[Header] = None
+    _is_dark_mode: bool = False
+    _is_pending_orated_entry: bool = False
     _pending_youtube_video: Optional[PendingYoutubeVideo] = None
     _n_programs_traversed: int = 0
     _pending_run_data_to_be_added_to_db: Optional[dict] = None
@@ -46,6 +49,13 @@ class State:
             "✨ current_routine="
             f"{self.current_routine.title if self.current_routine else None}"
         )
+
+    def __init__(self):
+        ui.timer(0.2, self._check_header_and_update_is_dark_mode)
+
+    def _check_header_and_update_is_dark_mode(self):
+        if self._header is not None:
+            self._is_dark_mode = self._header._is_dark_mode
 
     # The following properties are used to access information in private variables that
     # we only want mutated by this class's own methods.
@@ -79,8 +89,16 @@ class State:
         return self._current_routine
 
     @property
+    def header(self):
+        return self._header
+
+    @property
     def program_titles(self):
         return [p.title for p in self._programs]
+
+    @property
+    def is_pending_orated_entry(self):
+        return self._is_pending_orated_entry
 
     @property
     def pending_youtube_video(self):
@@ -143,8 +161,13 @@ class State:
         logger.log(STATE_LOG_LVL, f"ℹ️  {self}")
 
     def build_header(self, hide_navigation_buttons: bool = False):
-        self._header = Header(hide_navigation_buttons)
+        self._header = Header(
+            hide_navigation_buttons, is_dark_mode=self._is_dark_mode
+        )
         self.update_header()
+
+    def set_is_pending_orated_entry(self, is_pending_orated_entry: bool):
+        self._is_pending_orated_entry = is_pending_orated_entry
 
     def set_pending_youtube_video(self, video_id: str):
         self._pending_youtube_video = video_id

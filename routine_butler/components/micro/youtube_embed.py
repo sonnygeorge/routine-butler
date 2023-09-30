@@ -14,15 +14,13 @@ from nicegui import ui
 # Users should remove channels where this occurs often from their queue parameters in
 # order to have a better experience.
 
-HEIGHT = 315
-WIDTH = 560
+HEIGHT = 432
+WIDTH = 768
 
 
 def youtube_embed(
     video_id: str, autoplay: bool = True, start_seconds: Optional[int] = None
 ) -> ui.element:
-    """Plays a youtube video at 2x speed."""
-
     # Add player with using iframe html
     html = f'<iframe width="{WIDTH}" height="{HEIGHT}" '
     html += f'src="http://www.youtube.com/embed/{video_id}'

@@ -51,27 +51,6 @@ class YoutubeVideoMode(StrEnum):
     RANDOM = "random"
 
 
-GET_PLAYER_JAVASCRIPT = "var player = YT.get('player');"
-
-
-async def add_video_to_global_player(
-    video_id: str,
-    autoplay: bool = True,
-    start_seconds: Optional[int] = None,
-    playback_rate: float = 1.0,
-):
-    """Adds a YouTube video in the global player."""
-    state.player.set_visibility(True)
-    # js = GET_PLAYER_JAVASCRIPT + f"\nplayer.loadVideoById('{video_id}');"
-    # if autoplay:
-    #     js += "\nplayer.playVideo();"
-    # if start_seconds is not None:
-    #     js += f"\nplayer.seekTo({start_seconds});"
-    # js += f"\nplayer.setPlaybackRate({playback_rate});"
-    # print(js)
-    await ui.run_javascript(GET_PLAYER_JAVASCRIPT)
-
-
 def get_last_watched_video(path_or_id: str) -> Optional[str]:
     """Returns the video ID of the most recent successfully watched YouTube video in the
     series.
@@ -168,7 +147,7 @@ class YoutubeVideoGui:
         else:  # otherwise, display the error msg & complete after brief wait
             ui.notify(invalid_msg)
             logger.warning(invalid_msg)
-            await asyncio.sleep(3.4)
+            await asyncio.sleep(2.8)
             self.on_complete()
 
     def navigate_to_youtube_view(self):

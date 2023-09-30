@@ -47,6 +47,7 @@ class PagePath(StrEnum):
     LOGIN = "/login"
     RING = "/ring"
     YOUTUBE = "/youtube"
+    ORATED_ENTRY = "/orated-entry"
 
 
 # Playback rates for YouTube videos
@@ -120,6 +121,8 @@ PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW = [
     PagePath.DO_ROUTINE,
     PagePath.RING,
     PagePath.LOGIN,
+    PagePath.YOUTUBE,
+    PagePath.ORATED_ENTRY,
 ]
 
 
@@ -134,6 +137,9 @@ class ICON_STRS:  # Quasar material icons
     dark_mode = "dark_mode"
     light_mode = "light_mode"
     g_suite = "add_to_drive"
+    loading = "pending"
+    check = "check"
+    pause = "pause"
 
 
 class CLR_CODES:

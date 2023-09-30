@@ -1,12 +1,16 @@
 beautifulsoup4
+vosk
+pydantic==1.10.12
+pyaudio
 chromedriver-autoinstaller
 google-api-python-client
 google-auth-oauthlib
 loguru
 Mock.GPIO
 nicegui
-pre-commit
 pytest
 rich
 selenium
 sqlalchemy
+simpletransformers==0.61.4
+torch==2.0.0

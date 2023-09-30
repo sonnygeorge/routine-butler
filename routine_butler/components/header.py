@@ -57,9 +57,14 @@ class NextAlarmDisplay:
 
 
 class Header(ui.header):
-    def __init__(self, hide_navigation_buttons=False):
+    def __init__(self, hide_navigation_buttons=False, is_dark_mode=False):
         super().__init__()
         self.classes("justify-between items-center bg-primary shadow-lg py-3")
+
+        self._is_dark_mode = is_dark_mode
+        dark_mode = ui.dark_mode()
+        if self._is_dark_mode:
+            dark_mode.enable()
 
         with self:
             left_row = ui.row().style("align-items: center").classes("pl-3")
@@ -91,16 +96,17 @@ class Header(ui.header):
 
             with right_row:
                 micro.vertical_separator()
-                dark = ui.dark_mode()
                 # dark mode button
-                header_button(
-                    icon=ICON_STRS.dark_mode, on_click=dark.enable
+                dark_button = header_button(
+                    icon=ICON_STRS.dark_mode, on_click=dark_mode.enable
                 ).props("text-color=white")
+                dark_button.on("click", lambda: self.set_dark_mode(True))
                 micro.vertical_separator()
                 # light mode button
-                header_button(
-                    icon=ICON_STRS.light_mode, on_click=dark.disable
+                light_button = header_button(
+                    icon=ICON_STRS.light_mode, on_click=dark_mode.disable
                 ).props("text-color=white")
+                light_button.on("click", lambda: self.set_dark_mode(False))
                 micro.vertical_separator()
                 # g suite button
                 header_button(
@@ -119,6 +125,9 @@ class Header(ui.header):
             home_button.on("click", lambda: ui.open(PagePath.HOME))
             routine_button.on("click", lambda: ui.open(PagePath.SET_ROUTINES))
             program_button.on("click", lambda: ui.open(PagePath.SET_PROGRAMS))
+
+    def set_dark_mode(self, is_dark_mode: bool):
+        self._is_dark_mode = is_dark_mode
 
     async def _hdl_g_suite_button_click(self):
         logger.info("Manually asserting G Suite credentials...")

@@ -82,12 +82,20 @@ def redirect_to_ring_page_if_next_alarms_time_reached(state: "State") -> None:
         redirect_to_page(PagePath.RING)
 
 
+MATHJAX_SCRIPTS = """
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+"""
+
+
 def initialize_page(page: PagePath, state: "State") -> None:
     """Performs a set of standard actions that should be performed at the onset of any
     page load.
     """
     logger.info(f'📱 Initializing page "{page}"... ')
     state.log_state()
+    if page == PagePath.DO_ROUTINE:
+        ui.add_body_html(MATHJAX_SCRIPTS)
 
     ui.colors(  # apply universal color scheme
         primary=CLR_CODES.primary,

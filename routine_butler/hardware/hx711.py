@@ -1,14 +1,7 @@
 import statistics
 import time
 
-try:
-    import RPi.GPIO as GPIO
-
-    MOCK = False
-except:  # noqa
-    import Mock.GPIO as GPIO
-
-    MOCK = True
+from routine_butler.hardware.gpio import GPIO, GPIO_IS_MOCK
 
 
 class HX711:
@@ -63,7 +56,7 @@ class HX711:
             return unsignedValue
 
     def read(self):
-        if MOCK:
+        if GPIO_IS_MOCK:
             return 100
 
         self.waitForReady()
@@ -111,7 +104,7 @@ class HX711:
         self.REFERENCE_UNIT = reference_unit
 
     # HX711 datasheet states that setting the PDA_CLOCK pin on high
-    # for a more than 60 microseconds would power off the chip.
+    # for more than 60 microseconds would power off the chip.
     # I used 100 microseconds, just in case.
     # I've found it is good practice to reset the hx711 if it wasn't used
     # for more than a few seconds.

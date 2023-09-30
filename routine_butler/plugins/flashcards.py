@@ -164,7 +164,7 @@ class FlashcardsGui:
             # Flashcard
             card = micro.card().style(f"width: {WIDTH}px;")
             with card.classes("flex flex-col items-center justify-center"):
-                ui.markdown(flashcard_text)
+                micro.markdown(flashcard_text)
             # Control panel
             if self.state != self.State.FRONT:
                 self._add_control_panel()

@@ -62,7 +62,10 @@ class RoutineAdministrator(ui.row):
             self.program_frame.classes("items-center justify-center")
         self.add_sidebar()
 
-        if state.n_programs_traversed == 0:
+        if (
+            state.n_programs_traversed == 0
+            and state.pending_run_data_to_be_added_to_db is None
+        ):
             ui.timer(0.1, self.begin_administration, once=True)
         else:  # resuming mid-routine, presumably after a program completion
             self.on_program_completion()

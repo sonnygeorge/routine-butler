@@ -10,6 +10,7 @@ class RunArgs(Protocol):
     native: bool
     fullscreen: bool
     open_browser: bool
+    reload: bool
 
 
 CLI_DESCRIPTION = "CLI for running RoutineButler"
@@ -35,6 +36,10 @@ ARGS = [
         "arg": "--open-browser",
         "help": "Auto-opens browser on startup, not applicable w/ --native",
     },
+    {
+        "arg": "--reload",
+        "help": "Reloads the app on file changes (useful for development)",
+    },
 ]
 
 
@@ -43,11 +48,12 @@ if __name__ in {"__main__", "__mp_main__"}:
     for arg in ARGS:
         parser.add_argument(arg["arg"], action="store_true", help=arg["help"])
     args: RunArgs = parser.parse_args()
-
+    
     main(
         testing=args.testing,
         single_user=args.single_user,
         native=args.native,
         fullscreen=args.fullscreen,
         open_browser=args.open_browser,
+        reload=args.reload,
     )

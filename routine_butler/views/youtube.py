@@ -34,7 +34,7 @@ BODY_HTML = """
 
 IFRAME_HTML = """
 <iframe id="player"
-    width="640" height="360"
+    width="768" height="432"
     src="{src}"
     allow="autoplay"
 ></iframe>
