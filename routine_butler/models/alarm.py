@@ -57,6 +57,6 @@ class Alarm(BaseModel):
         now = datetime.datetime.now()
         todays_ring_dtime = self.get_todays_ring_datetime()
         if todays_ring_dtime < now:  # is past, then next is tomorrow
-            return todays_ring_dtime.replace(day=now.day + 1)
+            return todays_ring_dtime + datetime.timedelta(days=1)
         else:  # next is today
             return todays_ring_dtime
