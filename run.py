@@ -48,7 +48,7 @@ if __name__ in {"__main__", "__mp_main__"}:
     for arg in ARGS:
         parser.add_argument(arg["arg"], action="store_true", help=arg["help"])
     args: RunArgs = parser.parse_args()
-    
+
     main(
         testing=args.testing,
         single_user=args.single_user,

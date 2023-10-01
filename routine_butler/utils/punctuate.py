@@ -80,9 +80,9 @@ class RestorePuncts:
 
         while True:
             # words in the chunk and the overlapping portion
-            wrds_len = wrds[(length * i) : (length * (i + 1))]
+            wrds_len = wrds[length * i : length * (i + 1)]  # noqa
             wrds_ovlp = wrds[
-                (length * (i + 1)) : ((length * (i + 1)) + overlap)
+                length * (i + 1) : (length * (i + 1)) + overlap  # noqa
             ]
             wrds_split = wrds_len + wrds_ovlp
 

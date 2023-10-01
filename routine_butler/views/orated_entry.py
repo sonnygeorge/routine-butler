@@ -169,7 +169,7 @@ class ASR:
 
     def __init__(self):
         self.signals, self.queues, self.diaries = None, None, None
-        self.state = None
+        self._state = None
         self.build_ui()
         ui.timer(0.1, self.spawn_subprocesses, once=True)
         self.monitoring = ui.timer(0.4, self.monitor)
@@ -182,7 +182,7 @@ class ASR:
         buttons_column.style(f"height: {self.SIDEBAR_HEIGHT_PX}px;")
         with buttons_column.classes("bg-gray-300 rounded-lg shadow-md px-2"):
             self.undo_button = ui.button("Undo", icon="undo")
-            self.undo_button.props(f"color=primary")
+            self.undo_button.props("color=primary")
             self.undo_button.classes(f"w-{self.SIDEBAR_WIDTH}")
             self.undo_button.on("click", self.hdl_undo_button_click)
             self.finish_button = ui.button("Finish", icon=ICON_STRS.check)
@@ -241,28 +241,28 @@ class ASR:
                 self.update_text_area()
             self.n_transcriptions_as_of_last_check = n_transcriptions
             # Check if a new state should be entered
-            for state in self.STATES:
-                if state.should_enter(self.signals) and self.state != state:
-                    self.update_state(state)
+            for _state in self.STATES:
+                if _state.should_enter(self.signals) and self._state != _state:
+                    self.update_state(_state)
                     break
 
     def update_state(self, state: GUIState):
         self.finish_button.disable()
-        self.state = state
-        self.action_button.set_text(self.state.text)
-        self.action_button.props(f"icon={self.state.icon}")
-        self.action_button.props(f"color={self.state.color}")
-        if self.state.should_disable_undo_button:
+        self._state = state
+        self.action_button.set_text(self._state.text)
+        self.action_button.props(f"icon={self._state.icon}")
+        self.action_button.props(f"color={self._state.color}")
+        if self._state.should_disable_undo_button:
             self.undo_button.disable()
         else:
             self.undo_button.enable()
 
-        if self.state.should_disable_finish_button:
+        if self._state.should_disable_finish_button:
             self.finish_button.disable()
         else:
             self.finish_button.enable()
 
-        if self.state.should_disable_action_button:
+        if self._state.should_disable_action_button:
             self.action_button.disable()
         else:
             self.action_button.enable()
@@ -279,13 +279,13 @@ class ASR:
             self.monitoring.deactivate()
 
     def hdl_action_button_click(self):
-        if isinstance(self.state, ReadyState):
+        if isinstance(self._state, ReadyState):
             with self.lock:
                 self.signals["asr_is_paused"] = False
-        elif isinstance(self.state, RecordingState):
+        elif isinstance(self._state, RecordingState):
             with self.lock:
                 self.signals["asr_is_paused"] = True
-        elif isinstance(self.state, FinalReviewState):
+        elif isinstance(self._state, FinalReviewState):
             run_data = OratedEntryRunData(entry=self.text_area.value)
             state.set_pending_run_data_to_be_added_to_db(run_data)
             state.set_is_pending_orated_entry(False)

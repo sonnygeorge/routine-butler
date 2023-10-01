@@ -1,10 +1,13 @@
 from os import PathLike
 from typing import List, Optional, Protocol
+
 from pydantic import BaseModel
+
 
 class CloudStorageBucketItem(BaseModel):
     name: str
     is_dir: bool
+
 
 class CloudStorageBucket(Protocol):
     """Protocol for interacting with a cloud storage bucket."""
