@@ -9,6 +9,7 @@ import pyaudio
 from nicegui import run, ui
 from vosk import KaldiRecognizer, Model
 
+from routine_butler.components import micro
 from routine_butler.globals import ICON_STRS, PagePath
 from routine_butler.plugins._orated_entry import (
     DEFAULT_SIGNALS,
@@ -310,4 +311,5 @@ class ASR:
 @ui.page(path=PagePath.ORATED_ENTRY)
 def orated_entry():
     initialize_page(PagePath.ORATED_ENTRY, state=state)
-    ASR()
+    with micro.card().classes("absolute-center w-fit"):
+        ASR()
