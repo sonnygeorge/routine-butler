@@ -27,7 +27,7 @@ from routine_butler.state import state
 from routine_butler.utils.misc import initialize_page, redirect_to_page
 from routine_butler.utils.punctuate import RestorePuncts
 
-AUDIO_INPUT_DEVICE_NAME = "USB"  # FIXME
+INPUT_DEVICE_NAME_SUBSTR = "USB"
 CHANNELS = 1
 FRAME_RATE = 16000
 RECORDING_CYCLE_SECONDS = 7
@@ -59,11 +59,9 @@ def record(lock, signals: Signals, recorded: Queue, **kwargs):
     punctuate_thread.start()
 
     p = pyaudio.PyAudio()
-
+    device_idx = None
     info = p.get_host_api_info_by_index(0)
-
     numdevices = info.get("deviceCount")
-
     for i in range(0, numdevices):
         n_channels = p.get_device_info_by_host_api_device_index(0, i).get(
             "maxInputChannels"
@@ -71,8 +69,18 @@ def record(lock, signals: Signals, recorded: Queue, **kwargs):
         if n_channels > 0:
             name = p.get_device_info_by_host_api_device_index(0, i).get("name")
             logger.info(f"Input Device id {i} - {name}")
+            if INPUT_DEVICE_NAME_SUBSTR.lower() in name.lower():
+                device_idx = i
+                break
 
-    stream = p.open(
+    if device_idx is None:
+        logger.error(
+            f"Unable to find device w/ '{INPUT_DEVICE_NAME_SUBSTR}' in name"
+        )
+        open_stream = p.open
+    else:
+        open_stream = partial(p.open, input_device_index=device_idx)
+    stream = open_stream(
         format=AUDIO_FORMAT,
         channels=CHANNELS,
         rate=RATE,
@@ -162,9 +170,7 @@ def punctuate(
         if not transcribed.empty():
             text_to_punctuate = transcribed.get()
             if text_to_punctuate in transcribed_diary:
-                punctuated_text = rpunct.punctuate(
-                    text_to_punctuate, lang="en"
-                )
+                punctuated_text = rpunct.punctuate(text_to_punctuate)
                 with lock:
                     punctuated_diary.append(punctuated_text)
         check_if_punctuation_has_completed_and_update_signal()
