@@ -6,6 +6,7 @@ from multiprocessing import Manager, Queue
 from typing import List
 
 import pyaudio
+from loguru import logger
 from nicegui import run, ui
 from vosk import KaldiRecognizer, Model
 
@@ -26,6 +27,7 @@ from routine_butler.state import state
 from routine_butler.utils.misc import initialize_page, redirect_to_page
 from routine_butler.utils.punctuate import RestorePuncts
 
+AUDIO_INPUT_DEVICE_NAME = "USB"  # FIXME
 CHANNELS = 1
 FRAME_RATE = 16000
 RECORDING_CYCLE_SECONDS = 7
@@ -57,6 +59,19 @@ def record(lock, signals: Signals, recorded: Queue, **kwargs):
     punctuate_thread.start()
 
     p = pyaudio.PyAudio()
+
+    info = p.get_host_api_info_by_index(0)
+
+    numdevices = info.get("deviceCount")
+
+    for i in range(0, numdevices):
+        n_channels = p.get_device_info_by_host_api_device_index(0, i).get(
+            "maxInputChannels"
+        )
+        if n_channels > 0:
+            name = p.get_device_info_by_host_api_device_index(0, i).get("name")
+            logger.info(f"Input Device id {i} - {name}")
+
     stream = p.open(
         format=AUDIO_FORMAT,
         channels=CHANNELS,
