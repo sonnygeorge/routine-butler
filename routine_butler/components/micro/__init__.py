@@ -34,6 +34,7 @@ from routine_butler.components.micro.svg import (
 from routine_butler.components.micro.target_duration_slider import (
     target_duration_slider,
 )
+from routine_butler.components.micro.text_area import text_area
 from routine_butler.components.micro.time_input import time_input
 from routine_butler.components.micro.vertical_separator import (
     vertical_separator,

@@ -20,8 +20,8 @@ def close_keyboard():
         pass
 
 
-def input(*args, **kwargs) -> ui.input:
-    input = ui.input(*args, **kwargs)
+def text_area(*args, **kwargs) -> ui.textarea:
+    input = ui.textarea(*args, **kwargs)
     input.on("focus", open_keyboard)
     input.on("blur", close_keyboard)
     return input

@@ -218,7 +218,9 @@ class ASR:
             self.action_button.classes(f"w-{self.SIDEBAR_WIDTH}")
         with parent_container:
             with ui.column().style(f"width: {self.TEXT_BOX_WIDTH_PX}px;"):
-                self.text_area = ui.textarea(placeholder="Begin your entry...")
+                self.text_area = micro.text_area(
+                    placeholder="Begin your entry..."
+                )
                 self.text_area.disable()
                 self.text_area.props("hide-bottom-space")
                 self.text_area.classes("w-full h-full")
