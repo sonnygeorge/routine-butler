@@ -1,4 +1,5 @@
 import json
+import re
 import threading
 import time
 from functools import partial
@@ -27,14 +28,13 @@ from routine_butler.state import state
 from routine_butler.utils.misc import initialize_page, redirect_to_page
 from routine_butler.utils.punctuate import RestorePuncts
 
-INPUT_DEVICE_NAME_SUBSTR = "USB"
+INPUT_DEVICE_NAME_PATTERN = re.compile(r"(?i)(\S*usb\S*|\S*webcam\S*)")
 CHANNELS = 1
-FRAME_RATE = 16000
 RECORDING_CYCLE_SECONDS = 7
 AUDIO_FORMAT = pyaudio.paInt16
 FRAMES_PER_BUFFER = 3200
 CHANNELS = 1
-RATE = 16000
+SAMPLE_RATE = 48000
 CHUNK = 1024
 MIN_CHARS_PER_CYCLE = 6
 
@@ -47,7 +47,7 @@ def record(lock, signals: Signals, recorded: Queue, **kwargs):
         )
 
     def recording_cycle_is_complete(frames: list) -> bool:
-        return len(frames) >= (FRAME_RATE * RECORDING_CYCLE_SECONDS) / CHUNK
+        return len(frames) >= (SAMPLE_RATE * RECORDING_CYCLE_SECONDS) / CHUNK
 
     _transcribe = partial(
         transcribe, lock=lock, signals=signals, recorded=recorded, **kwargs
@@ -69,25 +69,28 @@ def record(lock, signals: Signals, recorded: Queue, **kwargs):
         if n_channels > 0:
             name = p.get_device_info_by_host_api_device_index(0, i).get("name")
             logger.info(f"Input Device id {i} - {name}")
-            if INPUT_DEVICE_NAME_SUBSTR.lower() in name.lower():
+            if INPUT_DEVICE_NAME_PATTERN.search(name) is not None:
                 device_idx = i
+                logger.info(f"Opting to use device - '{name}'")
                 break
 
     if device_idx is None:
         logger.error(
-            f"Unable to find device w/ '{INPUT_DEVICE_NAME_SUBSTR}' in name"
+            f"Unable to find device w/ '{INPUT_DEVICE_NAME_PATTERN}' in name"
         )
-        open_stream = p.open
-    else:
-        open_stream = partial(p.open, input_device_index=device_idx)
-    stream = open_stream(
+        device_idx = 0
+
+    stream = p.open(
         format=AUDIO_FORMAT,
         channels=CHANNELS,
-        rate=RATE,
+        rate=SAMPLE_RATE,
         input=True,
         frames_per_buffer=FRAMES_PER_BUFFER,
+        input_device_index=device_idx,
     )
     signals["stream_is_open"] = True
+
+    # Start reading stream and appending cycles to queue
     frames = []
     while not signals["asr_is_complete"]:
         if not should_record():
@@ -118,7 +121,7 @@ def transcribe(
         return not signals["asr_is_paused"]
 
     model = Model(None, "vosk-model-small-en-us-0.15")
-    speech_recognizer = KaldiRecognizer(model, FRAME_RATE)
+    speech_recognizer = KaldiRecognizer(model, SAMPLE_RATE)
     speech_recognizer.SetWords(True)
     signals["transcription_model_is_loaded"] = True
     while not signals["asr_is_complete"]:
