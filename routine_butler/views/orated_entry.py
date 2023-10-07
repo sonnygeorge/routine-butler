@@ -180,7 +180,9 @@ def punctuate(
         if not transcribed.empty():
             text_to_punctuate = transcribed.get()
             if text_to_punctuate in transcribed_diary:
+                logger.info(f"Punctuating: {text_to_punctuate}")
                 punctuated_text = rpunct.punctuate(text_to_punctuate)
+                logger.info(f"Punctuated: {punctuated_text}")
                 with lock:
                     punctuated_diary.append(punctuated_text)
         check_if_punctuation_has_completed_and_update_signal()
@@ -250,14 +252,15 @@ class ASR:
                 punctuated_diary=self.punctuated_diary,
             )
 
-        self.manager = Manager()
-        self.lock = self.manager.Lock()
-        self.signals = self.manager.dict(DEFAULT_SIGNALS)
-        recorded_queue = self.manager.Queue()
-        transcribed_queue = self.manager.Queue()
-        self.transcribed_diary = self.manager.list()
-        self.punctuated_diary = self.manager.list()
-        await run.cpu_bound(partialize(record))
+        if __name__ == "__main__":
+            self.manager = Manager()
+            self.lock = self.manager.Lock()
+            self.signals = self.manager.dict(DEFAULT_SIGNALS)
+            recorded_queue = self.manager.Queue()
+            transcribed_queue = self.manager.Queue()
+            self.transcribed_diary = self.manager.list()
+            self.punctuated_diary = self.manager.list()
+            await run.cpu_bound(partialize(record))
 
     def update_text_area(self):
         if not self.signals["punctuation_is_complete"]:
