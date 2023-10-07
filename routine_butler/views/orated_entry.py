@@ -30,7 +30,7 @@ from routine_butler.utils.misc import (
     log_errors,
     redirect_to_page,
 )
-from routine_butler.utils.punctuate import RestorePuncts
+from routine_butler.utils.punctuate import apply_punctuation_rules
 
 INPUT_DEVICE_NAME_PATTERN = re.compile(r"(?i)(\S*usb\S*|\S*webcam\S*)")
 CHANNELS = 1
@@ -172,7 +172,6 @@ def punctuate(
             with lock:
                 signals["punctuation_is_complete"] = True
 
-    # rpunct = RestorePuncts()
     while not signals["punctuation_is_complete"]:
         if len(transcribed_diary) == 0:
             time.sleep(0.1)
@@ -180,12 +179,7 @@ def punctuate(
         if not transcribed.empty():
             text_to_punctuate: str = transcribed.get()
             if text_to_punctuate in transcribed_diary:
-                logger.info(f"Punctuating: {text_to_punctuate}")
-                # punctuated_text = rpunct.punctuate(text_to_punctuate)
-                punctuated_text = (
-                    text_to_punctuate[0].upper() + text_to_punctuate[1:] + "."
-                )
-                logger.info(f"Punctuated: {punctuated_text}")
+                punctuated_text = apply_punctuation_rules(text_to_punctuate)
                 with lock:
                     punctuated_diary.append(punctuated_text)
         check_if_punctuation_has_completed_and_update_signal()
