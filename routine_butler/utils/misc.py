@@ -1,5 +1,7 @@
+import functools
 import importlib
 import os
+import traceback
 from typing import TYPE_CHECKING, Dict, Protocol, Type
 
 from loguru import logger
@@ -126,3 +128,17 @@ class PendingYoutubeVideo(BaseModel):
     start_seconds: int = 0
     playback_rate: PlaybackRate = PlaybackRate.PLAYBACK_RATE_NORMAL
     autoplay: bool = False
+
+
+def log_errors(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            logger.error(
+                f"Exception occurred in {func.__name__}: {e}\n{traceback.format_exc()}"
+            )
+            raise
+
+    return wrapper

@@ -25,7 +25,11 @@ from routine_butler.plugins._orated_entry import (
 )
 from routine_butler.plugins.orated_entry import OratedEntryRunData
 from routine_butler.state import state
-from routine_butler.utils.misc import initialize_page, redirect_to_page
+from routine_butler.utils.misc import (
+    initialize_page,
+    log_errors,
+    redirect_to_page,
+)
 from routine_butler.utils.punctuate import RestorePuncts
 
 INPUT_DEVICE_NAME_PATTERN = re.compile(r"(?i)(\S*usb\S*|\S*webcam\S*)")
@@ -39,6 +43,7 @@ CHUNK = 1024
 MIN_CHARS_PER_CYCLE = 6
 
 
+@log_errors
 def record(lock, signals: Signals, recorded: Queue, **kwargs):
     def should_record() -> bool:
         return (
@@ -109,6 +114,7 @@ def record(lock, signals: Signals, recorded: Queue, **kwargs):
     punctuate_thread.join()
 
 
+@log_errors
 def transcribe(
     lock,
     signals: Signals,
@@ -145,6 +151,7 @@ def transcribe(
             transcribed_diary.append(text)
 
 
+@log_errors
 def punctuate(
     lock,
     signals: Signals,
