@@ -14,5 +14,4 @@ pytest
 rich
 selenium
 sqlalchemy
-simpletransformers==0.61.4
 torch==2.0.1
