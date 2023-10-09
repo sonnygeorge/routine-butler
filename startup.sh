@@ -1,8 +1,11 @@
 #!/bin/bash
 # Commands for running RoutineButler on a Raspberry Pi
 
-echo "Adjusting system volume to 78%..."
-amixer set Master -- 78%
+echo "Adjusting system volume to 84%..."
+amixer set Master -- 84%
+
+echo "Adjusting screen resolution to 1280x720..."
+xrandr --output HDMI-1 --mode 1280x720
 
 echo "Activating virtual environment..."
 source venv/bin/activate
