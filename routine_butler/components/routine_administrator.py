@@ -1,11 +1,13 @@
 import datetime
+import random
 from typing import List, Optional, Tuple
 
+from loguru import logger
 from nicegui import ui
 
 from routine_butler.components import micro
 from routine_butler.globals import G_SUITE_CREDENTIALS_MANAGER, PagePath
-from routine_butler.models import Program, ProgramRun, Routine
+from routine_butler.models import PriorityLevel, Program, ProgramRun, Routine
 from routine_butler.state import state
 from routine_butler.utils.misc import redirect_to_page
 
@@ -16,6 +18,12 @@ SVGS_COLOR = "black"
 SVG_WIDTH_PX = 23
 SDBR_FONT_PX = 12.5
 SDBR_ROW_HEIGHT_PX = 28
+
+LOAD_SECONDS_PER_PROGRAM = 2.5
+TARGET_CUSHION_SECONDS = 90
+
+
+# FIXME: not finishing correctly
 
 
 def add_horizontal_dash() -> None:
@@ -35,23 +43,113 @@ def sidebar_label(text: str) -> ui.label:
     return label
 
 
+def prune_element_programs_to_target_duration(
+    element_programs_queue: List[Program],
+    element_program_priorities: List[PriorityLevel],
+    target_duration_minutes: int,
+) -> List[Program]:
+    """Prunes the element programs queue to the target duration. Returns the pruned
+    queue."""
+
+    def merge_priority_dicts():
+        merged = {}
+        merged.update(low_priority_programs)
+        merged.update(med_priority_programs)
+        merged.update(high_priority_programs)
+        return merged
+
+    def total_expected_time_seconds():
+        programs: List[Program] = merge_priority_dicts().values()
+        return sum((p.estimate_duration_in_seconds() for p in programs))
+
+    target_seconds = target_duration_minutes * 60
+    loading_offset = LOAD_SECONDS_PER_PROGRAM * len(element_programs_queue)
+    target_seconds -= loading_offset
+    target_seconds -= TARGET_CUSHION_SECONDS
+
+    low_priority_programs = {}
+    med_priority_programs = {}
+    high_priority_programs = {}
+    for i, program in enumerate(element_programs_queue):
+        if element_program_priorities[i] == PriorityLevel.LOW:
+            low_priority_programs[i] = program
+        elif element_program_priorities[i] == PriorityLevel.MEDIUM:
+            med_priority_programs[i] = program
+        else:
+            high_priority_programs[i] = program
+
+    pruned_titles = []
+    while total_expected_time_seconds() >= target_seconds:
+        if len(low_priority_programs) > 0:
+            key_to_prune = random.sample(
+                list(low_priority_programs.keys()), 1
+            )[0]
+            pruned_titles.append(low_priority_programs[key_to_prune].title)
+            low_priority_programs.pop(key_to_prune)
+        elif len(med_priority_programs) > 0:
+            key_to_prune = random.sample(
+                list(med_priority_programs.keys()), 1
+            )[0]
+            pruned_titles.append(med_priority_programs[key_to_prune].title)
+            med_priority_programs.pop(key_to_prune)
+        else:
+            key_to_prune = random.sample(
+                list(high_priority_programs.keys()), 1
+            )[0]
+            pruned_titles.append(high_priority_programs[key_to_prune].title)
+            high_priority_programs.pop(key_to_prune)
+
+    msg = f"Pruned {pruned_titles} to hit {target_duration_minutes} minutes."
+    if len(pruned_titles) > 0:
+        ui.timer(0.1, lambda: ui.notify(msg), once=True)
+
+    merged = merge_priority_dicts()
+    sorted_keys = sorted(merged.keys())
+    return [merged[k] for k in sorted_keys]
+
+
 def get_programs_queues(
-    routine: Routine,
+    routine: Routine, target_duration_minutes: Optional[int] = None
 ) -> Tuple[List[Program], List[Program]]:
     element_program_titles = [e.program for e in routine.elements]
+    element_program_priorities = [e.priority_level for e in routine.elements]
     reward_program_titles = [r.program for r in routine.rewards]
     user_programs = {p.title: p for p in state.user.get_programs(state.engine)}
     element_programs_queue = [user_programs[t] for t in element_program_titles]
     reward_programs_queue = [user_programs[t] for t in reward_program_titles]
+    if target_duration_minutes is not None:
+        element_programs_queue = prune_element_programs_to_target_duration(
+            element_programs_queue,
+            element_program_priorities,
+            target_duration_minutes,
+        )
     return element_programs_queue, reward_programs_queue
 
 
 class RoutineAdministrator(ui.row):
     def __init__(self, routine: Routine):
         self.routine = routine
-        queues = get_programs_queues(routine)
-        self.element_programs_queue, self.reward_programs_queue = queues
-        self.n_programs_total = sum((len(q) for q in queues))
+        if (
+            self.routine.target_duration_enabled
+            and state.element_programs_queue is None
+        ):
+            target_duration_minutes = self.routine.target_duration_minutes
+        else:
+            target_duration_minutes = None
+        queues = get_programs_queues(routine, target_duration_minutes)
+        if state.element_programs_queue is None:
+            state.set_element_programs_queue(queues[0])
+            self.element_programs_queue = queues[0]
+        else:
+            self.element_programs_queue = state.element_programs_queue
+        self.reward_programs_queue = queues[1]
+
+        n_element_programs = len(self.element_programs_queue)
+        n_reward_programs = len(self.reward_programs_queue)
+        self.n_programs_total = n_element_programs + n_reward_programs
+
+        self.is_complete = False
+        ui.timer(0.2, self.check_if_complete)
 
         super().__init__()
         self.classes("absolute-center items-center")
@@ -69,6 +167,11 @@ class RoutineAdministrator(ui.row):
             ui.timer(0.1, self.begin_administration, once=True)
         else:  # resuming mid-routine, presumably after a program completion
             self.on_program_completion()
+
+    def check_if_complete(self):
+        if self.is_complete:
+            logger.info(f"Routine complete: {self.routine.title}")
+            redirect_to_page(PagePath.HOME)
 
     def add_sidebar(self):
         with self:
@@ -160,15 +263,16 @@ class RoutineAdministrator(ui.row):
 
     def _administer_next_program(self):
         if self.has_nothing_left_to_administer:
+            state.set_element_programs_queue(None)
             state.set_n_programs_traversed(0)
-            redirect_to_page(PagePath.HOME)
-            return
-        state.set_current_program_start_time(datetime.datetime.now())
-        with self.program_frame:
-            self.current_program.administer(
-                on_complete=self.on_program_completion
-            )
-        self.update_sidebar()
+            self.is_complete = True
+        else:
+            state.set_current_program_start_time(datetime.datetime.now())
+            with self.program_frame:
+                self.current_program.administer(
+                    on_complete=self.on_program_completion
+                )
+            self.update_sidebar()
 
     def _transition_to_next_program(self):
         self.program_frame.clear()  # clear current program frame ui

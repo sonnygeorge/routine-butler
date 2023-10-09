@@ -32,6 +32,7 @@ class State:
     _is_pending_orated_entry: bool = False
     _pending_youtube_video: Optional[PendingYoutubeVideo] = None
     _n_programs_traversed: int = 0
+    _element_programs_queue: Optional[List["Program"]] = None
     _pending_run_data_to_be_added_to_db: Optional[dict] = None
     _current_program_start_time: Optional[datetime.datetime] = None
 
@@ -109,6 +110,10 @@ class State:
         return self._n_programs_traversed
 
     @property
+    def element_programs_queue(self):
+        return self._element_programs_queue
+
+    @property
     def pending_run_data_to_be_added_to_db(self):
         return self._pending_run_data_to_be_added_to_db
 
@@ -174,6 +179,9 @@ class State:
 
     def set_n_programs_traversed(self, n: int):
         self._n_programs_traversed = n
+
+    def set_element_programs_queue(self, queue: List["Program"]):
+        self._element_programs_queue = queue
 
     def set_pending_run_data_to_be_added_to_db(self, run_data: dict):
         self._pending_run_data_to_be_added_to_db = run_data

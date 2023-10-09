@@ -100,3 +100,6 @@ class LockBox(BaseModel):
 
     def administer(self, on_complete: callable):
         LockBoxGui(self.target_grams, self.tolerance_grams, on_complete)
+
+    def estimate_duration_in_seconds(self) -> float:
+        return 0  # Lock box should never be skipped

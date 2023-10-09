@@ -170,3 +170,16 @@ class YoutubeVideo(BaseModel):
 
     def administer(self, on_complete: callable):
         YoutubeVideoGui(self, on_complete=on_complete)
+
+    def estimate_duration_in_seconds(self) -> float:
+        if self.mode == YoutubeVideoMode.SINGLE:
+            return 6 * 60  # We have no way of guessing video length from ID
+        else:  # We parse the path
+            est_video_seconds = int(str(self.path_or_id).split("-")[-1])
+            seconds_to_watch = est_video_seconds - self.start_seconds
+            watch_time_seconds = seconds_to_watch / float(self.playback_rate)
+            # add 3.5 seconds for user to click success
+            total_time_seconds = watch_time_seconds + 3.5
+            if not self.autoplay:
+                total_time_seconds += 3  # add 3 seconds for user to click play
+            return total_time_seconds

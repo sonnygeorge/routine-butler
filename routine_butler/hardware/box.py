@@ -96,29 +96,29 @@ class Box:
         GPIO.output(LOCK_PIN, GPIO.HIGH)
 
     def unlock(self):
-        logger.info(BOX_LOG_LVL, "Unlocking box...")
+        logger.log(BOX_LOG_LVL, "Unlocking box...")
         GPIO.setup(UNLOCK_PIN, GPIO.OUT)
         GPIO.output(UNLOCK_PIN, GPIO.LOW)
         time.sleep(LOCK_WAIT_SECONDS)
         GPIO.output(UNLOCK_PIN, GPIO.HIGH)
 
     def turn_green_led_on():
-        logger.info(BOX_LOG_LVL, "Turning green LED on...")
+        logger.log(BOX_LOG_LVL, "Turning green LED on...")
         GPIO.setup(GREEN_LED_PIN, GPIO.OUT)
         GPIO.output(GREEN_LED_PIN, GPIO.HIGH)
 
     def turn_green_led_off():
-        logger.info(BOX_LOG_LVL, "Turning green LED off...")
+        logger.log(BOX_LOG_LVL, "Turning green LED off...")
         GPIO.setup(GREEN_LED_PIN, GPIO.OUT)
         GPIO.output(GREEN_LED_PIN, GPIO.LOW)
 
     def turn_red_led_on():
-        logger.info(BOX_LOG_LVL, "Turning red LED on...")
+        logger.log(BOX_LOG_LVL, "Turning red LED on...")
         GPIO.setup(RED_LED_PIN, GPIO.OUT)
         GPIO.output(RED_LED_PIN, GPIO.HIGH)
 
     def turn_red_led_off():
-        logger.info(BOX_LOG_LVL, "Turning red LED off...")
+        logger.log(BOX_LOG_LVL, "Turning red LED off...")
         GPIO.setup(RED_LED_PIN, GPIO.OUT)
         GPIO.output(RED_LED_PIN, GPIO.LOW)
 

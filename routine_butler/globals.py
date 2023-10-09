@@ -117,6 +117,14 @@ BINDING_REFRESH_INTERVAL_SECONDS = 0.3  # Higher is more cpu friendly
 THROTTLE_SECONDS = 0.7  # For event handlers that would otherwise be spammed
 
 
+class _time_estimation:
+    READING_SPEED_CHARS_PER_SECOND = 16
+    CHECK_WAIT_SECOND_MULTIPLIER = 1.5
+
+
+TIME_ESTIMATION = _time_estimation()
+
+
 PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW = [
     PagePath.DO_ROUTINE,
     PagePath.RING,

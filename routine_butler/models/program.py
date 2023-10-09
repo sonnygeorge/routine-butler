@@ -35,3 +35,7 @@ class Program(BaseDBPydanticModel):
     def administer(self, on_complete: callable) -> dict:
         plugin = state.plugins[self.plugin_type](**self.plugin_dict)
         plugin.administer(on_complete=on_complete)
+
+    def estimate_duration_in_seconds(self) -> float:
+        plugin = state.plugins[self.plugin_type](**self.plugin_dict)
+        return plugin.estimate_duration_in_seconds()

@@ -113,6 +113,8 @@ class DriveFolderManager:
     ) -> str:
         current_parent_folder_id = self.get_root_folder_id(service)
         for folder_name in path_to_folder.split("/"):
+            if len(folder_name) == 0:
+                continue
             current_parent_folder_id = self._get_folder_id(
                 service,
                 folder_name,

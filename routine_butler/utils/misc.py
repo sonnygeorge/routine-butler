@@ -28,6 +28,9 @@ class Plugin(Protocol):
     def administer(self, on_complete: callable) -> None:
         ...
 
+    def estimate_duration_in_seconds(self) -> float:
+        ...
+
     def dict(self) -> dict:
         ...
 

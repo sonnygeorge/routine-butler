@@ -94,3 +94,6 @@ class YoutubeQueue(BaseModel):
 
     def administer(self, on_complete: callable):
         YoutubeQueueGui(self, on_complete=on_complete)
+
+    def estimate_duration_in_seconds(self) -> float:
+        return self.target_duration_minutes * 60

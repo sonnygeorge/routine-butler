@@ -4,6 +4,7 @@ from nicegui import ui
 from pydantic import BaseModel
 
 from routine_butler.components import micro
+from routine_butler.globals import TIME_ESTIMATION
 from routine_butler.plugins._check import (
     NUMERIC_VALIDATORS,
     CheckRunData,
@@ -59,7 +60,7 @@ class NumericRangeCheckGui:
         card = micro.card().classes("flex flex-col items-center")
         with card.style(f"width: {GUI_COMPONENT_WIDTH_PX}px"):
             # Display checkable prompt
-            ui.markdown(f"# {data.checkable_prompt}")
+            ui.markdown(f"**{data.checkable_prompt}**")
             ui.separator()
             # Add interval inputs
             with ui.row().classes(ROW_CLASSES):
@@ -101,7 +102,7 @@ class NumericRangeCheckGui:
                 if not fn(value):
                     ui.notify(msg)
                     return
-        if not (min <= best <= max):
+        if not int(min) < int(best) or not int(best) < int(max):
             ui.notify("Best estimate must be between min and max estimates")
             return
         ci = ConfidenceInterval(
@@ -120,3 +121,9 @@ class NumericRangeCheck(BaseModel):
 
     def administer(self, on_complete: callable):
         NumericRangeCheckGui(self, on_complete=on_complete)
+
+    def estimate_duration_in_seconds(self) -> float:
+        n_chars_to_read = len(self.checkable_prompt)
+        read = n_chars_to_read / TIME_ESTIMATION.READING_SPEED_CHARS_PER_SECOND
+        wait = self.wait_seconds * TIME_ESTIMATION.CHECK_WAIT_SECOND_MULTIPLIER
+        return read + wait + 3.5  # 3.5 seconds for entry of range

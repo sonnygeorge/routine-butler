@@ -222,3 +222,6 @@ class Flashcards(BaseModel):
 
     def administer(self, on_complete: callable):
         FlashcardsGui(self, on_complete)
+
+    def estimate_duration_in_seconds(self) -> float:
+        return self.target_minutes * 60

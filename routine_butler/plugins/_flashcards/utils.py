@@ -24,15 +24,12 @@ async def get_paths_of_collections_to_load(
 ) -> List[str]:
     """Given the the path attribute of a flashcards program, return a list of the paths
     of sheets that should be read"""
-    path_arg = None if path == "" else path
-    try:
-        items: List[CloudStorageBucketItem] = await STORAGE_BUCKET.list(
-            path_arg
-        )
-    except ValueError:  # if list() raises ValueError...
-        # ...the path is not a folder. We therefore assume it is a sheet.
+    if "-" in path:
+        # It is a path to a single sheet
         return [path]
 
+    path_arg = None if path == "" else path
+    items: List[CloudStorageBucketItem] = await STORAGE_BUCKET.list(path_arg)
     sheets_to_read = []
     for item in items:
         item_path = f"{path}/{item.name}" if path else item.name

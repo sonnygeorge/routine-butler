@@ -73,7 +73,6 @@ def markdown(text: str) -> ui.html:
         await ui.run_javascript("MathJax.typeset()", respond=False)
 
     ui.add_body_html(MATHJAX_SCRIPTS)
-    print("suppossedly added mathjax scripts")
     html = markdown_to_html_with_math(text)
     html = apply_tailwind(html)
     html = apply_custom_highlight_style(html)
