@@ -8,7 +8,38 @@ Here is a picture of my current setup which I am actively using as my morning an
 
 ![picture of the lockbox and kiosk](https://i.imgur.com/64x0Byw.jpeg)
 
-## 🏃👞 Running Kiosk-Style "On Boot" on a RaspberryPi
+## 🏃👞 Setup Instructions
+
+### 1. Flash Raspberry Pi OS
+
+Flash the latest version of **32-bit** [Raspberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/) onto an SD card and boot up the Raspberry Pi.
+
+### 2. Make sure system is up-to-date
+
+After configuring the Raspberry Pi with language, timezone, and internet, make sure the system is up-to-date with:
+
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+### 2. Clone Repo
+
+Clone the repo with:
+
+```bash
+git clone https://github.com/sonnygeorge/routine-butler.git
+```
+
+### 3. Change the system's python version to 3.11
+
+Use [this](https://github.com/tvdsluijs/sh-python-installer) tool to change the system's python version to 3.11.
+
+```bash
+wget -qO - https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh | sudo bash -s 3.11.0
+```
+
+## Run on boot
 
 To run RoutineButler automatically on boot, I am using `systemd`, a service manager for Linux systems that provides a way to manage background processes (including running them on boot).
 
