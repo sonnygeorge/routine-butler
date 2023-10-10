@@ -53,7 +53,15 @@ First, install matchbox-keyboard with:
 sudo apt-get install matchbox-keyboard
 ```
 
-### 7. Create venv and install dependencies
+### 7. Install emojis
+
+Next, install emojis with:
+
+```bash
+sudo apt install fonts-noto-color-emoji
+```
+
+### 8. Create venv and install dependencies
 
 First, verify that the system's Python version is 3.11 with:
 
@@ -76,7 +84,15 @@ sudo apt-get install portaudio19-dev python3-pyaudio
 pip install pyaudio
 ```
 
-### 8. Create a systemd service to run the app on startup and enable the service
+### 9. Verify app's audio and keyboard functionality
+
+First, verify that the app's audio is working by running (make sure venv is activated):
+
+```bash
+python test_audio_and_keyboard.py
+```
+
+### 10. Create a systemd service to run the app on startup and enable the service
 
 In order to run the app on startup, we will create a systemd service file and enable it.
 

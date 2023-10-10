@@ -138,20 +138,20 @@ class BaseDBPydanticModel(BaseModel):
     created_at: Optional[datetime.datetime] = None
     updated_at: Optional[datetime.datetime] = None
 
-    _READ_ONLY_FIELDS = {"uid", "created_at", "updated_at"}
-
     def __init__(self, **kwargs):
+        _READ_ONLY_FIELDS = {"uid", "created_at", "updated_at"}
         self._validate_orm_model()
         # if any protected fields are being initialized, raise error
-        if any(field in kwargs.keys() for field in self._READ_ONLY_FIELDS):
+        if any(field in kwargs.keys() for field in _READ_ONLY_FIELDS):
             raise AttemptedSetOnReadOnlyFieldError(
-                f"Cannot initialize the following fields: {self._READ_ONLY_FIELDS}"
+                f"Cannot initialize the following fields: {_READ_ONLY_FIELDS}"
             )
         super().__init__(**kwargs)
 
     def __setattr__(self, name, value):
         """Prevents external modification of a protected field."""
-        if name in self._READ_ONLY_FIELDS:
+        _READ_ONLY_FIELDS = {"uid", "created_at", "updated_at"}
+        if name in _READ_ONLY_FIELDS:
             # determine if the scope that is attempting to modify the attribute is
             # within a class
             outer_scope_locals = sys._getframe(1).f_locals
@@ -175,7 +175,7 @@ class BaseDBPydanticModel(BaseModel):
         # This provides the Pydantic model with a from_orm() method that converts
         # the SQLAlchemy ORM model instance to a Pydantic model instance--see:
         # docs.pydantic.dev/usage/models/#orm-mode-aka-arbitrary-class-instances
-        orm_mode: bool = True
+        from_attributes = True  # changed in v2 to from_attributes
         # We store SQLAlchemy ORM model that represents the corresponding database
         # table here. Otherwise, Pydantic would consider it a data field.
         orm_model: BaseDBORMModel = None

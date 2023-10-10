@@ -116,7 +116,7 @@ class NumericRangeCheckGui:
 
 class NumericRangeCheck(BaseModel):
     checkable_prompt: str = "Do the thing!"
-    units = ""
+    units: str = ""
     wait_seconds: int = 0
 
     def administer(self, on_complete: callable):
