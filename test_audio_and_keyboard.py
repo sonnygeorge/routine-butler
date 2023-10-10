@@ -3,20 +3,7 @@ import time
 
 from routine_butler.globals import ALARM_WAV_PATH
 from routine_butler.hardware.audio import play_wav_with_volume_adjustment
-
-
-def open_keyboard():
-    try:
-        subprocess.Popen(["matchbox-keyboard"])
-    except FileNotFoundError:
-        pass
-
-
-def close_keyboard():
-    try:
-        subprocess.run(["killall", "matchbox-keyboard"])
-    except FileNotFoundError:
-        pass
+from routine_butler.utils.misc import close_keyboard, open_keyboard
 
 
 def test_audio():

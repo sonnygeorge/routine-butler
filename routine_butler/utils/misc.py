@@ -1,6 +1,7 @@
 import functools
 import importlib
 import os
+import subprocess
 import traceback
 from typing import TYPE_CHECKING, Dict, Protocol, Type
 
@@ -145,3 +146,17 @@ def log_errors(func):
             raise
 
     return wrapper
+
+
+def open_keyboard():
+    try:
+        subprocess.Popen(["matchbox-keyboard", "lq1"])
+    except FileNotFoundError:
+        pass
+
+
+def close_keyboard():
+    try:
+        subprocess.run(["killall", "matchbox-keyboard"])
+    except FileNotFoundError:
+        pass
