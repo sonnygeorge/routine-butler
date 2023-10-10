@@ -99,7 +99,7 @@ In order to run the app on startup, we will create a systemd service file and en
 Create a systemd service file named `/etc/systemd/system/routine-butler.service` with:
 
 ```bash
-nano /etc/systemd/system/routine-butler.service
+sudo nano /etc/systemd/system/routine-butler.service
 ```
 
 Copy and paste the following contents into the file:
