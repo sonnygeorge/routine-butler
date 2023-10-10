@@ -72,7 +72,7 @@ pip install -r requirements.txt
 If `pyaudio` fails to install, try the following:
 
 ```bash
-sudo apt-get install libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0 ffmpeg libav-tools
+sudo apt-get install portaudio19-dev python3-pyaudio
 pip install pyaudio
 ```
 
