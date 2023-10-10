@@ -115,18 +115,18 @@ Copy and paste the following contents into the file:
 ```bash
 [Unit]
 Description=Routine Butler Python App
-After=network.target  # specifies that the service should start after the network is available
+After=network.target
 
 [Service]
-User=raspberry  # user to run the service as
-WorkingDirectory=/home/raspberry/routine-butler  # path to the repo
-Environment=DISPLAY=:0  # display number (0 is used since my setup has only one display)
-Environment=PULSE_SERVER=/run/user/1000/pulse/native  # number is user-specific... 1000 is the common, default user-value
-ExecStart=bash startup.sh  # script in the repo that runs necessary commands to start the app on Raspberry Pi
-Restart=on-failure  # restart the service if it fails
+User=raspberry
+WorkingDirectory=/home/raspberry/routine-butler
+Environment=DISPLAY=:0
+Environment=PULSE_SERVER=/run/user/1000/pulse/native
+ExecStart=bash startup.sh
+Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target  # specifies that the service will be enabled during the multi-user system boot process
+WantedBy=multi-user.target
 ```
 
 After creating the service file, enable it using the following command:
