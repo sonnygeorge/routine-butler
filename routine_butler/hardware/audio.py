@@ -32,24 +32,11 @@ def play_wav(file_path: str) -> None:
     logger.log(AUDIO_LOG_LVL, f"Playing wav: {file_path.split('/')[-1]}")
 
     p = pyaudio.PyAudio()
-    num_devices = p.get_device_count()
-    device_idx = None
-    for i in range(num_devices):
-        device_info = p.get_device_info_by_index(i)
-        device_name = device_info.get("name", "").lower()
-        if "usb" in device_name and device_info["maxOutputChannels"] > 0:
-            device_idx = i
-            break
-    if device_idx is None:
-        logger.warning("No usb audio device found, using default device")
-        device_idx = p.get_default_output_device_info()["index"]
-
     wf = wave.open(file_path, "rb")
     stream = p.open(
         format=p.get_format_from_width(wf.getsampwidth()),
         channels=wf.getnchannels(),
         rate=wf.getframerate(),
-        output_device_index=device_idx,
         output=True,
     )
     data = wf.readframes(1024)
