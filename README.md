@@ -118,8 +118,8 @@ Description=Routine Butler Python App
 After=network.target
 
 [Service]
-User=raspberry
-WorkingDirectory=/home/raspberry/routine-butler
+User=rpi
+WorkingDirectory=/home/rpi/routine-butler
 Environment=DISPLAY=:0
 Environment=PULSE_SERVER=/run/user/1000/pulse/native
 ExecStart=bash startup.sh
