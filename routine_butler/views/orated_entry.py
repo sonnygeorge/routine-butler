@@ -65,53 +65,54 @@ def record(lock, signals: Signals, recorded: Queue, **kwargs):
     transcribe_thread.start()
     punctuate_thread.start()
 
-    p = pyaudio.PyAudio()
-    device_idx = None
-    info = p.get_host_api_info_by_index(0)
-    numdevices = info.get("deviceCount")
-    for i in range(0, numdevices):
-        n_channels = p.get_device_info_by_host_api_device_index(0, i).get(
-            "maxInputChannels"
-        )
-        if n_channels > 0:
-            name = p.get_device_info_by_host_api_device_index(0, i).get("name")
-            logger.info(f"Input Device id {i} - {name}")
-            if INPUT_DEVICE_NAME_PATTERN.search(name) is not None:
-                device_idx = i
-                logger.info(f"Opting to use device - '{name}'")
-                break
+    # p = pyaudio.PyAudio()
+    # device_idx = None
+    # info = p.get_host_api_info_by_index(0)
+    # numdevices = info.get("deviceCount")
+    # for i in range(0, numdevices):
+    #     n_channels = p.get_device_info_by_host_api_device_index(0, i).get(
+    #         "maxInputChannels"
+    #     )
+    #     if n_channels > 0:
+    #         name = p.get_device_info_by_host_api_device_index(0, i).get("name")
+    #         logger.info(f"Input Device id {i} - {name}")
+    #         if INPUT_DEVICE_NAME_PATTERN.search(name) is not None:
+    #             device_idx = i
+    #             logger.info(f"Opting to use device - '{name}'")
+    #             break
 
-    if device_idx is None:
-        logger.error(
-            f"Unable to find device w/ '{INPUT_DEVICE_NAME_PATTERN}' in name"
-        )
-        device_idx = 0
+    # if device_idx is None:
+    #     logger.error(
+    #         f"Unable to find device w/ '{INPUT_DEVICE_NAME_PATTERN}' in name"
+    #     )
+    #     device_idx = 0
 
-    stream = p.open(
-        format=AUDIO_FORMAT,
-        channels=CHANNELS,
-        rate=SAMPLE_RATE,
-        input=True,
-        frames_per_buffer=FRAMES_PER_BUFFER,
-        input_device_index=device_idx,
-    )
-    signals["stream_is_open"] = True
+    # stream = p.open(
+    #     format=AUDIO_FORMAT,
+    #     channels=CHANNELS,
+    #     rate=SAMPLE_RATE,
+    #     input=True,
+    #     frames_per_buffer=FRAMES_PER_BUFFER,
+    #     input_device_index=device_idx,
+    # )
 
     # Start reading stream and appending cycles to queue
     frames = []
-    while not signals["asr_is_complete"]:
-        if not should_record():
-            time.sleep(0.1)
-            continue
-        data = stream.read(CHUNK, exception_on_overflow=False)
-        frames.append(data)
-        if recording_cycle_is_complete(frames):
-            recorded.put(frames.copy())
-            frames = []
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
-
+    with sr.Microphone() as source:  # Opens pyaudio stream
+        signals["stream_is_open"] = True
+        while not signals["asr_is_complete"]:
+            if not should_record():
+                time.sleep(0.1)
+                continue
+            # data = stream.read(CHUNK, exception_on_overflow=False)
+            data = source.stream.read(CHUNK)
+            frames.append(data)
+            if recording_cycle_is_complete(frames):
+                recorded.put(frames.copy())
+                frames = []
+    # stream.stop_stream()
+    # stream.close()
+    # p.terminate()
     transcribe_thread.join()
     punctuate_thread.join()
 
@@ -139,10 +140,11 @@ def transcribe(
             continue
         try:
             recording_cycle_frames = recorded.get()
-        except EOFError:
+        except EOFError as e:
             # multiprocessing.Queue.get() raises EOFError when the queue is
             # empty and the queue's sender has exited. This is a hacky way to
             # catch this error and exit the thread.
+            logger.info(e)
             break
         # speech_recognizer.AcceptWaveform(b"".join(recording_cycle_frames))
         # result = speech_recognizer.Result()
