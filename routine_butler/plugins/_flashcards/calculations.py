@@ -1,9 +1,7 @@
 """calculations.py Calcuations for the flashcards plugin."""
 
-from math import factorial
+from math import atan, factorial, pi
 from typing import TYPE_CHECKING
-
-import numpy as np
 
 if TYPE_CHECKING:
     from routine_butler.plugins.flashcards import FlashcardCollection
@@ -24,7 +22,7 @@ def calculate_flashcard_pick_weight(
     ), "has_bad_formatting must be a bool"
 
     m, a = mastery / 10, appetite / 10  # normalize to 0-1
-    mastery_multiplier = np.arctan(-10 * m + 2.2) / (np.pi * m ** (-m))
+    mastery_multiplier = atan(-10 * m + 2.2) / (pi * m ** (-m))
     mastery_multiplier += 0.7 - 1.05 * m**10
     mastery_multiplier = max(mastery_multiplier, 0.25)
     appetite_multiplier = (2 * a) ** 2.8 + a + 0.5
