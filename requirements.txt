@@ -1,5 +1,4 @@
 beautifulsoup4
-vosk
 pydantic==2.4.2
 pyaudio
 chromedriver-autoinstaller
@@ -15,3 +14,4 @@ pytest
 rich
 selenium
 sqlalchemy
+SpeechRecognition

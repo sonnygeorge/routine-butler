@@ -61,6 +61,14 @@ Next, install emojis with:
 sudo apt install fonts-noto-color-emoji
 ```
 
+### 8. Install flac
+
+Next, install flac with:
+
+```bash
+sudo apt-get install flac
+```
+
 ### 8. Create venv and install dependencies
 
 First, verify that the system's Python version is 3.11 with:

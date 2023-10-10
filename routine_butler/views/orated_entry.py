@@ -1,4 +1,4 @@
-import json
+# import json
 import re
 import threading
 import time
@@ -7,9 +7,11 @@ from multiprocessing import Manager, Queue
 from typing import List
 
 import pyaudio
+
+# from vosk import KaldiRecognizer, Model
+import speech_recognition as sr
 from loguru import logger
 from nicegui import run, ui
-from vosk import KaldiRecognizer, Model
 
 from routine_butler.components import micro
 from routine_butler.globals import ICON_STRS, PagePath
@@ -126,9 +128,10 @@ def transcribe(
     def should_transcribe():
         return not signals["asr_is_paused"]
 
-    model = Model(None, "vosk-model-small-en-us-0.15")
-    speech_recognizer = KaldiRecognizer(model, SAMPLE_RATE)
-    speech_recognizer.SetWords(True)
+    r = sr.Recognizer()
+    # model = Model(None, "vosk-model-small-en-us-0.15")
+    # speech_recognizer = KaldiRecognizer(model, SAMPLE_RATE)
+    # speech_recognizer.SetWords(True)
     signals["transcription_model_is_loaded"] = True
     while not signals["asr_is_complete"]:
         if not should_transcribe():
@@ -141,9 +144,14 @@ def transcribe(
             # empty and the queue's sender has exited. This is a hacky way to
             # catch this error and exit the thread.
             break
-        speech_recognizer.AcceptWaveform(b"".join(recording_cycle_frames))
-        result = speech_recognizer.Result()
-        text = json.loads(result)["text"]
+        # speech_recognizer.AcceptWaveform(b"".join(recording_cycle_frames))
+        # result = speech_recognizer.Result()
+        # text = json.loads(result)["text"]
+        audio = sr.AudioData(b"".join(recording_cycle_frames), SAMPLE_RATE, 2)
+        try:
+            text = r.recognize_google(audio)
+        except sr.UnknownValueError:
+            text = ""
         if len(text) < MIN_CHARS_PER_CYCLE:
             continue
         with lock:
