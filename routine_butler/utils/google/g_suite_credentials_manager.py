@@ -147,8 +147,8 @@ class G_Suite_Credentials_Manager:
         # 7. ascertain credentials
         flow.fetch_token(code=code)
         self._credentials = flow.credentials
-        if "refresh-token" not in self._credentials.to_json():
-            raise ValueError("Google seems to not have given a refresh token.")
+        json_keys = dict(self._credentials.__dict__).keys()
+        logger.info(f"Saving token file w/ keys: {json_keys}")
         # 8. save the credentials
         with open(TOKEN_FILE_PATH, "w") as f:
             f.write(self._credentials.to_json())
