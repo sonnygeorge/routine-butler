@@ -31,12 +31,50 @@ Clone the repo with:
 git clone https://github.com/sonnygeorge/routine-butler.git
 ```
 
-### 4. Change the system's python version to 3.11
+### 4. Install Python 3.11
 
-Use [this](https://github.com/tvdsluijs/sh-python-installer) tool to change the system's python version to 3.11 with:
+First, install the dependencies for building Python 3.11 with:
 
 ```bash
-wget -qO - https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh | sudo bash -s 3.11.0
+sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev
+```
+
+Next, download Python 3.11 with:
+
+```bash
+cd ~/Downloads
+wget https://www.python.org/ftp/python/VERSION/Python-3.11.1.tgz
+```
+
+Extract the downloaded file with:
+
+```bash
+sudo tar zxf Python-3.11.1.tgz
+```
+
+Configure the build with:
+
+```bash
+cd Python-3.11.1
+sudo ./configure --enable-optimizations
+```
+
+Build with (this takes around 30 minutes):
+
+```bash
+sudo make -j 4
+```
+
+Install with:
+
+```bash
+sudo make altinstall
+```
+
+Verify that Python 3.11 is installed with:
+
+```bash
+python3.11 --version
 ```
 
 ### 5. Change audio output device
@@ -71,16 +109,10 @@ sudo apt-get install flac
 
 ### 8. Create venv and install dependencies
 
-First, verify that the system's Python version is 3.11 with:
+Once Python 3.11 is succesfully installed, create a virtual environment and install the packages in `requirements.txt` with:
 
 ```bash
-python --version
-```
-
-Then create a virtual environment and install dependencies with:
-
-```bash
-python -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -97,7 +129,7 @@ pip install pyaudio
 First, verify that the app's audio is working by running (make sure venv is activated):
 
 ```bash
-python test_audio_and_keyboard.py
+python3.11 test_audio_and_keyboard.py
 ```
 
 ### 10. Create a systemd service to run the app on startup and enable the service

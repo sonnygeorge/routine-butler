@@ -2,16 +2,13 @@
 # Commands for running RoutineButler on a Raspberry Pi
 
 echo "Adjusting system volume to 84%..."
-amixer set Master -- 84%
-
-echo "Adjusting screen resolution to 1280x720..."
-xrandr --output HDMI-1 --mode 1280x720
+amixer set Master -- 85%
 
 echo "Activating virtual environment..."
 source venv/bin/activate
 
 echo "Attempting to run RoutineButler in single-user mode..."
-python3 run.py --single-user &
+python3.11 run.py --single-user &
 
 echo "Waiting for RoutineButler to start..."
 sleep 15

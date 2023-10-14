@@ -8,11 +8,6 @@ venv:
 activate:
 	source venv/bin/activate
 
-# Install requirements
-install:
-	python -m spacy download en_core_web_sm
-	pip install -r requirements.txt
-
 # Clean up repo junk files
 cleanse:
 	@echo "Cleaning up junk files..."
