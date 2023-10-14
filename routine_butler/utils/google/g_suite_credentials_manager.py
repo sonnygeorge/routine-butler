@@ -54,7 +54,6 @@ class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
 
 
 # FIXME: I think this might not get taken down when I ctrl-c
-# FIXME: In fact, I don't think this ever gets taken down...
 def start_temp_extra_server_to_listen_for_auth_redirect(
     main_app_server_port: int,
     temp_extra_server_port: int,
@@ -133,11 +132,12 @@ class G_Suite_Credentials_Manager:
             include_granted_scopes="true",
         )
         # 3. redirect to given authorization url
-        logger.info(f"Attempting request/redirect to '{authorization_url}'...")
+        logger.info(f"Attempting request/redirect to google...")
         ui.timer(0.1, lambda: ui.open(authorization_url), once=True)
         # 4. wait for the code to be written to the file once auth is complete
         while not os.path.exists(CODE_TEMP_FILE_PATH):
             await asyncio.sleep(0.2)
+        logger.info("Code file found... terminating temp server process...")
         # 5. stop the server
         server_process.terminate()
         # 6. read the code from the file & deletes the file
@@ -147,6 +147,8 @@ class G_Suite_Credentials_Manager:
         # 7. ascertain credentials
         flow.fetch_token(code=code)
         self._credentials = flow.credentials
+        if "refresh-token" not in self._credentials.to_json():
+            raise ValueError("Google seems to not have given a refresh token.")
         # 8. save the credentials
         with open(TOKEN_FILE_PATH, "w") as f:
             f.write(self._credentials.to_json())
