@@ -35,13 +35,17 @@ class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
         super().__init__(*args, **kwargs)
 
     def do_GET(self):
+        """Handles the GET request"""
+        logger.info("Received GET request on temp auth-redirect server...")
         parsed_url = urlparse(self.path)
         query_params = parse_qs(parsed_url.query)
         if "code" in query_params:
             code = query_params["code"][0]
+            logger.info(f"Received necessary code in request.")
             with open(CODE_TEMP_FILE_PATH, "w") as f:
                 f.write(code)
-            # redirect back to Routine Butler
+            # Redirect back to Routine Butler
+            logger.info("Responding with redirect to Routine Butler...")
             self.send_response(302)
             redirect_url = f"http://localhost:{self.redirect_server_port}"
             redirect_url += self.redirect_page_path
@@ -49,6 +53,8 @@ class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
 
+# FIXME: I think this might not get taken down when I ctrl-c
+# FIXME: In fact, I don't think this ever gets taken down...
 def start_temp_extra_server_to_listen_for_auth_redirect(
     main_app_server_port: int,
     temp_extra_server_port: int,
@@ -59,8 +65,8 @@ def start_temp_extra_server_to_listen_for_auth_redirect(
     server_address = ("", temp_extra_server_port)
     RequestHandlerClass = partial(
         AuthRedirectRequestHandler,
-        main_app_server_port,  # NOTE: These cannot be kwargs since this is later...
-        redirect_page_path,  # ...called with positional args only
+        main_app_server_port,  # NOTE: These cannot be kwargs since this is...
+        redirect_page_path,  # ...later called with positional args only
     )
     httpd = HTTPServer(
         server_address=server_address,
@@ -100,7 +106,6 @@ class G_Suite_Credentials_Manager:
         6. reads the code from the file
         7. exchanges the code for credentials
         8. saves the credentials to a file
-
         """
         if os.path.exists(CODE_TEMP_FILE_PATH):
             os.remove(CODE_TEMP_FILE_PATH)
@@ -112,6 +117,10 @@ class G_Suite_Credentials_Manager:
             redirect_page_path=self.redirect_server_page_path,
         )
         server_process = multiprocessing.Process(target=start_server_callable)
+        logger.info(
+            f"Starting temporary server on port {self.temp_extra_server_port} "
+            "to listen for auth redirect..."
+        )
         server_process.start()
         # 2. build the flow and get the authorization url
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
@@ -124,6 +133,7 @@ class G_Suite_Credentials_Manager:
             include_granted_scopes="true",
         )
         # 3. redirect to given authorization url
+        logger.info(f"Attempting request/redirect to '{authorization_url}'...")
         ui.timer(0.1, lambda: ui.open(authorization_url), once=True)
         # 4. wait for the code to be written to the file once auth is complete
         while not os.path.exists(CODE_TEMP_FILE_PATH):
@@ -153,11 +163,12 @@ class G_Suite_Credentials_Manager:
                     TOKEN_FILE_PATH, self.SCOPES
                 )
             except Exception as e:
-                # if the token file is corrupted/ somehow invalid
+                # if the token file is somehow corrupted
                 logger.error(
                     f"Error loading G-Suite token file at '{TOKEN_FILE_PATH}':"
                     f" {e}"
                 )
+                os.remove(TOKEN_FILE_PATH)  # Delete the corrupted token file
                 return False
         # If still no credentials, return false
         if self._credentials is None:
