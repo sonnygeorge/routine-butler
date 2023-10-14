@@ -10,6 +10,7 @@ import google_auth_oauthlib.flow
 from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from loguru import logger
 from nicegui import ui
 
 if TYPE_CHECKING:
@@ -147,9 +148,17 @@ class G_Suite_Credentials_Manager:
         """
         # If no credentials & token.json exists, try to load them
         if self._credentials is None and os.path.exists(TOKEN_FILE_PATH):
-            self._credentials = Credentials.from_authorized_user_file(
-                TOKEN_FILE_PATH, self.SCOPES
-            )
+            try:
+                self._credentials = Credentials.from_authorized_user_file(
+                    TOKEN_FILE_PATH, self.SCOPES
+                )
+            except Exception as e:
+                # if the token file is corrupted/ somehow invalid
+                logger.error(
+                    f"Error loading G-Suite token file at '{TOKEN_FILE_PATH}':"
+                    f" {e}"
+                )
+                return False
         # If still no credentials, return false
         if self._credentials is None:
             return False
@@ -164,10 +173,15 @@ class G_Suite_Credentials_Manager:
                     f.write(self._credentials.to_json())
             except RefreshError:
                 return False  # Return false since refresh failed
-        else:
-            return False
+            else:
+                return False
 
     async def get_credentials(self) -> Credentials:
+        """Returns the credentials, running the auth flow if necessary."""
+        logger.info("Getting G-Suite credentials...")
         if not self.validate_credentials():
+            logger.info("G-Suite credentials invalid. Running auth flow...")
             await self.run_auth_flow()
+        else:
+            logger.info("G-Suite credentials valid.")
         return self._credentials
