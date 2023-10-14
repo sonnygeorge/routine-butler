@@ -48,7 +48,8 @@ class State:
             f"✨ next_alarm={self.next_alarm} ✨ next_routine="
             f"{self.next_routine.title if self.next_routine else None} "
             "✨ current_routine="
-            f"{self.current_routine.title if self.current_routine else None}"
+            f"{self.current_routine.title if self.current_routine else None} "
+            f"✨ n_programs_traversed={self.n_programs_traversed}"
         )
 
     def __init__(self):

@@ -23,9 +23,6 @@ LOAD_SECONDS_PER_PROGRAM = 2.5
 TARGET_CUSHION_SECONDS = 90
 
 
-# FIXME: not finishing correctly
-
-
 def add_horizontal_dash() -> None:
     dash = ui.label("-").style(f"font-size: {SDBR_FONT_PX + 12}px")
     dash.classes("text-gray-600 font-medium")
@@ -148,6 +145,13 @@ class RoutineAdministrator(ui.row):
         n_reward_programs = len(self.reward_programs_queue)
         self.n_programs_total = n_element_programs + n_reward_programs
 
+        logger.info(
+            f"(re-)Initializing RoutineAdministrator for {routine.title} w/ "
+            f"{n_element_programs} element programs, {n_reward_programs} "
+            f"reward programs, target duration: {target_duration_minutes}, & "
+            f"{state.n_programs_traversed} programs traversed so far."
+        )
+
         self.is_complete = False
         ui.timer(0.2, self.check_if_complete)
 
@@ -170,7 +174,7 @@ class RoutineAdministrator(ui.row):
 
     def check_if_complete(self):
         if self.is_complete:
-            logger.info(f"Routine complete: {self.routine.title}")
+            logger.info(f"Routine completed! ({self.routine.title})")
             redirect_to_page(PagePath.HOME)
 
     def add_sidebar(self):
@@ -269,6 +273,7 @@ class RoutineAdministrator(ui.row):
         else:
             state.set_current_program_start_time(datetime.datetime.now())
             with self.program_frame:
+                logger.info(f"Administering {self.current_program.title}...")
                 self.current_program.administer(
                     on_complete=self.on_program_completion
                 )

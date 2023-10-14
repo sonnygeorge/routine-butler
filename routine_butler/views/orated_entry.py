@@ -144,7 +144,6 @@ def transcribe(
             # multiprocessing.Queue.get() raises EOFError when the queue is
             # empty and the queue's sender has exited. This is a hacky way to
             # catch this error and exit the thread.
-            logger.info(e)
             break
         # speech_recognizer.AcceptWaveform(b"".join(recording_cycle_frames))
         # result = speech_recognizer.Result()
