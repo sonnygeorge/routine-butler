@@ -141,7 +141,7 @@ class G_Suite_Credentials_Manager:
             await asyncio.sleep(0.2)
         logger.info("Code file found.")
         # # 5. stop the server
-        # server_process.terminate()
+        pass  # No longer needed since server shuts itself down
         # 6. read the code from the file & deletes the file
         with open(CODE_TEMP_FILE_PATH, "r") as f:
             code = f.read()
