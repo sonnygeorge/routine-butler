@@ -11,7 +11,7 @@ from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from loguru import logger
-from nicegui import ui
+from nicegui import run, ui
 
 if TYPE_CHECKING:
     from routine_butler.globals import PagePath
@@ -52,6 +52,8 @@ class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
             redirect_url += self.redirect_page_path
             self.send_header("Location", redirect_url)
             self.end_headers()
+            # Shutdown after successful receiving of code
+            self.server.shutdown()
 
 
 # FIXME: I think this might not get taken down when I ctrl-c
@@ -116,12 +118,11 @@ class G_Suite_Credentials_Manager:
             temp_extra_server_port=self.temp_extra_server_port,
             redirect_page_path=self.redirect_server_page_path,
         )
-        server_process = multiprocessing.Process(target=start_server_callable)
         logger.info(
             f"Starting temporary server on port {self.temp_extra_server_port} "
             "to listen for auth redirect..."
         )
-        server_process.start()
+        ui.timer(0.1, lambda: run.cpu_bound(start_server_callable), once=True)
         # 2. build the flow and get the authorization url
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
             self.credentials_file_path,
@@ -138,9 +139,9 @@ class G_Suite_Credentials_Manager:
         # 4. wait for the code to be written to the file once auth is complete
         while not os.path.exists(CODE_TEMP_FILE_PATH):
             await asyncio.sleep(0.2)
-        logger.info("Code file found... terminating temp server process...")
-        # 5. stop the server
-        server_process.terminate()
+        logger.info("Code file found.")
+        # # 5. stop the server
+        # server_process.terminate()
         # 6. read the code from the file & deletes the file
         with open(CODE_TEMP_FILE_PATH, "r") as f:
             code = f.read()
@@ -166,7 +167,7 @@ class G_Suite_Credentials_Manager:
                     TOKEN_FILE_PATH, self.SCOPES
                 )
             except Exception as e:
-                # if the token file is somehow corrupted
+                # If the token file is somehow corrupted
                 logger.error(
                     f"Error loading G-Suite token file at '{TOKEN_FILE_PATH}':"
                     f" {e}"
