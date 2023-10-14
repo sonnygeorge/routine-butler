@@ -37,6 +37,7 @@ class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """Handles the GET request"""
         logger.info("Received GET request on temp auth-redirect server...")
+        logger.info(f"Request being handled with process id {os.getpid()}.")
         parsed_url = urlparse(self.path)
         query_params = parse_qs(parsed_url.query)
         if "code" in query_params:
@@ -60,7 +61,7 @@ def start_temp_extra_server_to_listen_for_auth_redirect(
     redirect_page_path: str,
 ):
     """Starts a temporary server to listen for the google authorization redirect"""
-
+    logger.info(f"Temp server being started with process id {os.getpid()}.")
     server_address = ("", temp_extra_server_port)
     RequestHandlerClass = partial(
         AuthRedirectRequestHandler,
