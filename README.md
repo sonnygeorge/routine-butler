@@ -43,7 +43,7 @@ Next, download Python 3.11 with:
 
 ```bash
 cd ~/Downloads
-wget https://www.python.org/ftp/python/VERSION/Python-3.11.1.tgz
+wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tgz
 ```
 
 Extract the downloaded file with:
@@ -124,7 +124,11 @@ sudo apt-get install portaudio19-dev python3-pyaudio
 pip install pyaudio
 ```
 
-### 9. Verify app's audio and keyboard functionality
+### 9. Change screen resolution
+
+User the screen configuration app to change the screen resolution to **1200x720**.
+
+### 10. Verify app's audio and keyboard functionality
 
 First, verify that the app's audio is working by running (make sure venv is activated):
 
@@ -132,7 +136,7 @@ First, verify that the app's audio is working by running (make sure venv is acti
 python3.11 test_audio_and_keyboard.py
 ```
 
-### 10. Create a systemd service to run the app on startup and enable the service
+### 11. Create a systemd service to run the app on startup and enable the service
 
 In order to run the app on startup, we will create a systemd service file and enable it.
 
