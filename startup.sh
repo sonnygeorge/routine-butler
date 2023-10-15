@@ -15,11 +15,11 @@ sleep 15
 
 echo "Starting Chromium in kiosk mode..."
 
-# Stop the screensaver function & desktop environment from interfering w/ display
-xset s noblank
-xset s off
-xset -dpms
+# # Stop the screensaver function & desktop environment from interfering w/ display
+# xset s noblank
+# xset s off
+# xset -dpms
 # Remove the mouse cursor from the display
 unclutter -idle 0.5 -root &
 
-chromium-browser --noerrdialogs --disable-infobars --kiosk http://127.0.0.1:8080
+chromium-browser --noerrdialogs --disable-infobars --start-maximized --kiosk http://127.0.0.1:8080
