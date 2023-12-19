@@ -126,7 +126,7 @@ pip install pyaudio
 
 ### 9. Change screen resolution
 
-User the screen configuration app to change the screen resolution to **1200x720**.
+Use the screen configuration app to change the screen resolution to **1200x720**.
 
 ### 10. Verify app's audio and keyboard functionality
 

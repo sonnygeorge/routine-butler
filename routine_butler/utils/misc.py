@@ -150,17 +150,17 @@ def log_errors(func):
 
 def open_keyboard():
     logger.info("Opening keyboard...")
-    # try:
-    #     subprocess.Popen(
-    #         ["matchbox-keyboard", "--fontptsize", "64", "lq1"]
-    #     )
-    # except FileNotFoundError:
-    #     pass
+    try:
+        subprocess.Popen(
+            ["matchbox-keyboard", "--fontptsize", "64", "lq1"]
+        )
+    except FileNotFoundError:
+        pass
 
 
 def close_keyboard():
     logger.info("Closing keyboard...")
-    # try:
-    #     subprocess.run(["killall", "matchbox-keyboard"])
-    # except FileNotFoundError:
-    #     pass
+    try:
+        subprocess.run(["killall", "matchbox-keyboard"])
+    except FileNotFoundError:
+        pass

@@ -134,11 +134,13 @@ class RoutineAdministrator(ui.row):
         else:
             target_duration_minutes = None
         queues = get_programs_queues(routine, target_duration_minutes)
+        
         if state.element_programs_queue is None:
             state.set_element_programs_queue(queues[0])
             self.element_programs_queue = queues[0]
         else:
             self.element_programs_queue = state.element_programs_queue
+        
         self.reward_programs_queue = queues[1]
 
         n_element_programs = len(self.element_programs_queue)
@@ -169,7 +171,7 @@ class RoutineAdministrator(ui.row):
             and state.pending_run_data_to_be_added_to_db is None
         ):
             ui.timer(0.1, self.begin_administration, once=True)
-        else:  # resuming mid-routine, presumably after a program completion
+        else:  # Resuming mid-routine, presumably after a program completion
             self.on_program_completion()
 
     def check_if_complete(self):
