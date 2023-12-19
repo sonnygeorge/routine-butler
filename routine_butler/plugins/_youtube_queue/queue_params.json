@@ -192,7 +192,7 @@
     },
     "@ai-explained-": {
         "substring_priority_scores": {},
-        "priority_score": 66
+        "priority_score": 68
     },
     "@TheAiGrid": {
         "substring_priority_scores": {},
@@ -382,6 +382,14 @@
     },
     "@everydaylouie": {
         "substring_priority_scores": {},
-        "priority_score": 60
+        "priority_score": 54
+    },
+    "@AustinMarshmallows": {
+        "substring_priority_scores": {},
+        "priority_score": 50
+    },
+    "@SamuelAlbanie1": {
+        "substring_priority_scores": {},
+        "priority_score": 75
     }
 }
