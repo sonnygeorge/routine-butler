@@ -1,5 +1,4 @@
 import asyncio
-import multiprocessing
 import os
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -56,7 +55,7 @@ class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
             self.server.shutdown()
 
 
-# FIXME: I think this might not get taken down when I ctrl-c
+# Does this shut down when I control-c?
 def start_temp_extra_server_to_listen_for_auth_redirect(
     main_app_server_port: int,
     temp_extra_server_port: int,
@@ -136,19 +135,6 @@ class G_Suite_Credentials_Manager:
             "to listen for auth redirect..."
         )
         ui.timer(0.1, lambda: run.cpu_bound(start_server_callable), once=True)
-        # # 2. build the flow and get the authorization url
-        # flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        #     self.credentials_file_path,
-        #     scopes=self.SCOPES,
-        #     redirect_uri=f"http://localhost:{self.temp_extra_server_port}",
-        # )
-        # authorization_url, _ = flow.authorization_url(
-        #     access_type="offline",
-        #     include_granted_scopes="true",
-        # )
-        # # 3. redirect to given authorization url
-        # logger.info(f"Attempting request/redirect to google...")
-        # ui.timer(0.1, lambda: ui.open(authorization_url), once=True)
         # 4. wait for the code to be written to the file once auth is complete
         while not os.path.exists(CODE_TEMP_FILE_PATH):
             await asyncio.sleep(0.2)
