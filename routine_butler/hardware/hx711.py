@@ -80,8 +80,12 @@ class HX711:
         return self.read() - self.OFFSET
 
     def getWeight(self):
+        print("Getting weight...")
         value = self.getValue()
+        print("Got value:", value)
         value /= self.REFERENCE_UNIT
+        print("Divided by reference unit:", self.REFERENCE_UNIT)
+        print("Got weight:", value)
         return value
 
     def tare(self, times=25):
