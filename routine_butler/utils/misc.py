@@ -152,7 +152,7 @@ def open_keyboard():
     logger.info("Opening keyboard...")
     try:
         subprocess.Popen(
-            ["matchbox-keyboard", "--fontptsize", "64", "lq1"]
+            ["matchbox-keyboard", "lq1"]
         )
     except FileNotFoundError:
         pass
