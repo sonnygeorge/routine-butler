@@ -12,7 +12,7 @@ Here is a picture of my current setup which I am actively using as my morning an
 
 ### 1. Flash Raspberry Pi OS
 
-Flash the latest version of **32-bit** [Raspberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/) onto an SD card and boot up the Raspberry Pi.
+Flash the latest version of [Raspberry Pi OS: **BULLSEYE** (not Bookworm)](https://www.raspberrypi.org/software/operating-systems/) (currently using 64-bit although 32-bit might be better?) onto an SD card and boot up the Raspberry Pi.
 
 ### 2. Make sure system is up-to-date
 
@@ -172,3 +172,16 @@ sudo systemctl enable routine-butler.service
 ```
 
 **Hint**: To check the status and logs of the service, use `sudo systemctl status routine-butler.service` and `sudo journalctl -u routine-butler.service`, respectively.
+
+### 12. Install `chromium-chromedriver`
+
+```bash
+sudo apt-get install chromium-chromedriver
+```
+
+### 13. Download and add certain files to repo
+
+Ascertain that the following files are present in the repo:
+
+- `google_credentials.json`
+- `db.sqlite` (optional if you want to use the last backup)
