@@ -10,6 +10,7 @@ httpcore==0.17.3
 aiofiles==23.2.1
 aiohttp==3.8.6
 aiosignal==1.3.1
+uvicorn==0.22.0
 annotated-types==0.6.0
 anyio==3.7.1
 async-timeout==4.0.3
