@@ -111,18 +111,6 @@ class G_Suite_Credentials_Manager:
         """
         if os.path.exists(CODE_TEMP_FILE_PATH):
             os.remove(CODE_TEMP_FILE_PATH)
-        # 1. start a temporary server to listen for the redirect
-        start_server_callable = partial(
-            start_temp_extra_server_to_listen_for_auth_redirect,
-            main_app_server_port=self.main_app_server_port,
-            temp_extra_server_port=self.temp_extra_server_port,
-            redirect_page_path=self.redirect_server_page_path,
-        )
-        logger.info(
-            f"Starting temporary server on port {self.temp_extra_server_port} "
-            "to listen for auth redirect..."
-        )
-        ui.timer(0.1, lambda: run.cpu_bound(start_server_callable), once=True)
         # 2. build the flow and get the authorization url
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
             self.credentials_file_path,
@@ -136,12 +124,36 @@ class G_Suite_Credentials_Manager:
         # 3. redirect to given authorization url
         logger.info(f"Attempting request/redirect to google...")
         ui.timer(0.1, lambda: ui.open(authorization_url), once=True)
+        # 1. start a temporary server to listen for the redirect
+        start_server_callable = partial(
+            start_temp_extra_server_to_listen_for_auth_redirect,
+            main_app_server_port=self.main_app_server_port,
+            temp_extra_server_port=self.temp_extra_server_port,
+            redirect_page_path=self.redirect_server_page_path,
+        )
+        logger.info(
+            f"Starting temporary server on port {self.temp_extra_server_port} "
+            "to listen for auth redirect..."
+        )
+        ui.timer(0.1, lambda: run.cpu_bound(start_server_callable), once=True)
+        # # 2. build the flow and get the authorization url
+        # flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        #     self.credentials_file_path,
+        #     scopes=self.SCOPES,
+        #     redirect_uri=f"http://localhost:{self.temp_extra_server_port}",
+        # )
+        # authorization_url, _ = flow.authorization_url(
+        #     access_type="offline",
+        #     include_granted_scopes="true",
+        # )
+        # # 3. redirect to given authorization url
+        # logger.info(f"Attempting request/redirect to google...")
+        # ui.timer(0.1, lambda: ui.open(authorization_url), once=True)
         # 4. wait for the code to be written to the file once auth is complete
         while not os.path.exists(CODE_TEMP_FILE_PATH):
             await asyncio.sleep(0.2)
         logger.info("Code file found.")
-        # # 5. stop the server
-        pass  # No longer needed since server shuts itself down
+        # 5. stopping the server - no longer needed since server shuts itself down
         # 6. read the code from the file & deletes the file
         with open(CODE_TEMP_FILE_PATH, "r") as f:
             code = f.read()
