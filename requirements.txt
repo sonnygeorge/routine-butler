@@ -9,6 +9,7 @@ annotated-types==0.6.0
 anyio==3.7.1
 async-timeout==4.0.3
 fastapi==0.103.2
+python-socketio==5.9.0
 beautifulsoup4
 pydantic==2.4.2
 pyaudio
