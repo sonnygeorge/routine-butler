@@ -134,13 +134,13 @@ class RoutineAdministrator(ui.row):
         else:
             target_duration_minutes = None
         queues = get_programs_queues(routine, target_duration_minutes)
-        
+
         if state.element_programs_queue is None:
             state.set_element_programs_queue(queues[0])
             self.element_programs_queue = queues[0]
         else:
             self.element_programs_queue = state.element_programs_queue
-        
+
         self.reward_programs_queue = queues[1]
 
         n_element_programs = len(self.element_programs_queue)
@@ -218,11 +218,13 @@ class RoutineAdministrator(ui.row):
                 micro.reward_svg(REWARD_SVG_SIZE, color=SVGS_COLOR)
 
     async def begin_administration(self):
-        if G_SUITE_CREDENTIALS_MANAGER.validate_credentials():
+        creds_were_valid = G_SUITE_CREDENTIALS_MANAGER.validate_credentials()
+        if creds_were_valid:
             self._administer_next_program()
         else:
             await G_SUITE_CREDENTIALS_MANAGER.get_credentials()
             self._administer_next_program()
+        self.update()
 
     @property
     def has_only_rewards_left_to_administer(self) -> bool:
