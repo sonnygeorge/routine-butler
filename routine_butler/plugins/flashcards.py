@@ -32,7 +32,8 @@ from routine_butler.plugins._flashcards.utils import (
 
 ## TODO: Move "state" to configs and call it STATE
 
-WIDTH = 700
+WIDTH_PX = 700
+FCARD_HEIGHT_PX = 400
 MAX_N_COLLECTIONS = 36
 
 
@@ -162,9 +163,12 @@ class FlashcardsGui:
             )
             ui.label(progress_label_str).classes("font-bold text-gray-700")
             # Flashcard
-            card = micro.card().style(f"width: {WIDTH}px;")
+            card = micro.card().style(f"width: {WIDTH_PX}px;")
             with card.classes("flex flex-col items-center justify-center"):
-                micro.markdown(flashcard_text)
+                scroll_area = ui.scroll_area()
+                scroll_area.classes("w-full items-center justify-center")
+                with scroll_area.style(f"height: {FCARD_HEIGHT_PX}px;"):
+                    micro.markdown(flashcard_text)
             # Control panel
             if self.state != self.State.FRONT:
                 self._add_control_panel()
