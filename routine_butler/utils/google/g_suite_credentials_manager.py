@@ -1,4 +1,5 @@
 import asyncio
+import multiprocessing
 import os
 from functools import partial
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -10,7 +11,7 @@ from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from loguru import logger
-from nicegui import run, ui
+from nicegui import ui
 
 if TYPE_CHECKING:
     from routine_butler.globals import PagePath
@@ -134,7 +135,8 @@ class G_Suite_Credentials_Manager:
             f"Starting temporary server on port {self.temp_extra_server_port} "
             "to listen for auth redirect..."
         )
-        ui.timer(0.1, lambda: run.cpu_bound(start_server_callable), once=True)
+        server_process = multiprocessing.Process(target=start_server_callable)
+        server_process.start()
         # 4. wait for the code to be written to the file once auth is complete
         while not os.path.exists(CODE_TEMP_FILE_PATH):
             await asyncio.sleep(0.2)
@@ -152,6 +154,9 @@ class G_Suite_Credentials_Manager:
         # 8. save the credentials
         with open(TOKEN_FILE_PATH, "w") as f:
             f.write(self._credentials.to_json())
+        # 9. ascertain that subprocess is killed and server no longer being served
+        server_process.terminate()  # Gracefully terminate the process
+        server_process.join()
 
     def validate_credentials(self) -> bool:
         """Validates the credentials, and refreshes them if necessary.
