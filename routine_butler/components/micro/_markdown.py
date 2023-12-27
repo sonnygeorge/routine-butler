@@ -27,6 +27,9 @@ def markdown_to_html_with_math(markdown_text: str) -> str:
             "pymdownx.inlinehilite",
         ],
         extension_configs={
+            "pymdownx.tasklist": {
+                "clickable_checkbox": True,
+            },
             "pymdownx.superfences": {
                 "preserve_tabs": True,
             },
