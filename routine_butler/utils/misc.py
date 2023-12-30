@@ -19,7 +19,7 @@ from routine_butler.globals import (
     PagePath,
     PlaybackRate,
 )
-from routine_butler.utils.scheduled import BG_TASK_MANAGER
+from routine_butler.utils.background_task import BG_TASK_MANAGER
 
 if TYPE_CHECKING:
     from routine_butler.state import State
