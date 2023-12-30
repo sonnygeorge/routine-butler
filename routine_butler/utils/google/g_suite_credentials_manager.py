@@ -42,7 +42,7 @@ class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
         query_params = parse_qs(parsed_url.query)
         if "code" in query_params:
             code = query_params["code"][0]
-            logger.info(f"Received necessary code in request.")
+            logger.info("Received necessary code in request.")
             with open(CODE_TEMP_FILE_PATH, "w") as f:
                 f.write(code)
             # Redirect back to Routine Butler
@@ -97,19 +97,19 @@ class G_Suite_Credentials_Manager:
     async def run_auth_flow(self):
         """Runs the authorization flow and gets credentials:
 
-        1. starts a temporary server to listen for the google auth flows redirect request
-        2. builds the flow and gets the authorization url
-        3. redirects to the authorization url
-        4. waits for the necessary code that is embedded in the redirect request url to
-           be written to a file by the temp server subprocess
-        5. stops the temp server
-        6. reads the code from the file
-        7. exchanges the code for credentials
-        8. saves the credentials to a file
+        1. Starts a temporary server to listen for the google auth flows redirect request
+        2. Builds the flow and gets the authorization url
+        3. Redirects to the authorization url
+        4. Waits for the necessary code that is embedded in the redirect request url to
+           Be written to a file by the temp server subprocess
+        5. Stops the temp server
+        6. Reads the code from the file
+        7. Exchanges the code for credentials
+        8. Saves the credentials to a file
         """
         if os.path.exists(CODE_TEMP_FILE_PATH):
             os.remove(CODE_TEMP_FILE_PATH)
-        # 2. build the flow and get the authorization url
+        # 2. Build the flow and get the authorization url
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
             self.credentials_file_path,
             scopes=self.SCOPES,
@@ -119,10 +119,10 @@ class G_Suite_Credentials_Manager:
             access_type="offline",
             include_granted_scopes="true",
         )
-        # 3. redirect to given authorization url
-        logger.info(f"Attempting request/redirect to google...")
+        # 3. Redirect to given authorization url
+        logger.info("Attempting request/redirect to google...")
         ui.timer(0.1, lambda: ui.open(authorization_url), once=True)
-        # 1. start a temporary server to listen for the redirect
+        # 1. Start a temporary server to listen for the redirect
         start_server_callable = partial(
             start_temp_extra_server_to_listen_for_auth_redirect,
             main_app_server_port=self.main_app_server_port,
@@ -135,27 +135,26 @@ class G_Suite_Credentials_Manager:
         )
         server_process = multiprocessing.Process(target=start_server_callable)
         server_process.start()
-        # 4. wait for the code to be written to the file once auth is complete
+        # 4. Wait for the code to be written to the file once auth is complete
         while not os.path.exists(CODE_TEMP_FILE_PATH):
             await asyncio.sleep(0.2)
         logger.info("Code file found.")
-        # 5. stopping the server - no longer needed since server shuts itself down
-        # 6. read the code from the file & deletes the file
+        # 5. Ascertain that subprocess is killed and server no longer being served
+        #   NOTE: On the RPi, for some reason, SIGTERM (p.terminate() + p.join()) does
+        #   not work (it waits forever for some resource?), so we use p.kill() instead.
+        server_process.kill()
+        # 6. Read the auth code from the file & delete the file
         with open(CODE_TEMP_FILE_PATH, "r") as f:
             code = f.read()
         os.remove(CODE_TEMP_FILE_PATH)
-        # 7. ascertain credentials
+        # 7. Ascertain credentials
         flow.fetch_token(code=code)
         self._credentials = flow.credentials
         json_keys = dict(self._credentials.__dict__).keys()
         logger.info(f"Saving token file w/ keys: {json_keys}")
-        # 8. save the credentials
+        # 8. Save the credentials
         with open(TOKEN_FILE_PATH, "w") as f:
             f.write(self._credentials.to_json())
-        # 9. ascertain that subprocess is killed and server no longer being served
-        # NOTE: For some reason, the SIGTERM signal (p.terminate() + p.join()) does
-        # not work (it waits forever for some resource?), so we use p.kill() instead.
-        server_process.kill()
 
     def validate_credentials(self) -> bool:
         """Validates the credentials, and refreshes them if necessary.

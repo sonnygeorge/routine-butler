@@ -1,3 +1,8 @@
+"""
+Deprecated view for orated entry view.
+"""
+
+
 # import json
 import re
 import threading
@@ -10,7 +15,6 @@ import pyaudio
 
 # from vosk import KaldiRecognizer, Model
 import speech_recognition as sr
-from loguru import logger
 from nicegui import run, ui
 
 from routine_butler.components import micro
@@ -140,7 +144,7 @@ def transcribe(
             continue
         try:
             recording_cycle_frames = recorded.get()
-        except EOFError as e:
+        except EOFError:
             # multiprocessing.Queue.get() raises EOFError when the queue is
             # empty and the queue's sender has exited. This is a hacky way to
             # catch this error and exit the thread.

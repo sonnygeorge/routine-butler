@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from routine_butler.globals import (
     CLR_CODES,
+    N_SECONDS_BW_HOURLY_TASK_CHECKS,
     N_SECONDS_BW_RING_CHECKS,
     PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW,
     PLUGINS_DIR_PATH,
@@ -18,6 +19,7 @@ from routine_butler.globals import (
     PagePath,
     PlaybackRate,
 )
+from routine_butler.utils.scheduled import BG_TASK_MANAGER
 
 if TYPE_CHECKING:
     from routine_butler.state import State
@@ -103,7 +105,7 @@ def initialize_page(page: PagePath, state: "State") -> None:
     if page == PagePath.DO_ROUTINE:
         ui.add_body_html(MATHJAX_SCRIPTS)
 
-    ui.colors(  # apply universal color scheme
+    ui.colors(  # Apply universal color scheme
         primary=CLR_CODES.primary,
         secondary=CLR_CODES.secondary,
         accent=CLR_CODES.accent,
@@ -112,19 +114,24 @@ def initialize_page(page: PagePath, state: "State") -> None:
         info=CLR_CODES.info,
         warning=CLR_CODES.warning,
     )
-    # make all pages (except login) redirect to login page if user is None
+    # Make all pages (except login) redirect to login page if user is None
     if page != PagePath.LOGIN and state.user is None:
         redirect_to_page(PagePath.LOGIN)
-    # add header
+    # Add header
     if page in PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW:
         state.build_header(hide_navigation_buttons=True)
     else:
         state.build_header()
-        # monitor for the arrival of the time of the next alarm
+        # Monitor for the arrival of the time of the next alarm
         ui.timer(
             N_SECONDS_BW_RING_CHECKS,
             lambda: redirect_to_ring_page_if_next_alarms_time_reached(state),
         )
+    # Initiate timer to check for hourly background tasks
+    ui.timer(
+        N_SECONDS_BW_HOURLY_TASK_CHECKS,
+        BG_TASK_MANAGER.check_if_new_hour_and_run_tasks_if_so,
+    )
 
 
 class PendingYoutubeVideo(BaseModel):
@@ -151,9 +158,7 @@ def log_errors(func):
 def open_keyboard():
     logger.info("Opening keyboard...")
     try:
-        subprocess.Popen(
-            ["matchbox-keyboard", "lq1"]
-        )
+        subprocess.Popen(["matchbox-keyboard", "lq1"])
     except FileNotFoundError:
         pass
 

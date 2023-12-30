@@ -1,4 +1,4 @@
-# FIXME: Use spacy en-sm to or nltk pos-tagger to determine if a sentence's subject comes
+# TODO: Use spacy en-sm to or nltk pos-tagger to determine if a sentence's subject comes
 # after the verb and should be considered a question: I.E. START -> VERB -> NOUN PHRASE
 
 TOKEN_SWAPS = {

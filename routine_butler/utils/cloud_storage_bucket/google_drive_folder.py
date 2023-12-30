@@ -197,3 +197,10 @@ class GoogleDriveFolder(CloudStorageBucket):
             except HttpError as e:
                 logger.warning(e)
                 time.sleep(SECONDS_BETWEEN_RETRIES)
+
+    def validate_connection(self) -> bool:
+        try:
+            return self.credentials_manager.validate_credentials()
+        except Exception as e:
+            logger.warning(f"Error validating credentials: {e}")
+            return False

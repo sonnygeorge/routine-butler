@@ -22,6 +22,7 @@ class ProgramORM(BaseDBORMModel):
 
 class Program(BaseDBPydanticModel):
     """BaseDBPydanticModel model for a Program"""
+
     title: constr(max_length=ProgramORM.TITLE_LENGTH_LIMIT) = "New Program"
     # TODO: add dynamic Enum-style type hint?
     plugin_type: Optional[str] = None

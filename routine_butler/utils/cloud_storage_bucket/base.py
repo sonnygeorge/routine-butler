@@ -41,3 +41,7 @@ class CloudStorageBucket(Protocol):
         either a file or an empty directory).
         """
         ...
+
+    def validate_connection(self) -> bool:
+        """Attempts to validate the connection to the bucket."""
+        ...

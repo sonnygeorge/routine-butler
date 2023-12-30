@@ -1,4 +1,3 @@
-import subprocess
 import time
 
 from routine_butler.globals import ALARM_WAV_PATH

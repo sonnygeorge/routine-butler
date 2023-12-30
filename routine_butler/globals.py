@@ -89,6 +89,12 @@ FLASHCARDS_FOLDER_NAME = "flashcards"
 
 YOUTUBE_VIDEO_FOLDER_NAME = "youtube_video"
 
+
+# Folder within the root of storage bucket where DB backups are stored
+
+DB_BACKUP_FOLDER_NAME = "db_backups"
+
+
 # Gloablly-used DataframeLike type
 # NOTE: partial is used here to maintain the consistency of the constructor interface
 # since GoogleSheet uniquely requires root_folder_name and credentials_manager args
@@ -112,6 +118,7 @@ CONSTANT_RING_INTERVAL = 1  # Time between noises for "constant" ringing
 PERIODIC_RING_INTERVAL = 60  # Time between noises for "periodic" ringing
 
 N_SECONDS_BW_RING_CHECKS = 1  # Check every n secs for alarm that should ring
+N_SECONDS_BW_HOURLY_TASK_CHECKS = 5 * 60  # Check every n secs if new hour
 
 BINDING_REFRESH_INTERVAL_SECONDS = 0.3  # Higher is more cpu friendly
 THROTTLE_SECONDS = 0.7  # For event handlers that would otherwise be spammed
