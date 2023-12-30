@@ -30,7 +30,7 @@ logger.configure(
         dict(name=AUDIO_LOG_LVL, no=10, color="<green><bold>", icon="🔉"),
         dict(name=STATE_LOG_LVL, no=40, color="<cyan><bold>", icon="🌐"),
         dict(
-            name=BG_TASK_LOG_LVL, no=40, color="<light-blue><bold>", icon="🔁"
+            name=BG_TASK_LOG_LVL, no=40, color="<blue><bold>", icon="🔁"
         ),
     ],
 )
