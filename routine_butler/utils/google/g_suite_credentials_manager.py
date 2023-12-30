@@ -52,8 +52,6 @@ class AuthRedirectRequestHandler(BaseHTTPRequestHandler):
             redirect_url += self.redirect_page_path
             self.send_header("Location", redirect_url)
             self.end_headers()
-            # # Shutdown after successful receiving of code
-            # self.server.shutdown()
 
 
 # Does this shut down when I control-c?
@@ -155,6 +153,8 @@ class G_Suite_Credentials_Manager:
         with open(TOKEN_FILE_PATH, "w") as f:
             f.write(self._credentials.to_json())
         # 9. ascertain that subprocess is killed and server no longer being served
+        # NOTE: For some reason, the SIGTERM signal (p.terminate() + p.join()) does
+        # not work (it waits forever for some resource?), so we use p.kill() instead.
         server_process.kill()
 
     def validate_credentials(self) -> bool:
