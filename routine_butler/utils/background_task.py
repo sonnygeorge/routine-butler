@@ -2,6 +2,7 @@ import asyncio
 import datetime
 from dataclasses import dataclass
 from typing import List, Tuple
+from functools import partial
 
 from loguru import logger
 from nicegui import run
@@ -14,6 +15,9 @@ from routine_butler.globals import (
 from routine_butler.utils.logging import BG_TASK_LOG_LVL
 
 
+log_this = partial(logger.log, BG_TASK_LOG_LVL)
+
+
 @dataclass
 class ScheduledBackgroundTask:
     func: callable
@@ -21,7 +25,19 @@ class ScheduledBackgroundTask:
     hours_to_run: List[int]  # Ints representing hours
     pre_checks_that_must_be_true: Tuple[callable] = ()
     is_io_bound: bool = False
-    run_on_startup: bool = False
+    is_pending: bool = False
+
+    def should_be_run(self) -> bool:
+        """Returns True if the current day/hour matches the days/hours this task
+        is scheduled to run on.
+        """
+        if self.is_pending:
+            return True
+        else:
+            return (
+                datetime.datetime.now().weekday() in self.days_to_run
+                and datetime.datetime.now().hour in self.hours_to_run
+            )
 
 
 class HourlyBackgroundTaskManager:
@@ -35,7 +51,7 @@ class HourlyBackgroundTaskManager:
 
         This method is intended to be run on an interval <= 1 hour.
         """
-        logger.log(BG_TASK_LOG_LVL, "Checking if new hour has arrived...")
+        log_this("Checking if new hour has arrived...")
         if datetime.datetime.now().hour != self.last_hour_run:
             await self.hourly_run_tasks()
             self.last_hour_run = datetime.datetime.now().hour
@@ -44,52 +60,68 @@ class HourlyBackgroundTaskManager:
 
     async def hourly_run_tasks(self):
         """Intended to be run once per hour. Checks if any tasks are scheduled to run
-        oon the current day/hour. If so, asserts their preconditions and runs the
+        on the current day/hour. If so, asserts their preconditions and runs the
         task(s).
         """
-        logger.log(
-            BG_TASK_LOG_LVL,
-            "New hour arrived, checking for scheduled tasks...",
+        log_this(
+            "New hour arrived, checking for tasks to run...",
         )
+        task_was_found_to_run = False
         for task in self._tasks:
-            if datetime.datetime.now().weekday() in task.days_to_run:
-                if datetime.datetime.now().hour in task.hours_to_run:
-                    failed_checks = False
-                    for check in task.pre_checks_that_must_be_true:
-                        logger.log(
-                            f"Found '{task.func.__name__}' to run. Asserting "
-                            "preconditions are true..."
+            if task.should_be_run():
+                task_was_found_to_run = True
+                failed_checks = False
+                for check in task.pre_checks_that_must_be_true:
+                    log_this(
+                        f"Found '{task.func.__name__}' to run. Asserting "
+                        "preconditions are true..."
+                    )
+                    if asyncio.iscoroutinefunction(check):
+                        was_true = await check()
+                    else:
+                        was_true = check()
+                    if not was_true:
+                        log_this(
+                            f"Precondition '{check.__name__}' failed for task "
+                            f"'{task.func.__name__}'. Skipping task.",
                         )
-                        if asyncio.iscoroutinefunction(check):
-                            was_true = await check()
-                        else:
-                            was_true = check()
-                        if not was_true:
-                            logger.log(
-                                BG_TASK_LOG_LVL,
-                                f"Precondition '{check.__name__}' failed for task "
-                                f"'{task.func.__name__}'. Skipping task.",
-                            )
-                            failed_checks = True
-                            break
-                    if not failed_checks:
-                        if asyncio.iscoroutinefunction(task.func):
-                            await task.func()
-                        elif task.is_io_bound:
-                            await run.io_bound(task.func)
-                        else:
-                            await run.cpu_bound(task.func)
+                        failed_checks = True
+                        break
+                if not failed_checks:
+                    if asyncio.iscoroutinefunction(task.func):
+                        was_success = await task.func()
+                    elif task.is_io_bound:
+                        was_success = await run.io_bound(task.func)
+                    else:
+                        was_success = await run.cpu_bound(task.func)
+                    if was_success:
+                        log_this(
+                            f"Task '{task.func.__name__}' completed "
+                            "successfully.",
+                        )
+                        task.is_pending = False
+                    else:
+                        log_this(
+                            f"Task '{task.func.__name__}' failed. Will retry "
+                            "next hour.",
+                        )
+                        task.is_pending = True
+        if not task_was_found_to_run:
+            log_this(
+                "No tasks were found to be run.",
+            )
 
 
-async def perform_db_backup():
+async def perform_db_backup() -> bool:
     """Uploads a copy of the DB to the cloud storage bucket."""
     try:
         await STORAGE_BUCKET.upload(
             local_path=DB_PATH, remote_dir_path=f"{DB_BACKUP_FOLDER_NAME}/"
         )
-        logger.log(BG_TASK_LOG_LVL, "DB backup complete.")
+        return True
     except Exception as e:
         logger.warning(f"DB backup failed with error: {e}")
+        return False
 
 
 BG_TASK_MANAGER = HourlyBackgroundTaskManager(
@@ -97,10 +129,9 @@ BG_TASK_MANAGER = HourlyBackgroundTaskManager(
         ScheduledBackgroundTask(
             func=perform_db_backup,
             days_to_run=list(range(0, 7)),  # Every day...
-            hours_to_run=[19],  # @ approximately 7pm.
+            hours_to_run=[18],  # @ approximately 6pm.
             pre_checks_that_must_be_true=(STORAGE_BUCKET.validate_connection,),
             is_io_bound=True,
-            run_on_startup=True,
         )
     ]
 )
