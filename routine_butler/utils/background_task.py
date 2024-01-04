@@ -92,7 +92,7 @@ class HourlyBackgroundTaskManager:
                 else:
                     was_success = await run.cpu_bound(task.func)
                 if was_success:
-                    log_this(f"Task '{task_name}' completed successfully.")
+                    log_this(f"✅ Task '{task_name}' completed successfully.")
                     task.is_pending = False
                 else:
                     log_this(f"Task '{task_name}' failed. Marked pending.")
