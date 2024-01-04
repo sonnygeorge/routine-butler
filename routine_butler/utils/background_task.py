@@ -31,16 +31,9 @@ class ScheduledBackgroundTask:
         """Returns True if the current day/hour matches the days/hours this task is
         scheduled to run on.
         """
-        print(1)
         if self.is_pending:
             return True
         else:
-            print(
-                datetime.datetime.now().weekday(),
-                "in",
-                self.days_to_run,
-            )
-            print(datetime.datetime.now().hour - 1, "in", self.hours_to_run)
             return (
                 datetime.datetime.now().weekday() in self.days_to_run
                 and datetime.datetime.now().hour - 1 in self.hours_to_run
@@ -59,7 +52,7 @@ class HourlyBackgroundTaskManager:
         This method is intended to be run on an interval <= 1 hour.
         """
         log_this("Checking if new hour has arrived...")
-        if True:  # FIXME: datetime.datetime.now().hour != self.last_hour_run:
+        if datetime.datetime.now().hour != self.last_hour_run:
             await self.hourly_run_tasks()
             self.last_hour_run = datetime.datetime.now().hour
         else:
@@ -73,14 +66,11 @@ class HourlyBackgroundTaskManager:
         log_this("New hour arrived, checking for tasks to run...")
         task_was_found_to_run = False
         for task in self._tasks:
-            print(0)
             if not task.should_be_run():
                 continue
-            print(2)
             task_was_found_to_run = True
             failed_checks = False
             task_name = task.func.__name__
-            print(3)
             log_this(f"Found '{task_name}'. Asserting preconditions...")
             for check in task.pre_checks_that_must_be_true:
                 if asyncio.iscoroutinefunction(check):
@@ -129,7 +119,7 @@ BG_TASK_MANAGER = HourlyBackgroundTaskManager(
         ScheduledBackgroundTask(
             func=perform_db_backup,
             days_to_run=list(range(0, 7)),  # Every day...
-            hours_to_run=[18],  # @ approximately 6pm.
+            hours_to_run=[17],  # @ approximately 7pm.
             pre_checks_that_must_be_true=(STORAGE_BUCKET.validate_connection,),
             is_io_bound=True,
         )
