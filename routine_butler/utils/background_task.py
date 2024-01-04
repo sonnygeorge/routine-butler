@@ -129,7 +129,7 @@ BG_TASK_MANAGER = HourlyBackgroundTaskManager(
         ScheduledBackgroundTask(
             func=perform_db_backup,
             days_to_run=list(range(0, 7)),  # Every day...
-            hours_to_run=[19],  # @ approximately 6pm.
+            hours_to_run=[18],  # @ approximately 6pm.
             pre_checks_that_must_be_true=(STORAGE_BUCKET.validate_connection,),
             is_io_bound=True,
         )
