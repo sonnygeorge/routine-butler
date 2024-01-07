@@ -8,7 +8,6 @@ DB_LOG_LVL = "DATABASE"
 BOX_LOG_LVL = "BOX"
 STATE_LOG_LVL = "STATE"
 AUDIO_LOG_LVL = "AUDIO"
-BG_TASK_LOG_LVL = "BGTASK"
 
 
 FORMAT = (
@@ -29,8 +28,5 @@ logger.configure(
         dict(name=BOX_LOG_LVL, no=10, color="<green><bold>", icon="📦"),
         dict(name=AUDIO_LOG_LVL, no=10, color="<green><bold>", icon="🔉"),
         dict(name=STATE_LOG_LVL, no=40, color="<cyan><bold>", icon="🌐"),
-        dict(
-            name=BG_TASK_LOG_LVL, no=40, color="<blue><bold>", icon="🔁"
-        ),
     ],
 )

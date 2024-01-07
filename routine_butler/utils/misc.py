@@ -1,3 +1,4 @@
+import asyncio
 import functools
 import importlib
 import os
@@ -11,15 +12,16 @@ from pydantic import BaseModel
 
 from routine_butler.globals import (
     CLR_CODES,
-    N_SECONDS_BW_HOURLY_TASK_CHECKS,
+    DB_BACKUP_FOLDER_NAME,
+    DB_PATH,
     N_SECONDS_BW_RING_CHECKS,
     PAGES_WITH_ACTION_PATH_USER_MUST_FOLLOW,
     PLUGINS_DIR_PATH,
     PLUGINS_IMPORT_STR,
+    STORAGE_BUCKET,
     PagePath,
     PlaybackRate,
 )
-from routine_butler.utils.background_task import BG_TASK_MANAGER
 
 if TYPE_CHECKING:
     from routine_butler.state import State
@@ -127,11 +129,6 @@ def initialize_page(page: PagePath, state: "State") -> None:
             N_SECONDS_BW_RING_CHECKS,
             lambda: redirect_to_ring_page_if_next_alarms_time_reached(state),
         )
-    # Initiate timer to check for hourly background tasks
-    ui.timer(
-        N_SECONDS_BW_HOURLY_TASK_CHECKS,
-        BG_TASK_MANAGER.check_if_new_hour_and_run_tasks_if_so,
-    )
 
 
 class PendingYoutubeVideo(BaseModel):
@@ -169,3 +166,24 @@ def close_keyboard():
         subprocess.run(["killall", "matchbox-keyboard"])
     except FileNotFoundError:
         pass
+
+
+async def perform_db_backup() -> bool:
+    """Uploads a copy of the DB to the cloud storage bucket."""
+    logger.info("Attempting DB backup...")
+    ui.notify("Backing up database...")
+    await asyncio.sleep(0.5)  # Give time for notification to appear
+    try:
+        await STORAGE_BUCKET.upload(
+            local_path=DB_PATH,
+            remote_dir_path=f"{DB_BACKUP_FOLDER_NAME}/",
+        )
+        ui.notify("Success!")
+        logger.info("✅ DB backup successful!")
+        await asyncio.sleep(1.4)  # Give time for notification to appear
+        return True
+    except Exception as e:
+        ui.notify(f"Failure: {e}")
+        logger.warning(f"❌ 'perform_db_backup' failed with error: {e}")
+        await asyncio.sleep(2.8)  # Give time for notification to appear
+        return False

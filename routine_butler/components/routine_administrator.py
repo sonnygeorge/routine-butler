@@ -9,7 +9,7 @@ from routine_butler.components import micro
 from routine_butler.globals import G_SUITE_CREDENTIALS_MANAGER, PagePath
 from routine_butler.models import PriorityLevel, Program, ProgramRun, Routine
 from routine_butler.state import state
-from routine_butler.utils.misc import redirect_to_page
+from routine_butler.utils.misc import perform_db_backup, redirect_to_page
 
 ROUTINE_SVG_SIZE = 22
 PROGRAM_SVG_SIZE = 19
@@ -155,7 +155,7 @@ class RoutineAdministrator(ui.row):
         )
 
         self.is_complete = False
-        ui.timer(0.2, self.check_if_complete)
+        self.check_if_complete_timer = ui.timer(0.2, self.check_if_complete)
 
         super().__init__()
         self.classes("absolute-center items-center")
@@ -174,9 +174,11 @@ class RoutineAdministrator(ui.row):
         else:  # Resuming mid-routine, presumably after a program completion
             self.on_program_completion()
 
-    def check_if_complete(self):
+    async def check_if_complete(self):
         if self.is_complete:
+            self.check_if_complete_timer.cancel()
             logger.info(f"Routine completed! ({self.routine.title})")
+            await perform_db_backup()
             redirect_to_page(PagePath.HOME)
 
     def add_sidebar(self):
