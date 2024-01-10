@@ -101,10 +101,6 @@
         "substring_priority_scores": {},
         "priority_score": 25
     },
-    "@sportscentertop10daily": {
-        "substring_priority_scores": {},
-        "priority_score": 38
-    },
     "@BackGuy": {
         "substring_priority_scores": {},
         "priority_score": 19
@@ -192,7 +188,7 @@
     },
     "@ai-explained-": {
         "substring_priority_scores": {},
-        "priority_score": 68
+        "priority_score": 69
     },
     "@TheAiGrid": {
         "substring_priority_scores": {},
@@ -204,13 +200,9 @@
     },
     "@NeuralNine": {
         "substring_priority_scores": {
-            "GPT": 63
+            "GPT": 55
         },
-        "priority_score": 52
-    },
-    "@WheelsYT": {
-        "substring_priority_scores": {},
-        "priority_score": 41
+        "priority_score": 45
     },
     "@BlockdownBuilds": {
         "substring_priority_scores": {},
@@ -242,7 +234,7 @@
     },
     "@colinfurze": {
         "substring_priority_scores": {},
-        "priority_score": 56
+        "priority_score": 51
     },
     "@MaxFosh": {
         "substring_priority_scores": {},
@@ -265,11 +257,7 @@
             "Rick and Morty": 45,
             "Eric Andre": 62
         },
-        "priority_score": 29
-    },
-    "@MasterChefBrasilOficial": {
-        "substring_priority_scores": {},
-        "priority_score": 43
+        "priority_score": 23
     },
     "@EasySpanish": {
         "substring_priority_scores": {},
@@ -293,7 +281,7 @@
     },
     "@3blue1brown": {
         "substring_priority_scores": {},
-        "priority_score": 42
+        "priority_score": 46
     },
     "@braincraft": {
         "substring_priority_scores": {},
@@ -378,7 +366,7 @@
     },
     "@SamuelAlbanie1": {
         "substring_priority_scores": {},
-        "priority_score": 75
+        "priority_score": 79
     },
     "@everydaylouie": {
         "substring_priority_scores": {},
@@ -387,5 +375,21 @@
     "@AustinMarshmallows": {
         "substring_priority_scores": {},
         "priority_score": 50
+    },
+    "@iTalkStudios": {
+        "substring_priority_scores": {},
+        "priority_score": 51
+    },
+    "@PhoenixSC": {
+        "substring_priority_scores": {},
+        "priority_score": 62
+    },
+    "@bycloudAI": {
+        "substring_priority_scores": {},
+        "priority_score": 64
+    },
+    "@StatsUnited": {
+        "substring_priority_scores": {},
+        "priority_score": 52
     }
 }
