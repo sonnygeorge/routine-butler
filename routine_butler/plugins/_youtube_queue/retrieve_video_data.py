@@ -27,7 +27,7 @@ if platform == "darwin":
     except Exception as e:
         logger.warning(f"Could not auto-update chromedriver: {e}")
 
-MAX_CHANNELS_TO_SCRAPE = 20
+MAX_CHANNELS_TO_SCRAPE = 26
 
 VIDEO_GRID_ELMNT = "div"
 VIDEO_GRID_CLASS = "style-scope ytd-rich-grid-media"
