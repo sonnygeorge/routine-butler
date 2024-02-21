@@ -1,15 +1,11 @@
 {
-    "@legendcraftb_": {
-        "substring_priority_scores": {},
-        "priority_score": 78
-    },
     "@JavaTheCraft": {
         "substring_priority_scores": {},
         "priority_score": 78
     },
     "@MrBeast": {
         "substring_priority_scores": {},
-        "priority_score": 46
+        "priority_score": 55
     },
     "@Fireship": {
         "substring_priority_scores": {},
@@ -43,11 +39,11 @@
     },
     "@casey": {
         "substring_priority_scores": {},
-        "priority_score": 39
+        "priority_score": 58
     },
     "@ArjanCodes": {
         "substring_priority_scores": {},
-        "priority_score": 50
+        "priority_score": 39
     },
     "@theschooloflifetv": {
         "substring_priority_scores": {},
@@ -55,7 +51,7 @@
     },
     "@GeorgeCollier": {
         "substring_priority_scores": {},
-        "priority_score": 59
+        "priority_score": 53
     },
     "@ClarkElieson": {
         "substring_priority_scores": {},
@@ -127,7 +123,7 @@
     },
     "@MrBeastGaming": {
         "substring_priority_scores": {},
-        "priority_score": 37
+        "priority_score": 55
     },
     "@R.M.DiscGolf": {
         "substring_priority_scores": {},
@@ -139,7 +135,7 @@
     },
     "@TheMealPrepManual": {
         "substring_priority_scores": {},
-        "priority_score": 69
+        "priority_score": 51
     },
     "@DailyDoseOfInternet": {
         "substring_priority_scores": {},
@@ -147,14 +143,14 @@
     },
     "@LexClips": {
         "substring_priority_scores": {},
-        "priority_score": 37
+        "priority_score": 51
     },
     "@rekrap1": {
         "substring_priority_scores": {
             "Armor Suits": 79,
             "Melons": 80
         },
-        "priority_score": 13
+        "priority_score": 46
     },
     "@rekrap2": {
         "substring_priority_scores": {
@@ -165,7 +161,7 @@
     },
     "@JomboyMedia": {
         "substring_priority_scores": {
-            "a breakdown": 51,
+            "a breakdown": 44,
             "Things You Missed": 38
         },
         "priority_score": 11
@@ -176,11 +172,7 @@
     },
     "@Jeracraft": {
         "substring_priority_scores": {},
-        "priority_score": 42
-    },
-    "@MasterChefWorld": {
-        "substring_priority_scores": {},
-        "priority_score": 21
+        "priority_score": 50
     },
     "@shovel241": {
         "substring_priority_scores": {},
@@ -242,7 +234,7 @@
     },
     "@ChuckSutton": {
         "substring_priority_scores": {},
-        "priority_score": 56
+        "priority_score": 64
     },
     "@theintellectualcircle": {
         "substring_priority_scores": {},
@@ -255,13 +247,13 @@
     "@adultswim": {
         "substring_priority_scores": {
             "Rick and Morty": 45,
-            "Eric Andre": 60
+            "Eric Andre": 58
         },
         "priority_score": 23
     },
     "@EasySpanish": {
         "substring_priority_scores": {},
-        "priority_score": 39
+        "priority_score": 42
     },
     "@CodeEmporium": {
         "substring_priority_scores": {},
@@ -281,7 +273,7 @@
     },
     "@3blue1brown": {
         "substring_priority_scores": {},
-        "priority_score": 50
+        "priority_score": 62
     },
     "@braincraft": {
         "substring_priority_scores": {},
@@ -317,7 +309,7 @@
     },
     "@TomScottGo": {
         "substring_priority_scores": {},
-        "priority_score": 49
+        "priority_score": 58
     },
     "@veritasium": {
         "substring_priority_scores": {
@@ -336,21 +328,11 @@
     },
     "@techquickie": {
         "substring_priority_scores": {},
-        "priority_score": 52
-    },
-    "@ExplainingComputers": {
-        "substring_priority_scores": {
-            "pi": 37
-        },
-        "priority_score": 26
+        "priority_score": 39
     },
     "@engineerish": {
         "substring_priority_scores": {},
         "priority_score": 66
-    },
-    "@Tinkernut": {
-        "substring_priority_scores": {},
-        "priority_score": 46
     },
     "@Estefannie": {
         "substring_priority_scores": {},
@@ -362,7 +344,7 @@
     },
     "@Sidemen": {
         "substring_priority_scores": {},
-        "priority_score": 42
+        "priority_score": 55
     },
     "@SamuelAlbanie1": {
         "substring_priority_scores": {},
@@ -382,7 +364,7 @@
     },
     "@PhoenixSC": {
         "substring_priority_scores": {},
-        "priority_score": 62
+        "priority_score": 53
     },
     "@bycloudAI": {
         "substring_priority_scores": {},
@@ -391,5 +373,9 @@
     "@StatsUnited": {
         "substring_priority_scores": {},
         "priority_score": 52
-    }
+    },
+    "@samwitteveenai": {
+        "substring_priority_scores": {},
+        "priority_score": 56
+    },
 }
