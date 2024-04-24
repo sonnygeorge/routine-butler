@@ -174,7 +174,9 @@ def markdown(text: str) -> ui.html:
     ui.add_body_html(MATHJAX_SCRIPTS)
     text = preprocess_markdown(text)
     html = markdown_to_html_with_math(text)
-    element = ui.html(apply_all_custom_style_modifications(html))
+    # Tentative fix: using markdown to avoid error on <script> tags within html
+    element = ui.markdown(apply_all_custom_style_modifications(html))
+    # element = ui.html(apply_all_custom_style_modifications(html))
     ui.timer(0.1, _render_math, once=True)
     return element
 
